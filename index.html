@@ -30,6 +30,14 @@ button{font:inherit;color:inherit;cursor:pointer}
   border-radius:28px;box-shadow:0 12px 40px rgba(75,53,32,.22);overflow:hidden;
   display:flex;flex-direction:column;position:relative;
 }
+/* 手机竖屏：去掉手机壳边框，铺满全屏，打开即适配，无需手动缩放 */
+@media (max-width:480px){
+  html,body{margin:0;padding:0}
+  #phone{width:100%;height:100vh;height:100dvh;margin:0;border-radius:0;box-shadow:none;max-width:100%}
+  body{background:var(--bg)}
+}
+.bak-remind{margin:0 0 12px;padding:10px 12px;border-radius:10px;background:#fff8e6;border:1px solid #f0d9a8;color:#7a5a22;font-size:12.5px;line-height:1.5}
+.bak-remind .bak-go{color:#b07d2b;font-weight:700;cursor:pointer;text-decoration:underline;margin-left:4px}
 #bar{position:relative;height:52px;background:var(--bg);border-bottom:1px solid var(--line);
   display:flex;align-items:center;padding:0 12px;gap:8px;flex-shrink:0}
 #bar .bk{background:none;border:0;font-size:24px;color:var(--gold);padding:0 4px;line-height:1}
@@ -976,8 +984,8 @@ function recordCellHTML(r,i,opts){
   return '<div class="cell rec '+toneCls+'" data-act="editrec" data-i="'+i+'">'+
     '<span class="seq">'+(i+1)+'</span>'+
     '<div class="frame">'+
-      '<img class="face-img" data-char-img="'+r.charName+'" data-custom="'+(meta[r.charName]&&meta[r.charName].imgUrl?1:0)+'" src="'+((meta[r.charName]&&meta[r.charName].imgUrl)||charImg(r.charName))+'" alt="'+r.charName+'" onerror="window._replaceWithFace&&window._replaceWithFace(this,\'char\',this.dataset.charImg,this.dataset.charImg)"/>'+
-      (attr?'<img class="attr-icon" src="'+attrImg(attr)+'" alt=""/>':'')+
+      '<img loading="lazy" class="face-img" data-char-img="'+r.charName+'" data-custom="'+(meta[r.charName]&&meta[r.charName].imgUrl?1:0)+'" src="'+((meta[r.charName]&&meta[r.charName].imgUrl)||charImg(r.charName))+'" alt="'+r.charName+'" onerror="window._replaceWithFace&&window._replaceWithFace(this,\'char\',this.dataset.charImg,this.dataset.charImg)"/>'+
+      (attr?'<img loading="lazy" class="attr-icon" src="'+attrImg(attr)+'" alt=""/>':'')+
       '<div class="cell-overlay"><span class="cnt">'+r.drawCount+'</span></div>'+
     '</div>'+
     (hideName?'':'<span class="nm">'+r.charName+'</span>')+'</div>';
@@ -1023,9 +1031,9 @@ function homeHTML(){
   const list=viewOrder();
   return `
   <div class="kpis">
-    <div class="kpi"><img class="ico-img" src="images/home/总招募次数上面的图片.png" alt=""/><span class="v">${s.totalDraw}</span><span class="l">总招募次数</span></div>
-    <div class="kpi"><img class="ico-img" src="images/home/总绝密个数上面的图片.png" alt=""/><span class="v">${s.totalSecret}</span><span class="l">总绝密个数</span></div>
-    <div class="kpi"><img class="ico-img" src="images/home/平均出绝密次数上面的图片.png" alt=""/><span class="v">${s.avgDraw}</span><span class="l">平均出绝密次数</span></div>
+    <div class="kpi"><img loading="lazy" class="ico-img" src="images/home/总招募次数上面的图片.png" alt=""/><span class="v">${s.totalDraw}</span><span class="l">总招募次数</span></div>
+    <div class="kpi"><img loading="lazy" class="ico-img" src="images/home/总绝密个数上面的图片.png" alt=""/><span class="v">${s.totalSecret}</span><span class="l">总绝密个数</span></div>
+    <div class="kpi"><img loading="lazy" class="ico-img" src="images/home/平均出绝密次数上面的图片.png" alt=""/><span class="v">${s.avgDraw}</span><span class="l">平均出绝密次数</span></div>
   </div>
   <div class="top2">
     <div class="it"><div><span class="lbl">抽出次数最多的绝密密探</span><span class="nm">${s.mostDrawn.name}</span></div>
@@ -1065,7 +1073,7 @@ function homeHTML(){
   ${list.map((p,i)=>`
     <div class="pool" data-act="toggleprev" data-id="${p.id}">
       <div class="art long-press" data-pool-id="${p.id}">
-        <img class="art-img" src="${p.bannerUrl||poolImg(p)}" data-custom="${p.bannerUrl?1:0}"
+        <img loading="lazy" class="art-img" src="${p.bannerUrl||poolImg(p)}" data-custom="${p.bannerUrl?1:0}"
           onerror="window._replaceWithFace && window._replaceWithFace(this,'pool','${p.id}','${p.name}')" alt="${p.name}"/>
         <span class="pn">${p.name}</span>
         ${p.type!=='limit' && p.tag ? `<span class="pt">${p.tag}</span>` : ''}
@@ -1109,7 +1117,7 @@ function poolHTML(){
   return `
   <div class="pool-detail">
   <div class="pd-banner long-press">
-    <img src="${bannerUrl||poolImg(p)}" data-custom="${bannerUrl?1:0}"
+    <img loading="lazy" src="${bannerUrl||poolImg(p)}" data-custom="${bannerUrl?1:0}"
       onerror="window._replaceWithFace && window._replaceWithFace(this,'pool','${p.id}','${p.name}')" alt="${p.name}"/>
   </div>
   ${isLimit?`<div class="uprow-line">
@@ -1152,8 +1160,8 @@ function charsHTML(){
     ${list.map(n=>{const attr=meta[n]&&meta[n].attr;
       return `<div class="cell" data-act="editchar" data-n="${n}">
         <div class="frame">
-          <img class="face-img" data-char-img="${n}" data-custom="${(meta[n]&&meta[n].imgUrl)?1:0}" src="${(meta[n]&&meta[n].imgUrl)||charImg(n)}" alt="${n}" onerror="window._replaceWithFace&&window._replaceWithFace(this,\'char\',this.dataset.charImg,this.dataset.charImg)"/>
-          ${attr?`<img class="attr-icon" src="${attrImg(attr)}" alt="${attr}"/>`:''}
+          <img loading="lazy" class="face-img" data-char-img="${n}" data-custom="${(meta[n]&&meta[n].imgUrl)?1:0}" src="${(meta[n]&&meta[n].imgUrl)||charImg(n)}" alt="${n}" onerror="window._replaceWithFace&&window._replaceWithFace(this,\'char\',this.dataset.charImg,this.dataset.charImg)"/>
+          ${attr?`<img loading="lazy" class="attr-icon" src="${attrImg(attr)}" alt="${attr}"/>`:''}
         </div>
         <span class="nm">${n}</span>
         <span class="mtx">${[meta[n].attr,meta[n].job].filter(Boolean).join(' · ')||'未配置'}</span>
@@ -1190,8 +1198,8 @@ function pickerModal(title,upList,exclude,onPick){
       '<div class="pg">'+(list.length?list.map(n=>{const attr=meta[n]&&meta[n].attr;
         return '<div class="cell '+(upList.indexOf(n)>=0?'upc2':'')+'" data-n="'+n+'">'+
           '<div class="frame">'+
-            '<img class="face-img" data-char-img="'+n+'" data-custom="'+(meta[n]&&meta[n].imgUrl?1:0)+'" src="'+((meta[n]&&meta[n].imgUrl)||charImg(n))+'" alt="'+n+'" onerror="window._replaceWithFace&&window._replaceWithFace(this,\'char\',this.dataset.charImg,this.dataset.charImg)"/>'+
-            (attr?'<img class="attr-icon" src="'+attrImg(attr)+'" alt=""/>':'')+
+            '<img loading="lazy" class="face-img" data-char-img="'+n+'" data-custom="'+(meta[n]&&meta[n].imgUrl?1:0)+'" src="'+((meta[n]&&meta[n].imgUrl)||charImg(n))+'" alt="'+n+'" onerror="window._replaceWithFace&&window._replaceWithFace(this,\'char\',this.dataset.charImg,this.dataset.charImg)"/>'+
+            (attr?'<img loading="lazy" class="attr-icon" src="'+attrImg(attr)+'" alt=""/>':'')+
           '</div>'+
           '<span class="nm">'+n+'</span></div>'}).join('')
         :'<div class="empty">没有符合条件的密探</div>')+'</div>'+
@@ -1355,9 +1363,9 @@ function renderUpCard(name,sel,tag){
   const attr=meta[name]&&meta[name].attr;
   return '<div class="upc '+(sel?'sel':'')+'" data-up="'+name+'">'+
     '<div class="up-frame">'+
-      '<img class="up-img" data-char-img="'+name+'" data-custom="'+(meta[name]&&meta[name].imgUrl?1:0)+'" src="'+((meta[name]&&meta[name].imgUrl)||charImg(name))+'" alt="'+name+'" onerror="window._replaceWithFace&&window._replaceWithFace(this,\'char\',this.dataset.charImg,this.dataset.charImg)"/>'+
+      '<img loading="lazy" class="up-img" data-char-img="'+name+'" data-custom="'+(meta[name]&&meta[name].imgUrl?1:0)+'" src="'+((meta[name]&&meta[name].imgUrl)||charImg(name))+'" alt="'+name+'" onerror="window._replaceWithFace&&window._replaceWithFace(this,\'char\',this.dataset.charImg,this.dataset.charImg)"/>'+
       '<div class="up-pl">'+name[0]+'</div>'+
-      (attr?'<img class="up-attr" src="'+attrImg(attr)+'" alt="" onerror="this.style.display=\'none\'"/>':'')+
+      (attr?'<img loading="lazy" class="up-attr" src="'+attrImg(attr)+'" alt="" onerror="this.style.display=\'none\'"/>':'')+
     '</div>'+
     '<span class="upnm">'+name+'</span>'+
     '<span class="uptg">'+tag+'</span></div>';
@@ -1366,8 +1374,8 @@ function renderPickedCard(name){
   const attr=meta[name]&&meta[name].attr;
   return '<div class="upc sel" data-rs="1">'+
     '<div class="up-frame">'+
-      '<img class="up-img" data-char-img="'+name+'" data-custom="'+(meta[name]&&meta[name].imgUrl?1:0)+'" src="'+((meta[name]&&meta[name].imgUrl)||charImg(name))+'" alt="'+name+'" onerror="window._replaceWithFace&&window._replaceWithFace(this,\'char\',this.dataset.charImg,this.dataset.charImg)"/>'+
-      (attr?'<img class="up-attr" src="'+attrImg(attr)+'" alt=""/>':'')+
+      '<img loading="lazy" class="up-img" data-char-img="'+name+'" data-custom="'+(meta[name]&&meta[name].imgUrl?1:0)+'" src="'+((meta[name]&&meta[name].imgUrl)||charImg(name))+'" alt="'+name+'" onerror="window._replaceWithFace&&window._replaceWithFace(this,\'char\',this.dataset.charImg,this.dataset.charImg)"/>'+
+      (attr?'<img loading="lazy" class="up-attr" src="'+attrImg(attr)+'" alt=""/>':'')+
     '</div>'+
     '<span class="upnm">'+name+'</span>'+
     '<span class="uptg" style="background:#8c5f2b">已选</span></div>';
@@ -1386,9 +1394,21 @@ function subTabBar(){
   return '<div class="subtabs" id="subtabs">'+tabs.map(x=>'<div class="stab'+(subView===x.k?' on':'')+'" data-sv="'+x.k+'">'+x.t+'</div>').join('')+'</div>';
 }
 
+// 久未备份提醒：默认超过 3 天没备份就温和提示（备份/恢复都会刷新时间戳）
+function backupReminderHTML(){
+  const t=parseInt(lsGet('yiruanPool_prev_lastbackup')||'0',10);
+  const DAY=86400000;
+  if(!t||isNaN(t)||(Date.now()-t)>3*DAY){
+    const days=t?Math.floor((Date.now()-t)/DAY):0;
+    const tip=t?('已 '+days+' 天没备份'):'还没备份过';
+    return '<div class="bak-remind">💡 '+tip+'，建议导出一份 JSON 存手机本地，清缓存/换设备时不慌。<span class="bak-go" onclick="window.__gotoExport&&window.__gotoExport()">去备份</span></div>';
+  }
+  return '';
+}
+window.__gotoExport=function(){subView='export';go('sub')};
 // 副页主入口
 function subHTML(){
-  return subTabBar()+'<div id="subbody">'+
+  return subTabBar()+backupReminderHTML()+'<div id="subbody">'+
     (subView==='overview'?subOverviewHTML():
      subView==='import'?subImportHTML():
      subView==='export'?subExportHTML():
@@ -1415,7 +1435,7 @@ function subOverviewHTML(){
       '<div class="stat-card"><div class="lbl">密探库</div><div class="val">'+cntChars+'<small>位</small></div></div>'+
       '<div class="stat-card"><div class="lbl">抽到最多的密探</div><div class="val" style="font-size:15px">'+o.mostDrawn.name+'<small> · '+o.mostDrawn.count+'次</small></div></div>'+
     '</div>'+
-    '<div class="warn" style="margin-top:14px">副页独立模块：<b>导入</b> 从 xlsx 抽取抽卡记录、<b>导出</b> 把当前代码里的抽卡数据回写成 xlsx、<b>统计</b> 给限定池做细化排名。点顶部 tab 切换。<span style="opacity:.6">（页面版本 0911r）</span></div>';
+    '<div class="warn" style="margin-top:14px">副页独立模块：<b>导入</b> 从 xlsx 抽取抽卡记录、<b>导出</b> 把当前代码里的抽卡数据回写成 xlsx、<b>统计</b> 给限定池做细化排名。点顶部 tab 切换。<span style="opacity:.6">（页面版本 0911t）</span></div>';
 }
 
 /** 表2「距离下次保底还需多少次招募」解析："-" / 空 / 非数字 → 40（未抽，不计垫抽） */
@@ -1821,6 +1841,7 @@ function backupToJson(){
   try{ text=JSON.stringify(data) }
   catch(e){ return toast('备份失败：数据无法序列化') }
   downloadText(backupName(),text);
+  lsSet('yiruanPool_prev_lastbackup',String(Date.now()));
   toast('已备份 '+accounts.length+' 个账户 → '+backupName());
 }
 function readBackupFile(f){
@@ -1872,6 +1893,7 @@ function restoreFromJson(txt){
   recalcAll();save();
   toast('已恢复：'+hit+' 池 / '+rec+' 条记录 / '+img+' 张密探图'
     +((skip||imgSkip)?'（跳过 '+skip+' 个池、'+imgSkip+' 张图：代码里不存在）':''));
+  lsSet('yiruanPool_prev_lastbackup',String(Date.now()));
   subView='overview';go('sub');
 }
 /** 多账户恢复：按账户名匹配；同名覆盖记录/图，不存在的账户自动新建 */
@@ -2067,7 +2089,7 @@ function shrinkImage(dataUrl,cb,maxEdge){
         const px=ctx.getImageData(0,0,w,h).data;
         for(let i=3;i<px.length;i+=4){if(px[i]<250){hasAlpha=true;break}}
       }catch(e){}
-      const out=hasAlpha?c.toDataURL('image/png'):c.toDataURL('image/jpeg',0.85);
+      const out=hasAlpha?c.toDataURL('image/png'):c.toDataURL('image/jpeg',0.7);
       fin(out&&out.length<dataUrl.length?out:dataUrl);
     }catch(e){ fin(dataUrl) }
   };
@@ -2108,7 +2130,7 @@ function openImgMenu(charName, poolIdx){
         else pools[poolIdx].bannerUrl=d;
         save(); render(); if(!isChar && cur==='pool') poolHTML();
         toast('已更换（已自动压缩）');
-      }, isChar?600:1000);
+      }, isChar?400:800);
     }
   };
 }
