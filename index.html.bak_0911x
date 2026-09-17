@@ -467,14 +467,10 @@ const SEED=[
  ['士燮','水','诡道'],['刘繇','水','诡道'],['甘宁','水','诡道'],['蔡琰','水','诡道'],['鲁肃','水','诡道'],
  ['司马徽','阴','诡道'],['黄盖','阴','诡道'],['张闿','阴','诡道'],['张鲁','阴','诡道'],['葛洪','阴','诡道'],['贾诩','阴','诡道'],
  ['张修','火','诡道'],
- ['张绣','阴','破军'],
-
- ['简雍','阳','神纪'],
-
- ['法正','阴','神纪']
+ ['张绣','阴','破军']
 ];
 // 游戏出密探顺序（来自「卡池密探信息表」第 3 张表），1=最早出；UI 上按它倒序展示（曹丕最前、杨修最后）
-const CHAR_ORDER={'杨修':1,'鲁肃':2,'华佗':3,'陆逊':4,'吕蒙':5,'王粲':6,'郭嘉':7,'郭解':8,'贾诩':9,'孙尚香':10,'孙权':11,'马超':12,'张辽':13,'干吉':14,'周瑜':15,'令狐茂':16,'葛洪':17,'庞统':18,'荀彧':19,'蔡琰':20,'徐庶':21,'张角':22,'张仲景':23,'张鲁':24,'张修':25,'张郃':26,'刘豹':27,'张飞':28,'张闿':29,'戏学':30,'张邈':31,'太史慈':32,'黄盖':33,'甄宓':34,'甘宁':35,'张燕':36,'虞翻':37,'荀攸':38,'夏侯惇':39,'诸葛瑾':40,'诸葛诞':41,'孔融':42,'黄月英':43,'安期':44,'凌统':45,'董奉':46,'曹植':47,'祢衡':48,'蒯越':49,'司马徽':50,'诸葛亮':51,'刘繇':52,'满宠':53,'张绣':54,'朱然':55,'程昱':56,'士燮':57,'张昭':58,'董白':59,'马腾':60,'庞羲':61,'程普':62,'钟繇':63,'夏侯渊':64,'刘璋':65,'吕布':66,'曹丕':67,'庞德':68,'郭女王':69,'简雍':70,'法正':71};
+const CHAR_ORDER={'杨修':1,'鲁肃':2,'华佗':3,'陆逊':4,'吕蒙':5,'王粲':6,'郭嘉':7,'郭解':8,'贾诩':9,'孙尚香':10,'孙权':11,'马超':12,'张辽':13,'干吉':14,'周瑜':15,'令狐茂':16,'葛洪':17,'庞统':18,'荀彧':19,'蔡琰':20,'徐庶':21,'张角':22,'张仲景':23,'张鲁':24,'张修':25,'张郃':26,'刘豹':27,'张飞':28,'张闿':29,'戏学':30,'张邈':31,'太史慈':32,'黄盖':33,'甄宓':34,'甘宁':35,'张燕':36,'虞翻':37,'荀攸':38,'夏侯惇':39,'诸葛瑾':40,'诸葛诞':41,'孔融':42,'黄月英':43,'安期':44,'凌统':45,'董奉':46,'曹植':47,'祢衡':48,'蒯越':49,'司马徽':50,'诸葛亮':51,'刘繇':52,'满宠':53,'张绣':54,'朱然':55,'程昱':56,'士燮':57,'张昭':58,'董白':59,'马腾':60,'庞羲':61,'程普':62,'钟繇':63,'夏侯渊':64,'刘璋':65,'吕布':66,'曹丕':67};
 const ORDER_NONE=9999; // 名单外密探（如庞德/郭女王，新池 UP 未录入）排到最末
 function seedMeta(){const m={};SEED.forEach(x=>m[x[0]]={attr:x[1],job:x[2],releaseOrder:CHAR_ORDER[x[0]]||ORDER_NONE});return m}
 let meta=seedMeta();
@@ -501,7 +497,7 @@ const POOL_CATALOG=[
  {name:'绣衣天下',type:'pu',tag:'普池'},
  {name:'游说贤士',type:'anniv',tag:'1周年池'},
  {name:'东阁待贤',type:'anniv',tag:'1.5周年池'},
- {name:'燕金募秀',type:'anniv',tag:'18禁池'},
+ {name:'燕金募秀',type:'anniv',tag:'2周年池'},
  // 限定UP池：数据库按"老→新"顺序存档（弓剑江东最早、却月凌风最晚）
  // 渲染时会在 home 倒序成"新→老"，保持主页面视觉不变
  {name:'弓剑江东',type:'limit',tag:'限定UP池',up1:'孙权',  up2:'孙尚香'},
@@ -600,20 +596,12 @@ function load(){
     p.pity=(+p.pity>=1&&+p.pity<=40)?Math.round(+p.pity):40;
     if(p._spLabel!=null)delete p._spLabel;   // 旧字段：标签改由代码 tag 统一负责
     if(p.tag==null)p.tag=defaultTag(p.type);
-    if(p.name==='燕金募秀'&&p.tag==='2周年池')p.tag='18禁池';
     if(!p.stat)p.stat={}
     if(p.bannerUrl==null)p.bannerUrl='';
     // 从内置清单补齐 UP（老数据 up1/up2 可能为空）
     const m=POOL_CATALOG.find(c=>c.name===p.name);
     if(m){if(!p.up1)p.up1=m.up1||'';if(!p.up2)p.up2=m.up2||''}
   });
-    // 增量同步：代码 POOL_CATALOG 里用户本地尚未拥有的池子，自动补建（只新增、不覆盖已有记录/保底）
-    POOL_CATALOG.forEach(c=>{
-      if(!pools.find(x=>x.name===c.name)){
-        pools.push({id:rid(),name:c.name,type:c.type,tag:c.tag,up1:c.up1||'',up2:c.up2||'',pity:40,joinedUps:c.type==='pu'?[]:undefined,records:[],stat:{}});
-      }
-    });
-
   // 该账户的自定义密探图（账户隔离，覆盖全局 meta）
   const am=(packs&&packs.meta)||{};
   Object.keys(meta).forEach(n=>{meta[n].imgUrl=am[n]||''});
@@ -1400,7 +1388,7 @@ function subOverviewHTML(){
       '<div class="stat-card"><div class="lbl">密探库</div><div class="val">'+cntChars+'<small>位</small></div></div>'+
       '<div class="stat-card"><div class="lbl">抽到最多的密探</div><div class="val" style="font-size:15px">'+o.mostDrawn.name+'<small> · '+o.mostDrawn.count+'次</small></div></div>'+
     '</div>'+
-    '<div class="warn" style="margin-top:14px">副页独立模块：<b>导入</b> 从 xlsx 抽取抽卡记录、<b>导出</b> 把当前代码里的抽卡数据回写成 xlsx、<b>统计</b> 给限定池做细化排名。点顶部 tab 切换。<span style="opacity:.6">（页面版本 0917b）</span></div>';
+    '<div class="warn" style="margin-top:14px">副页独立模块：<b>导入</b> 从 xlsx 抽取抽卡记录、<b>导出</b> 把当前代码里的抽卡数据回写成 xlsx、<b>统计</b> 给限定池做细化排名。点顶部 tab 切换。<span style="opacity:.6">（页面版本 0911x）</span></div>';
 }
 
 /** 表2「距离下次保底还需多少次招募」解析："-" / 空 / 非数字 → 40（未抽，不计垫抽） */
@@ -1628,21 +1616,27 @@ function applyImportToPools(){
     p.records=x.items.map(it=>({charName:it.name,drawCount:it.drawCount}));
     limitWritten++;recWritten+=p.records.length;
   });
-  // --- 表1 普池 / 周年池 / 特殊池组：按表头归位到对应池子（表里没有该组则不动）---
-const gi=r.groupItems||{};
-const _poolByGroupKey=k=>{
-  k=String(k||'').trim();
-  if(k.indexOf('普池')>=0)return pools.find(p=>p.type==='pu');
-  let nm=k.replace(/密探$/,'');
-  let p=pools.find(x=>x.name===nm);
-  if(!p)p=pools.find(x=>x.name&&(nm.indexOf(x.name)>=0||x.name.indexOf(nm)>=0));
-  return p;
-};
-Object.keys(gi).forEach(k=>{
-  const items=gi[k]; if(!items||!items.length)return;
-  const p=_poolByGroupKey(k);
-  if(p){ p.records=items.map(it=>({charName:it.name,drawCount:it.drawCount})); recWritten+=p.records.length; }
-});
+  // --- 表1 普池 / 周年池组：按表数据全量覆盖（表里没有该组则不动）---
+  const gi=r.groupItems||{};
+  const GROUP_ALIAS=[['普池',/普池/],['东阁待贤',/东阁待贤/],['游说贤士',/游说贤士/]];
+  const normKey=s=>{s=String(s||'').trim();if(!s)return'';
+    for(const it of GROUP_ALIAS){if(it[1].test(s))return it[0]}
+    return s.split(/[\s\n　]+/)[0]||s};
+  const findG=n=>{for(const k in gi){if(normKey(k)===n||String(k).indexOf(n)>=0)return gi[k]}return null};
+  const puP=pools.find(p=>p.type==='pu');
+  const puG=findG('普池');
+  if(puP&&puG){
+    puP.records=puG.map(it=>({charName:it.name,drawCount:it.drawCount}));
+    recWritten+=puP.records.length;
+  }
+  ['东阁待贤','游说贤士'].forEach(nm=>{
+    const p=pools.find(p=>p.name===nm);
+    const g=findG(nm);
+    if(p&&g){
+      p.records=g.map(it=>({charName:it.name,drawCount:it.drawCount}));
+      recWritten+=p.records.length;
+    }
+  });
   // --- 表3 密探顺序：表内老→新，代码 UI 倒序展示 ---
   if(r.orderNew&&r.orderNew.length){
     r.orderNew.forEach((nm,i)=>{if(meta[nm])meta[nm].releaseOrder=i+1});
@@ -1663,7 +1657,7 @@ function exportFileName(){
 function subExportHTML(){
   const o=overall();
   return '<div class="subhd">导出当前招募数据</div>'+
-    '<div class="subhint">导出文件名：<b>小鸢助手 + 当日日期</b>（如「小鸢助手26.9.11.xlsx」）。三张表：<b>招募记录明细</b>（限定/普池 / 各周年·特殊池 多列组（自动随卡池增减），0 抽的池子不导出，表头带总抽数公式）、<b>卡池+up密探</b>（含每个限定池的「距离下次保底还需多少次招募」E 列，以及普池/周年池的 H/I 列）、<b>密探库密探顺序</b>。导回可再导入，逻辑完全对称。</div>'+
+    '<div class="subhint">导出文件名：<b>小鸢助手 + 当日日期</b>（如「小鸢助手26.9.11.xlsx」）。三张表：<b>招募记录明细</b>（限定/普池/东阁待贤/游说贤士 四列组，0 抽的池子不导出，表头带总抽数公式）、<b>卡池+up密探</b>（含每个限定池的「距离下次保底还需多少次招募」E 列，以及普池/周年池的 H/I 列）、<b>密探库密探顺序</b>。导回可再导入，逻辑完全对称。</div>'+
     '<div class="exp-area">'+
       '<p><b>当前数据快照</b></p>'+
       '<div class="exp-row"><span>限定池数量</span><span class="v">'+pools.filter(p=>p.type==='limit').length+'</span></div>'+
@@ -1690,57 +1684,51 @@ function exportToXlsx(){
     p.records.forEach(rc=>limitRows.push([serial++,c.name,rc.charName,Number(rc.drawCount)||0]));
   });
   const toItems=p=>((p&&p.records)||[]).map(rc=>({name:rc.charName,count:Number(rc.drawCount)||0}));
-// 非限定列组：普池 + 所有周年/特殊池（按 POOL_CATALOG 顺序），每块 = 序号 / 池名密探 / 抽数
-const nonLimitDefs=[];
-const _puP=pools.find(p=>p.type==='pu'); if(_puP)nonLimitDefs.push(_puP);
-POOL_CATALOG.filter(c=>c.type==='anniv'||c.type==='special').forEach(c=>{
-  const p=pools.find(x=>x.name===c.name&&(x.type==='anniv'||x.type==='special'));
-  if(p)nonLimitDefs.push(p);
-});
-const nonLimitItems=nonLimitDefs.map(p=>({p,items:toItems(p)}));
-const limTotal=limitRows.reduce((a,r)=>a+r[3],0);
-const nRows=Math.max(limitRows.length,...nonLimitItems.map(o=>o.items.length),1);
-const _START=6,_STEP=5;
-const _W=Math.max(19,_START+nonLimitItems.length*_STEP);
-const _colLetter=idx=>{let s='';let n=idx+1;while(n>0){const m=(n-1)%26;s=String.fromCharCode(65+(n-1)%26)+s;n=Math.floor((n-1)/26)}return s};
-const aoa=[];
-const hdr=new Array(_W).fill(null);
-hdr[0]='序号';hdr[1]='限定UP池';hdr[2]='密探';
-nonLimitItems.forEach((o,k)=>{
-  const c=_START+k*_STEP;
-  hdr[c]='序号';
-  hdr[c+1]=(o.p.type==='pu'?o.p.tag:o.p.name)+'密探';
-});
-aoa.push(hdr);
-for(let i=0;i<nRows;i++){
-  const row=new Array(_W).fill(null);
-  const lr=limitRows[i];
-  if(lr){row[0]=lr[0];row[1]=lr[1];row[2]=lr[2];row[3]=lr[3]}
-  nonLimitItems.forEach((o,k)=>{
-    const c=_START+k*_STEP;
-    if(o.items[i]){row[c]=i+1;row[c+1]=o.items[i].name;row[c+2]=o.items[i].count}
-    if(i===0&&!o.items.length){row[c]='-';row[c+1]='-';row[c+2]='-'}
-  });
-  aoa.push(row);
-}
-const ws1=XLSX.utils.aoa_to_sheet(aoa);
-// 垫池抽数 = 40 - 保底剩余（pity），各块各自汇总
-const daiOf=p=>{if(!p)return 0;const v=40-(+p.pity||40);return Math.max(0,Math.min(40,v))||0};
-const limDai=limCatalog.reduce((a,c)=>a+daiOf(pools.find(x=>x.name===c.name&&x.type==='limit')),0);
-const setF=(addr,col,total,dai)=>{
-  const f=dai>0
-    ?'"抽数|（总抽数"&(SUM('+col+'2:'+col+'9999)+'+dai+')&"·含垫'+dai+'）"'
-    :'"抽数|（总抽数"&SUM('+col+'2:'+col+'9999)&"）"';
-  ws1[addr]={t:'s',f:f,v:'抽数|（总抽数'+(total+dai)+(dai>0?'·含垫'+dai:'')+'）'};
-};
-setF('D1','D',limTotal,limDai);
-nonLimitItems.forEach((o,k)=>{
-  const c=_START+k*_STEP;
-  const col=_colLetter(c+2);
-  const total=o.items.reduce((a,it)=>a+it.count,0);
-  const dai=daiOf(o.p);
-  setF(col+'1',col,total,dai);
-});
+  const puItems=toItems(pools.find(p=>p.type==='pu'));
+  const dgItems=toItems(pools.find(p=>p.name==='东阁待贤'));
+  const ysItems=toItems(pools.find(p=>p.name==='游说贤士'));
+  const limTotal=limitRows.reduce((a,r)=>a+r[3],0);
+  const puTotal=puItems.reduce((a,it)=>a+it.count,0);
+  const dgTotal=dgItems.reduce((a,it)=>a+it.count,0);
+  const ysTotal=ysItems.reduce((a,it)=>a+it.count,0);
+  // 组装 sheet1 网格：限定 A-D / 普池 G-I / 东阁待贤 L-N / 游说贤士 Q-S
+  const nRows=Math.max(limitRows.length,puItems.length,dgItems.length,ysItems.length,1);
+  const aoa=[];
+  const hdr=new Array(19).fill(null);
+  hdr[0]='序号';hdr[1]='限定UP池';hdr[2]='密探';
+  hdr[6]='序号';hdr[7]='普池\n密探';
+  hdr[11]='序号';hdr[12]='东阁待贤\n密探';
+  hdr[16]='序号';hdr[17]='游说贤士\n密探';
+  aoa.push(hdr);
+  for(let i=0;i<nRows;i++){
+    const row=new Array(19).fill(null);
+    const lr=limitRows[i];
+    if(lr){row[0]=lr[0];row[1]=lr[1];row[2]=lr[2];row[3]=lr[3]}
+    if(puItems[i]){row[6]=i+1;row[7]=puItems[i].name;row[8]=puItems[i].count}
+    if(dgItems[i]){row[11]=i+1;row[12]=dgItems[i].name;row[13]=dgItems[i].count}
+    if(ysItems[i]){row[16]=i+1;row[17]=ysItems[i].name;row[18]=ysItems[i].count}
+    // 空组在首行放 "-" 占位（与源表一致，导入时会跳过）
+    if(i===0){
+      if(!dgItems.length){row[11]='-';row[12]='-';row[13]='-'}
+      if(!ysItems.length){row[16]='-';row[17]='-';row[18]='-'}
+    }
+    aoa.push(row);
+  }
+  const ws1=XLSX.utils.aoa_to_sheet(aoa);
+  // 垫池抽数 = 40 - 保底剩余（pity），四块各自汇总
+  const daiOf=p=>{if(!p)return 0;const v=40-(+p.pity||40);return Math.max(0,Math.min(40,v))||0};
+  const limDai=limCatalog.reduce((a,c)=>a+daiOf(pools.find(x=>x.name===c.name&&x.type==='limit')),0);
+  const puDai=daiOf(pools.find(p=>p.type==='pu'));
+  const dgDai=daiOf(pools.find(p=>p.name==='东阁待贤'));
+  const ysDai=daiOf(pools.find(p=>p.name==='游说贤士'));
+  // 表头总抽数公式：SUM 放宽到 9999 行（手动补行自动计入）+ 垫池抽数快照，含垫时附备注
+  const setF=(addr,col,total,dai)=>{
+    const f=dai>0
+      ?'"抽数|（总抽数"&(SUM('+col+'2:'+col+'9999)+'+dai+')&"·含垫'+dai+'）"'
+      :'"抽数|（总抽数"&SUM('+col+'2:'+col+'9999)&"）"';
+    ws1[addr]={t:'s',f:f,v:'抽数|（总抽数'+(total+dai)+(dai>0?'·含垫'+dai:'')+'）'};
+  };
+  setF('D1','D',limTotal,limDai);setF('I1','I',puTotal,puDai);setF('N1','N',dgTotal,dgDai);setF('S1','S',ysTotal,ysDai);
   // --- 表2：卡池+up密探（全部 UP 池，老→新）+ E 列保底剩余 + H/I 列普池·周年池保底剩余 ---
   const PITY_H='距离下次保底还需多少次招募\n（未抽池子填“-”或“40”）';
   const upRows=[['序列','up卡池','up密探A','up密探B',PITY_H,null,null,'特殊池',PITY_H]];
@@ -1757,7 +1745,7 @@ nonLimitItems.forEach((o,k)=>{
   // 特殊池（普池 / 1周年 / 1.5周年）写回 H/I 列：优先放回导入时它原来所在的那一行
   const spList=[];
   const puP2=pools.find(p=>p.type==='pu'); if(puP2)spList.push(puP2);
-  POOL_CATALOG.filter(c=>c.type==='anniv'||c.type==='special').forEach(c=>{const p=pools.find(x=>x.name===c.name&&(x.type==='anniv'||x.type==='special')); if(p)spList.push(p)});
+  ['游说贤士','东阁待贤'].forEach(nm=>{const p=pools.find(x=>x.name===nm); if(p)spList.push(p)});
   spList.forEach(sp=>{
     const label=sp.tag||'特殊池';   // 以代码里的 tag 为准（东阁待贤=1周年池 / 游说贤士=1.5周年池）
     let idx=sp._spAnchor?upRows.findIndex((r,i)=>i>0&&r[1]===sp._spAnchor):-1;
