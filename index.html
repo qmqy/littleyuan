@@ -495,8 +495,8 @@ function attrImg(attr){return 'images/attr/'+attr+'属性.png'}
 
 const POOL_CATALOG=[
  {name:'绣衣天下',type:'pu',tag:'普池'},
- {name:'东阁待贤',type:'anniv',tag:'1周年池'},
- {name:'游说贤士',type:'anniv',tag:'1.5周年池'},
+ {name:'东阁待贤',type:'anniv',tag:'1.5周年池'},
+ {name:'游说贤士',type:'anniv',tag:'1周年池'},
  {name:'燕金募秀',type:'anniv',tag:'2周年池'},
  // 限定UP池：数据库按"老→新"顺序存档（弓剑江东最早、却月凌风最晚）
  // 渲染时会在 home 倒序成"新→老"，保持主页面视觉不变
@@ -1443,7 +1443,7 @@ function subOverviewHTML(){
       '<div class="stat-card"><div class="lbl">密探库</div><div class="val">'+cntChars+'<small>位</small></div></div>'+
       '<div class="stat-card"><div class="lbl">抽到最多的密探</div><div class="val" style="font-size:15px">'+o.mostDrawn.name+'<small> · '+o.mostDrawn.count+'次</small></div></div>'+
     '</div>'+
-    '<div class="warn" style="margin-top:14px">副页独立模块：<b>导入</b> 从 xlsx 抽取抽卡记录、<b>导出</b> 把当前代码里的抽卡数据回写成 xlsx、<b>统计</b> 给限定池做细化排名。点顶部 tab 切换。<span style="opacity:.6">（页面版本 0911u）</span></div>';
+    '<div class="warn" style="margin-top:14px">副页独立模块：<b>导入</b> 从 xlsx 抽取抽卡记录、<b>导出</b> 把当前代码里的抽卡数据回写成 xlsx、<b>统计</b> 给限定池做细化排名。点顶部 tab 切换。<span style="opacity:.6">（页面版本 0911v）</span></div>';
 }
 
 /** 表2「距离下次保底还需多少次招募」解析："-" / 空 / 非数字 → 40（未抽，不计垫抽） */
