@@ -1400,7 +1400,7 @@ function subOverviewHTML(){
       '<div class="stat-card"><div class="lbl">密探库</div><div class="val">'+cntChars+'<small>位</small></div></div>'+
       '<div class="stat-card"><div class="lbl">抽到最多的密探</div><div class="val" style="font-size:15px">'+o.mostDrawn.name+'<small> · '+o.mostDrawn.count+'次</small></div></div>'+
     '</div>'+
-    '<div class="warn" style="margin-top:14px">副页独立模块：<b>导入</b> 从 xlsx 抽取抽卡记录、<b>导出</b> 把当前代码里的抽卡数据回写成 xlsx、<b>统计</b> 给限定池做细化排名。点顶部 tab 切换。<span style="opacity:.6">（页面版本 0917c）</span></div>';
+    '<div class="warn" style="margin-top:14px">副页独立模块：<b>导入</b> 从 xlsx 抽取抽卡记录、<b>导出</b> 把当前代码里的抽卡数据回写成 xlsx、<b>统计</b> 给限定池做细化排名。点顶部 tab 切换。<span style="opacity:.6">（页面版本 0917b）</span></div>';
 }
 
 /** 表2「距离下次保底还需多少次招募」解析："-" / 空 / 非数字 → 40（未抽，不计垫抽） */
@@ -1742,7 +1742,7 @@ nonLimitItems.forEach((o,k)=>{
   setF(col+'1',col,total,dai);
 });
   // --- 表2：卡池+up密探（全部 UP 池，老→新）+ E 列保底剩余 + H/I 列普池·周年池保底剩余 ---
-  const PITY_H='距离下次保底还需多少次招募（未抽池子填“-”或“40”）';
+  const PITY_H='距离下次保底还需多少次招募\n（未抽池子填“-”或“40”）';
   const upRows=[['序列','up卡池','up密探A','up密探B',PITY_H,null,null,'特殊池',PITY_H]];
   let s2=1;
   const pityCell=p=>{
