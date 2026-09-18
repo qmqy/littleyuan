@@ -494,7 +494,7 @@ function filt(a,j,ex){ex=ex||[];a=a||[];j=j||[];
 function charImg(n){return 'images/char/'+n+'.webp'}
 /** 池子 banner：pool.name + '.png' */
 function poolImg(p){return 'images/pool/'+p.name+'.webp'}
-/** 属性图标：attr + '属性.png'（如 火属性.png） */
+/** 属性图标：优先 .webp，失败回退 .png */
 function attrImg(attr){return 'images/attr/'+attr+'属性.webp'}
 
 const POOL_CATALOG=[
@@ -954,7 +954,7 @@ function recordCellHTML(r,i,opts){
     '<span class="seq">'+(i+1)+'</span>'+
     '<div class="frame">'+
       '<img loading="lazy" class="face-img" data-char-img="'+r.charName+'" data-custom="'+(meta[r.charName]&&meta[r.charName].imgUrl?1:0)+'" src="'+((meta[r.charName]&&meta[r.charName].imgUrl)||charImg(r.charName))+'" alt="'+r.charName+'" onerror="window._replaceWithFace&&window._replaceWithFace(this,\'char\',this.dataset.charImg,this.dataset.charImg)"/>'+
-      (attr?'<img loading="lazy" class="attr-icon" src="'+attrImg(attr)+'" alt=""/>':'')+
+      (attr?'<img loading="lazy" class="attr-icon" src="'+attrImg(attr)+'" alt="" onerror="window._replaceAttr&&window._replaceAttr(this,\''+attr+'\')"/>':'')+
       '<div class="cell-overlay"><span class="cnt">'+r.drawCount+'</span></div>'+
     '</div>'+
     (hideName?'':'<span class="nm">'+r.charName+'</span>')+'</div>';
@@ -1006,9 +1006,9 @@ function homeHTML(){
   const list=viewOrder();
   return `
   <div class="kpis">
-    <div class="kpi"><img loading="lazy" class="ico-img" src="images/home/总招募次数上面的图片.webp" alt=""/><span class="v">${s.totalDraw}</span><span class="l">总招募次数</span></div>
-    <div class="kpi"><img loading="lazy" class="ico-img" src="images/home/总绝密个数上面的图片.webp" alt=""/><span class="v">${s.totalSecret}</span><span class="l">总绝密个数</span></div>
-    <div class="kpi"><img loading="lazy" class="ico-img" src="images/home/平均出绝密次数上面的图片.webp" alt=""/><span class="v">${s.avgDraw}</span><span class="l">平均出绝密次数</span></div>
+    <div class="kpi"><img loading="lazy" class="ico-img" src="images/home/总招募次数上面的图片.png" alt=""/><span class="v">${s.totalDraw}</span><span class="l">总招募次数</span></div>
+    <div class="kpi"><img loading="lazy" class="ico-img" src="images/home/总绝密个数上面的图片.png" alt=""/><span class="v">${s.totalSecret}</span><span class="l">总绝密个数</span></div>
+    <div class="kpi"><img loading="lazy" class="ico-img" src="images/home/平均出绝密次数上面的图片.png" alt=""/><span class="v">${s.avgDraw}</span><span class="l">平均出绝密次数</span></div>
   </div>
   <div class="top2">
     <div class="it"><div><span class="lbl">抽出次数最多的绝密密探</span><span class="nm">${s.mostDrawn.name}</span></div>
@@ -1134,7 +1134,7 @@ function charsHTML(){
       return `<div class="cell" data-act="editchar" data-n="${n}">
         <div class="frame">
           <img loading="lazy" class="face-img" data-char-img="${n}" data-custom="${(meta[n]&&meta[n].imgUrl)?1:0}" src="${(meta[n]&&meta[n].imgUrl)||charImg(n)}" alt="${n}" onerror="window._replaceWithFace&&window._replaceWithFace(this,\'char\',this.dataset.charImg,this.dataset.charImg)"/>
-          ${attr?`<img loading="lazy" class="attr-icon" src="${attrImg(attr)}" alt="${attr}"/>`:''}
+          ${attr?`<img loading="lazy" class="attr-icon" src="${attrImg(attr)}" alt="${attr}" onerror="window._replaceAttr&&window._replaceAttr(this,'${attr}')"/>`:''}
         </div>
         <span class="nm">${n}</span>
         <span class="mtx">${[meta[n].attr,meta[n].job].filter(Boolean).join(' · ')||'未配置'}</span>
@@ -1172,7 +1172,7 @@ function pickerModal(title,upList,exclude,onPick){
         return '<div class="cell '+(upList.indexOf(n)>=0?'upc2':'')+'" data-n="'+n+'">'+
           '<div class="frame">'+
             '<img loading="lazy" class="face-img" data-char-img="'+n+'" data-custom="'+(meta[n]&&meta[n].imgUrl?1:0)+'" src="'+((meta[n]&&meta[n].imgUrl)||charImg(n))+'" alt="'+n+'" onerror="window._replaceWithFace&&window._replaceWithFace(this,\'char\',this.dataset.charImg,this.dataset.charImg)"/>'+
-            (attr?'<img loading="lazy" class="attr-icon" src="'+attrImg(attr)+'" alt=""/>':'')+
+            (attr?'<img loading="lazy" class="attr-icon" src="'+attrImg(attr)+'" alt="" onerror="window._replaceAttr&&window._replaceAttr(this,\''+attr+'\')"/>':'')+
           '</div>'+
           '<span class="nm">'+n+'</span></div>'}).join('')
         :'<div class="empty">没有符合条件的密探</div>')+'</div>'+
@@ -1330,7 +1330,7 @@ function renderUpCard(name,sel,tag){
     '<div class="up-frame">'+
       '<img loading="lazy" class="up-img" data-char-img="'+name+'" data-custom="'+(meta[name]&&meta[name].imgUrl?1:0)+'" src="'+((meta[name]&&meta[name].imgUrl)||charImg(name))+'" alt="'+name+'" onerror="window._replaceWithFace&&window._replaceWithFace(this,\'char\',this.dataset.charImg,this.dataset.charImg)"/>'+
       '<div class="up-pl">'+name[0]+'</div>'+
-      (attr?'<img loading="lazy" class="up-attr" src="'+attrImg(attr)+'" alt="" onerror="this.style.display=\'none\'"/>':'')+
+      (attr?'<img loading="lazy" class="up-attr" src="'+attrImg(attr)+'" alt="" onerror="window._replaceAttr&&window._replaceAttr(this,\''+attr+'\')"/>':'')+
     '</div>'+
     '<span class="upnm">'+name+'</span>'+
     '<span class="uptg">'+tag+'</span></div>';
@@ -1340,7 +1340,7 @@ function renderPickedCard(name){
   return '<div class="upc sel" data-rs="1">'+
     '<div class="up-frame">'+
       '<img loading="lazy" class="up-img" data-char-img="'+name+'" data-custom="'+(meta[name]&&meta[name].imgUrl?1:0)+'" src="'+((meta[name]&&meta[name].imgUrl)||charImg(name))+'" alt="'+name+'" onerror="window._replaceWithFace&&window._replaceWithFace(this,\'char\',this.dataset.charImg,this.dataset.charImg)"/>'+
-      (attr?'<img loading="lazy" class="up-attr" src="'+attrImg(attr)+'" alt=""/>':'')+
+      (attr?'<img loading="lazy" class="up-attr" src="'+attrImg(attr)+'" alt="" onerror="window._replaceAttr&&window._replaceAttr(this,\''+attr+'\')"/>':'')+
     '</div>'+
     '<span class="upnm">'+name+'</span>'+
     '<span class="uptg" style="background:#8c5f2b">已选</span></div>';
@@ -1400,7 +1400,7 @@ function subOverviewHTML(){
       '<div class="stat-card"><div class="lbl">密探库</div><div class="val">'+cntChars+'<small>位</small></div></div>'+
       '<div class="stat-card"><div class="lbl">抽到最多的密探</div><div class="val" style="font-size:15px">'+o.mostDrawn.name+'<small> · '+o.mostDrawn.count+'次</small></div></div>'+
     '</div>'+
-    '<div class="warn" style="margin-top:14px">副页独立模块：<b>导入</b> 从 xlsx 抽取抽卡记录、<b>导出</b> 把当前代码里的抽卡数据回写成 xlsx、<b>统计</b> 给限定池做细化排名。点顶部 tab 切换。<span style="opacity:.6">（页面版本 0917d）</span></div>';
+    '<div class="warn" style="margin-top:14px">副页独立模块：<b>导入</b> 从 xlsx 抽取抽卡记录、<b>导出</b> 把当前代码里的抽卡数据回写成 xlsx、<b>统计</b> 给限定池做细化排名。点顶部 tab 切换。<span style="opacity:.6">（页面版本 0917e）</span></div>';
 }
 
 /** 表2「距离下次保底还需多少次招募」解析："-" / 空 / 非数字 → 40（未抽，不计垫抽） */
@@ -2099,23 +2099,39 @@ function openImgMenu(charName, poolIdx){
     }
   };
 }
-/* 自定义图加载失败 → 恢复默认（pool/char 都通用） */
+/* 图片加载失败统一兜底：自定义图 → 清回默认；默认 webp → 回退 png；png 也失败 → 占位 */
 window._replaceWithFace=function(img, kind, key, name){
   const box=img.parentNode; if(!box) return;
+  const poolRef = kind==='pool' ? pools.find(p=>p.id===key) : null;
+  const poolName = poolRef ? poolRef.name : name;
+  // 自定义图失败：先清回默认（走 png 兜底），再失败才进占位
   if(box.dataset.custom==='1'){
-    if(kind==='pool'){ pools[key].bannerUrl=''; }
+    if(kind==='pool'){ if(poolRef) poolRef.bannerUrl=''; }
     else { if(!meta[key]) meta[key]={attr:'',job:''}; meta[key].imgUrl=''; }
     save();
     box.dataset.custom='0';
+    img.dataset.fallback='1';
     img.removeAttribute('onerror');
-    const fallback=kind==='pool' ? ('images/pool/'+(pools[key].name||name)+'.png')
-                                  : ('images/char/'+(name||key)+'.png');
-    img.src=fallback;
+    img.removeAttribute('loading');
+    img.loading='eager';
+    img.src = kind==='pool' ? ('images/pool/'+poolName+'.png')
+                            : ('images/char/'+(name||key)+'.png');
     img.onerror=function(){ window._replaceWithFace(img, kind, key, name); };
     toast('换图失败，已恢复默认');
     return;
   }
-  // 默认图也不存在 → 占位
+  // 默认 webp 失败（不支持/404/解码失败）→ 回退 png
+  if(img.dataset.fallback!=='1'){
+    img.dataset.fallback='1';
+    img.removeAttribute('onerror');
+    img.removeAttribute('loading');
+    img.loading='eager';
+    img.src = kind==='pool' ? ('images/pool/'+poolName+'.png')
+                            : ('images/char/'+(name||key)+'.png');
+    img.onerror=function(){ window._replaceWithFace(img, kind, key, name); };
+    return;
+  }
+  // png 也失败 → 占位
   img.remove();
   if(kind==='pool'){
     box.classList.add('placeholder');
@@ -2126,6 +2142,19 @@ window._replaceWithFace=function(img, kind, key, name){
     box.style.justifyContent='center'; box.style.flexDirection='column';
     box.innerHTML='<span style="font-size:22px;font-weight:700;color:#fff;text-shadow:0 2px 4px rgba(0,0,0,.3)">'
       +(key||name)[0]+'</span><span style="margin-top:6px;letter-spacing:1px;font-size:11px;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.4);opacity:.9">待填充</span>';
+  }
+};
+/* 属性图标 webp 失败 → 回退 png，再失败隐藏 */
+window._replaceAttr=function(img, attr){
+  if(img.dataset.fallback!=='1'){
+    img.dataset.fallback='1';
+    img.removeAttribute('onerror');
+    img.removeAttribute('loading');
+    img.loading='eager';
+    img.src='images/attr/'+attr+'属性.png';
+    img.onerror=function(){ window._replaceAttr(img, attr); };
+  } else {
+    img.style.display='none';
   }
 };
 
