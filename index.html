@@ -632,6 +632,8 @@ function save(){
     console.warn('save failed: quota');
     if(typeof toast==='function')toast('存储空间不足：自定义图片太多/太大，请换小图或恢复默认');
   }
+  // 数据已落盘 → 所有视图缓存失效，下次 render 重建
+  if(typeof markAllDirty==='function')markAllDirty();
 }
 /* ===== 账户操作 ===== */
 function updateAccBtn(){const b=$('#accBtn');if(b)b.textContent=accName()}
@@ -639,7 +641,7 @@ function switchAccount(id){
   if(id===curAccId||!accOf(id))return;
   save();
   curAccId=id;lsSet(CUR_K,curAccId);
-  load();render();
+  load();markAllDirty();render();
   toast('已切换到「'+accName()+'」');
 }
 function createAccount(name,copyCur){
@@ -658,7 +660,7 @@ function createAccount(name,copyCur){
   lsSet(accDataKey(id),JSON.stringify(data));
   lsSet(ACC_K,JSON.stringify(accList));
   lsSet(CUR_K,curAccId);
-  load();render();
+  load();markAllDirty();render();
   toast('已创建并切换到「'+name+'」');
 }
 function renameAccount(id){
@@ -808,6 +810,13 @@ let draft=null;
 
 function toast(m){const t=$('#tst');t.textContent=m;t.classList.add('on');
   clearTimeout(toast._t);toast._t=setTimeout(()=>t.classList.remove('on'),2000)}
+/* ===== 视图缓存：tab 切换复用 DOM，避免 71 张头像反复重建+解码 ===== */
+let _viewEl={};      // view -> 已构建好的 DOM 节点（切走时从 #body 摘下，保留在内存）
+let _viewDirty={};   // view -> 数据是否已变，需要重建
+let _tabSwitch=false;// 本次 render 是否由 tab 切换触发
+let _curPane=null;   // 当前挂在 #body 上的 pane
+function markAllDirty(){Object.keys(_viewEl).forEach(k=>{_viewDirty[k]=true})}
+
 function go(v){
   view=v;
   // 主页缩略图展开状态（prevOpens）只由点击控制，进出详情不再自动收起
@@ -826,13 +835,30 @@ function go(v){
   document.querySelectorAll('#topnav .navtab').forEach(el=>{
     el.classList.toggle('on',(v==='sub'&&el.dataset.nav==='sub')||((v==='home'||v==='pool'||v==='chars')&&el.dataset.nav==='home'));
   });
+  _tabSwitch=true;
+  // 池子详情依赖 draft、副页依赖 subView，上下文会变 → 这两个不复用，必须重建
+  if(v==='pool'||v==='sub')_viewDirty[v]=true;
   render();
 }
 
 function render(){
   const b=$('#body');
-  // 显示/隐藏 topnav：副页 view 时常显（已在 #bar 之下），子视图切换时仅重渲染 #body
-  b.innerHTML = view==='home'?homeHTML():view==='pool'?poolHTML():view==='sub'?subHTML():charsHTML();
+  const v=view;
+  // tab 切换且缓存仍有效 → 把之前摘下的 DOM 直接挂回来，不重建（图片不必重新解码）
+  if(_tabSwitch && _viewEl[v] && !_viewDirty[v]){
+    _tabSwitch=false;
+    if(_curPane&&_curPane.parentNode)_curPane.parentNode.removeChild(_curPane);
+    b.appendChild(_viewEl[v]);
+    _curPane=_viewEl[v];
+    return;
+  }
+  _tabSwitch=false;
+  // 需要重建：摘下当前 pane（旧节点留在 _viewEl 里备用），挂上新的
+  if(_curPane&&_curPane.parentNode)_curPane.parentNode.removeChild(_curPane);
+  const pane=document.createElement('div');
+  pane.innerHTML = v==='home'?homeHTML():v==='pool'?poolHTML():v==='sub'?subHTML():charsHTML();
+  b.appendChild(pane);
+  _viewEl[v]=pane; _viewDirty[v]=false; _curPane=pane;
   // 内部 data-act 元素不冒泡触发外层卡片
   b.querySelectorAll('[data-act]').forEach(el=>el.onclick=(e)=>{e.stopPropagation();act(el.dataset.act,el)});
   // 首页 / 详情页 banner 长按换图
@@ -1400,7 +1426,7 @@ function subOverviewHTML(){
       '<div class="stat-card"><div class="lbl">密探库</div><div class="val">'+cntChars+'<small>位</small></div></div>'+
       '<div class="stat-card"><div class="lbl">抽到最多的密探</div><div class="val" style="font-size:15px">'+o.mostDrawn.name+'<small> · '+o.mostDrawn.count+'次</small></div></div>'+
     '</div>'+
-    '<div class="warn" style="margin-top:14px">副页独立模块：<b>导入</b> 从 xlsx 抽取抽卡记录、<b>导出</b> 把当前代码里的抽卡数据回写成 xlsx、<b>统计</b> 给限定池做细化排名。点顶部 tab 切换。<span style="opacity:.6">（页面版本 0917g）</span></div>';
+    '<div class="warn" style="margin-top:14px">副页独立模块：<b>导入</b> 从 xlsx 抽取抽卡记录、<b>导出</b> 把当前代码里的抽卡数据回写成 xlsx、<b>统计</b> 给限定池做细化排名。点顶部 tab 切换。<span style="opacity:.6">（页面版本 0917h）</span></div>';
 }
 
 /** 表2「距离下次保底还需多少次招募」解析："-" / 空 / 非数字 → 40（未抽，不计垫抽） */
@@ -1880,7 +1906,7 @@ function restoreMulti(d){
   });
   lsSet(ACC_K,JSON.stringify(accList));
   if(!accOf(curAccId)){curAccId=accList[0].id;lsSet(CUR_K,curAccId)}
-  load();render();
+  load();markAllDirty();render();
   toast('已恢复 '+d.accounts.length+' 个账户：共 '+rec+' 条记录 / '+img+' 张图'
     +(accNew?'（新建 '+accNew+' 个账户）':''));
   subView='overview';go('sub');
@@ -1969,8 +1995,8 @@ function charModal(name){
     $('#cm').querySelectorAll('[data-j]').forEach(e=>e.onclick=()=>{st.job=e.dataset.j;draw()});
     $('#cm').querySelector('[data-x]').onclick=()=>d.remove();
     const dl=$('#cm').querySelector('[data-del]');
-    if(dl)dl.onclick=()=>{delete meta[name];d.remove();render();toast('已删除')};
-    $('#cm').querySelector('[data-ok]').onclick=()=>{meta[name]={attr:st.attr,job:st.job};d.remove();render();toast('已保存')};
+    if(dl)dl.onclick=()=>{delete meta[name];d.remove();markAllDirty();render();toast('已删除')};
+    $('#cm').querySelector('[data-ok]').onclick=()=>{meta[name]={attr:st.attr,job:st.job};d.remove();markAllDirty();render();toast('已保存')};
   }
   draw();
 }
@@ -1998,7 +2024,7 @@ function newCharModal(){
       if(!n)return toast('请输入密探名');
       if(meta[n])return toast('这位密探已经在了');
       meta[n]={attr:st.attr,job:st.job};
-      d.remove();render();toast('已添加 '+n);
+      d.remove();markAllDirty();render();toast('已添加 '+n);
     };
   }
   draw();
