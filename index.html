@@ -979,8 +979,8 @@ function recordCellHTML(r,i,opts){
   return '<div class="cell rec '+toneCls+'" data-act="editrec" data-i="'+i+'">'+
     '<span class="seq">'+(i+1)+'</span>'+
     '<div class="frame">'+
-      '<img loading="lazy" class="face-img" data-char-img="'+r.charName+'" data-custom="'+(meta[r.charName]&&meta[r.charName].imgUrl?1:0)+'" src="'+((meta[r.charName]&&meta[r.charName].imgUrl)||charImg(r.charName))+'" alt="'+r.charName+'" onerror="window._replaceWithFace&&window._replaceWithFace(this,\'char\',this.dataset.charImg,this.dataset.charImg)"/>'+
-      (attr?'<img loading="lazy" class="attr-icon" src="'+attrImg(attr)+'" alt="" onerror="window._replaceAttr&&window._replaceAttr(this,\''+attr+'\')"/>':'')+
+      '<img loading="eager" class="face-img" data-char-img="'+r.charName+'" data-custom="'+(meta[r.charName]&&meta[r.charName].imgUrl?1:0)+'" src="'+((meta[r.charName]&&meta[r.charName].imgUrl)||charImg(r.charName))+'" alt="'+r.charName+'" onerror="window._replaceWithFace&&window._replaceWithFace(this,\'char\',this.dataset.charImg,this.dataset.charImg)"/>'+
+      (attr?'<img loading="eager" class="attr-icon" src="'+attrImg(attr)+'" alt="" onerror="window._replaceAttr&&window._replaceAttr(this,\''+attr+'\')"/>':'')+
       '<div class="cell-overlay"><span class="cnt">'+r.drawCount+'</span></div>'+
     '</div>'+
     (hideName?'':'<span class="nm">'+r.charName+'</span>')+'</div>';
@@ -1032,9 +1032,9 @@ function homeHTML(){
   const list=viewOrder();
   return `
   <div class="kpis">
-    <div class="kpi"><img loading="lazy" class="ico-img" src="images/home/总招募次数上面的图片.jpg" alt=""/><span class="v">${s.totalDraw}</span><span class="l">总招募次数</span></div>
-    <div class="kpi"><img loading="lazy" class="ico-img" src="images/home/总绝密个数上面的图片.jpg" alt=""/><span class="v">${s.totalSecret}</span><span class="l">总绝密个数</span></div>
-    <div class="kpi"><img loading="lazy" class="ico-img" src="images/home/平均出绝密次数上面的图片.jpg" alt=""/><span class="v">${s.avgDraw}</span><span class="l">平均出绝密次数</span></div>
+    <div class="kpi"><img loading="eager" class="ico-img" src="images/home/总招募次数上面的图片.jpg" alt=""/><span class="v">${s.totalDraw}</span><span class="l">总招募次数</span></div>
+    <div class="kpi"><img loading="eager" class="ico-img" src="images/home/总绝密个数上面的图片.jpg" alt=""/><span class="v">${s.totalSecret}</span><span class="l">总绝密个数</span></div>
+    <div class="kpi"><img loading="eager" class="ico-img" src="images/home/平均出绝密次数上面的图片.jpg" alt=""/><span class="v">${s.avgDraw}</span><span class="l">平均出绝密次数</span></div>
   </div>
   <div class="top2">
     <div class="it"><div><span class="lbl">抽出次数最多的绝密密探</span><span class="nm">${s.mostDrawn.name}</span></div>
@@ -1074,7 +1074,7 @@ function homeHTML(){
   ${list.map((p,i)=>`
     <div class="pool" data-act="toggleprev" data-id="${p.id}">
       <div class="art long-press" data-pool-id="${p.id}">
-        <img loading="lazy" class="art-img" src="${p.bannerUrl||poolImg(p)}" data-custom="${p.bannerUrl?1:0}"
+        <img loading="eager" class="art-img" src="${p.bannerUrl||poolImg(p)}" data-custom="${p.bannerUrl?1:0}"
           onerror="window._replaceWithFace && window._replaceWithFace(this,'pool','${p.id}','${p.name}')" alt="${p.name}"/>
         <span class="pn">${p.name}</span>
         ${p.type!=='limit' && p.tag ? `<span class="pt">${p.tag}</span>` : ''}
@@ -1118,7 +1118,7 @@ function poolHTML(){
   return `
   <div class="pool-detail">
   <div class="pd-banner long-press">
-    <img loading="lazy" src="${bannerUrl||poolImg(p)}" data-custom="${bannerUrl?1:0}"
+    <img loading="eager" src="${bannerUrl||poolImg(p)}" data-custom="${bannerUrl?1:0}"
       onerror="window._replaceWithFace && window._replaceWithFace(this,'pool','${p.id}','${p.name}')" alt="${p.name}"/>
   </div>
   ${isLimit?`<div class="uprow-line">
@@ -1159,8 +1159,8 @@ function charsHTML(){
     ${list.map(n=>{const attr=meta[n]&&meta[n].attr;
       return `<div class="cell" data-act="editchar" data-n="${n}">
         <div class="frame">
-          <img loading="lazy" class="face-img" data-char-img="${n}" data-custom="${(meta[n]&&meta[n].imgUrl)?1:0}" src="${(meta[n]&&meta[n].imgUrl)||charImg(n)}" alt="${n}" onerror="window._replaceWithFace&&window._replaceWithFace(this,\'char\',this.dataset.charImg,this.dataset.charImg)"/>
-          ${attr?`<img loading="lazy" class="attr-icon" src="${attrImg(attr)}" alt="${attr}" onerror="window._replaceAttr&&window._replaceAttr(this,'${attr}')"/>`:''}
+          <img loading="eager" class="face-img" data-char-img="${n}" data-custom="${(meta[n]&&meta[n].imgUrl)?1:0}" src="${(meta[n]&&meta[n].imgUrl)||charImg(n)}" alt="${n}" onerror="window._replaceWithFace&&window._replaceWithFace(this,\'char\',this.dataset.charImg,this.dataset.charImg)"/>
+          ${attr?`<img loading="eager" class="attr-icon" src="${attrImg(attr)}" alt="${attr}" onerror="window._replaceAttr&&window._replaceAttr(this,'${attr}')"/>`:''}
         </div>
         <span class="nm">${n}</span>
         <span class="mtx">${[meta[n].attr,meta[n].job].filter(Boolean).join(' · ')||'未配置'}</span>
@@ -1197,8 +1197,8 @@ function pickerModal(title,upList,exclude,onPick){
       '<div class="pg">'+(list.length?list.map(n=>{const attr=meta[n]&&meta[n].attr;
         return '<div class="cell '+(upList.indexOf(n)>=0?'upc2':'')+'" data-n="'+n+'">'+
           '<div class="frame">'+
-            '<img loading="lazy" class="face-img" data-char-img="'+n+'" data-custom="'+(meta[n]&&meta[n].imgUrl?1:0)+'" src="'+((meta[n]&&meta[n].imgUrl)||charImg(n))+'" alt="'+n+'" onerror="window._replaceWithFace&&window._replaceWithFace(this,\'char\',this.dataset.charImg,this.dataset.charImg)"/>'+
-            (attr?'<img loading="lazy" class="attr-icon" src="'+attrImg(attr)+'" alt="" onerror="window._replaceAttr&&window._replaceAttr(this,\''+attr+'\')"/>':'')+
+            '<img loading="eager" class="face-img" data-char-img="'+n+'" data-custom="'+(meta[n]&&meta[n].imgUrl?1:0)+'" src="'+((meta[n]&&meta[n].imgUrl)||charImg(n))+'" alt="'+n+'" onerror="window._replaceWithFace&&window._replaceWithFace(this,\'char\',this.dataset.charImg,this.dataset.charImg)"/>'+
+            (attr?'<img loading="eager" class="attr-icon" src="'+attrImg(attr)+'" alt="" onerror="window._replaceAttr&&window._replaceAttr(this,\''+attr+'\')"/>':'')+
           '</div>'+
           '<span class="nm">'+n+'</span></div>'}).join('')
         :'<div class="empty">没有符合条件的密探</div>')+'</div>'+
@@ -1354,9 +1354,9 @@ function renderUpCard(name,sel,tag){
   const attr=meta[name]&&meta[name].attr;
   return '<div class="upc '+(sel?'sel':'')+'" data-up="'+name+'">'+
     '<div class="up-frame">'+
-      '<img loading="lazy" class="up-img" data-char-img="'+name+'" data-custom="'+(meta[name]&&meta[name].imgUrl?1:0)+'" src="'+((meta[name]&&meta[name].imgUrl)||charImg(name))+'" alt="'+name+'" onerror="window._replaceWithFace&&window._replaceWithFace(this,\'char\',this.dataset.charImg,this.dataset.charImg)"/>'+
+      '<img loading="eager" class="up-img" data-char-img="'+name+'" data-custom="'+(meta[name]&&meta[name].imgUrl?1:0)+'" src="'+((meta[name]&&meta[name].imgUrl)||charImg(name))+'" alt="'+name+'" onerror="window._replaceWithFace&&window._replaceWithFace(this,\'char\',this.dataset.charImg,this.dataset.charImg)"/>'+
       '<div class="up-pl">'+name[0]+'</div>'+
-      (attr?'<img loading="lazy" class="up-attr" src="'+attrImg(attr)+'" alt="" onerror="window._replaceAttr&&window._replaceAttr(this,\''+attr+'\')"/>':'')+
+      (attr?'<img loading="eager" class="up-attr" src="'+attrImg(attr)+'" alt="" onerror="window._replaceAttr&&window._replaceAttr(this,\''+attr+'\')"/>':'')+
     '</div>'+
     '<span class="upnm">'+name+'</span>'+
     '<span class="uptg">'+tag+'</span></div>';
@@ -1365,8 +1365,8 @@ function renderPickedCard(name){
   const attr=meta[name]&&meta[name].attr;
   return '<div class="upc sel" data-rs="1">'+
     '<div class="up-frame">'+
-      '<img loading="lazy" class="up-img" data-char-img="'+name+'" data-custom="'+(meta[name]&&meta[name].imgUrl?1:0)+'" src="'+((meta[name]&&meta[name].imgUrl)||charImg(name))+'" alt="'+name+'" onerror="window._replaceWithFace&&window._replaceWithFace(this,\'char\',this.dataset.charImg,this.dataset.charImg)"/>'+
-      (attr?'<img loading="lazy" class="up-attr" src="'+attrImg(attr)+'" alt="" onerror="window._replaceAttr&&window._replaceAttr(this,\''+attr+'\')"/>':'')+
+      '<img loading="eager" class="up-img" data-char-img="'+name+'" data-custom="'+(meta[name]&&meta[name].imgUrl?1:0)+'" src="'+((meta[name]&&meta[name].imgUrl)||charImg(name))+'" alt="'+name+'" onerror="window._replaceWithFace&&window._replaceWithFace(this,\'char\',this.dataset.charImg,this.dataset.charImg)"/>'+
+      (attr?'<img loading="eager" class="up-attr" src="'+attrImg(attr)+'" alt="" onerror="window._replaceAttr&&window._replaceAttr(this,\''+attr+'\')"/>':'')+
     '</div>'+
     '<span class="upnm">'+name+'</span>'+
     '<span class="uptg" style="background:#8c5f2b">已选</span></div>';
@@ -1426,7 +1426,7 @@ function subOverviewHTML(){
       '<div class="stat-card"><div class="lbl">密探库</div><div class="val">'+cntChars+'<small>位</small></div></div>'+
       '<div class="stat-card"><div class="lbl">抽到最多的密探</div><div class="val" style="font-size:15px">'+o.mostDrawn.name+'<small> · '+o.mostDrawn.count+'次</small></div></div>'+
     '</div>'+
-    '<div class="warn" style="margin-top:14px">副页独立模块：<b>导入</b> 从 xlsx 抽取抽卡记录、<b>导出</b> 把当前代码里的抽卡数据回写成 xlsx、<b>统计</b> 给限定池做细化排名。点顶部 tab 切换。<span style="opacity:.6">（页面版本 0917h）</span></div>';
+    '<div class="warn" style="margin-top:14px">副页独立模块：<b>导入</b> 从 xlsx 抽取抽卡记录、<b>导出</b> 把当前代码里的抽卡数据回写成 xlsx、<b>统计</b> 给限定池做细化排名。点顶部 tab 切换。<span style="opacity:.6">（页面版本 0917i）</span></div>';
 }
 
 /** 表2「距离下次保底还需多少次招募」解析："-" / 空 / 非数字 → 40（未抽，不计垫抽） */
@@ -2172,6 +2172,24 @@ document.querySelectorAll('#topnav .navtab').forEach(el=>{
   el.onclick=()=>{const t=el.dataset.nav;if(t==='sub'){subView='overview';go('sub')}else go('home')};
 });
 load();go('home');
+
+/* Service Worker：图片加载过一次后存入手机本地缓存，之后打开直接本地读取（秒开、断网也能看） */
+if('serviceWorker' in navigator && location.protocol!=='file:'){
+  window.addEventListener('load',()=>{
+    navigator.serviceWorker.register('sw.js').then(function(reg){
+      // 首屏渲染完，再让 SW 后台把剩余图片也缓存下来（不抢首屏带宽）
+      function kick(){
+        var sw=reg.active;
+        if(sw) setTimeout(function(){ sw.postMessage({type:'PRECACHE'}); },2000);
+      }
+      if(reg.active) kick();
+      else {
+        var w=reg.installing||reg.waiting;
+        if(w) w.addEventListener('statechange',function(){ if(w.state==='activated') kick(); });
+      }
+    }).catch(function(){});
+  });
+}
 </script>
 </body>
 </html>
