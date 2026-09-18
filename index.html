@@ -10,8 +10,8 @@
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="default"/>
 <meta name="apple-mobile-web-app-title" content="小鸢助手"/>
-<link rel="apple-touch-icon" href="images/home/总绝密个数上面的图片.png"/>
-<link rel="icon" href="images/home/总绝密个数上面的图片.png"/>
+<link rel="apple-touch-icon" href="images/appicon.png"/>
+<link rel="icon" href="images/appicon.png"/>
 <!-- SheetJS：xlsx 解析/导出（副页面导入/导出功能用） -->
 <script src="xlsx.full.min.js"></script>
 <style>
@@ -491,11 +491,11 @@ function filt(a,j,ex){ex=ex||[];a=a||[];j=j||[];
     return true})}
 
 /** 密探立绘：name + '.png' */
-function charImg(n){return 'images/char/'+n+'.png'}
+function charImg(n){return 'images/char/'+n+'.webp'}
 /** 池子 banner：pool.name + '.png' */
-function poolImg(p){return 'images/pool/'+p.name+'.png'}
+function poolImg(p){return 'images/pool/'+p.name+'.webp'}
 /** 属性图标：attr + '属性.png'（如 火属性.png） */
-function attrImg(attr){return 'images/attr/'+attr+'属性.png'}
+function attrImg(attr){return 'images/attr/'+attr+'属性.webp'}
 
 const POOL_CATALOG=[
  {name:'绣衣天下',type:'pu',tag:'普池'},
@@ -1006,9 +1006,9 @@ function homeHTML(){
   const list=viewOrder();
   return `
   <div class="kpis">
-    <div class="kpi"><img loading="lazy" class="ico-img" src="images/home/总招募次数上面的图片.png" alt=""/><span class="v">${s.totalDraw}</span><span class="l">总招募次数</span></div>
-    <div class="kpi"><img loading="lazy" class="ico-img" src="images/home/总绝密个数上面的图片.png" alt=""/><span class="v">${s.totalSecret}</span><span class="l">总绝密个数</span></div>
-    <div class="kpi"><img loading="lazy" class="ico-img" src="images/home/平均出绝密次数上面的图片.png" alt=""/><span class="v">${s.avgDraw}</span><span class="l">平均出绝密次数</span></div>
+    <div class="kpi"><img loading="lazy" class="ico-img" src="images/home/总招募次数上面的图片.webp" alt=""/><span class="v">${s.totalDraw}</span><span class="l">总招募次数</span></div>
+    <div class="kpi"><img loading="lazy" class="ico-img" src="images/home/总绝密个数上面的图片.webp" alt=""/><span class="v">${s.totalSecret}</span><span class="l">总绝密个数</span></div>
+    <div class="kpi"><img loading="lazy" class="ico-img" src="images/home/平均出绝密次数上面的图片.webp" alt=""/><span class="v">${s.avgDraw}</span><span class="l">平均出绝密次数</span></div>
   </div>
   <div class="top2">
     <div class="it"><div><span class="lbl">抽出次数最多的绝密密探</span><span class="nm">${s.mostDrawn.name}</span></div>
@@ -1400,7 +1400,7 @@ function subOverviewHTML(){
       '<div class="stat-card"><div class="lbl">密探库</div><div class="val">'+cntChars+'<small>位</small></div></div>'+
       '<div class="stat-card"><div class="lbl">抽到最多的密探</div><div class="val" style="font-size:15px">'+o.mostDrawn.name+'<small> · '+o.mostDrawn.count+'次</small></div></div>'+
     '</div>'+
-    '<div class="warn" style="margin-top:14px">副页独立模块：<b>导入</b> 从 xlsx 抽取抽卡记录、<b>导出</b> 把当前代码里的抽卡数据回写成 xlsx、<b>统计</b> 给限定池做细化排名。点顶部 tab 切换。<span style="opacity:.6">（页面版本 0917c）</span></div>';
+    '<div class="warn" style="margin-top:14px">副页独立模块：<b>导入</b> 从 xlsx 抽取抽卡记录、<b>导出</b> 把当前代码里的抽卡数据回写成 xlsx、<b>统计</b> 给限定池做细化排名。点顶部 tab 切换。<span style="opacity:.6">（页面版本 0917d）</span></div>';
 }
 
 /** 表2「距离下次保底还需多少次招募」解析："-" / 空 / 非数字 → 40（未抽，不计垫抽） */
