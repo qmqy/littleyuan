@@ -302,8 +302,23 @@ button{font:inherit;color:inherit;cursor:pointer}
 .stat-card .val{font-size:18px;color:var(--ink);font-weight:700;letter-spacing:.3px}
 .stat-card .val small{font-size:11px;color:var(--soft);font-weight:500;margin-left:3px}
 .stat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:13px}
+/* 概览页专用：卡片纵向堆叠，保证每张卡片的展开区正好落在**它自己下方**（不跑到区底） */
+.stat-stack{display:flex;flex-direction:column;gap:8px;margin-bottom:13px}
+/* 紧凑型卡片：单行 —— 左「名称」，中「数值」，右侧展开按钮；用于概览页 5 张卡 */
+.stat-card.slim{display:flex;align-items:center;gap:6px;padding:10px 13px;min-height:0}
+.stat-card.slim .lbl{margin:0;font-size:12.5px;flex:0 0 auto}
+.stat-card.slim .val{margin-left:auto;font-size:15px;line-height:1.35}
+.stat-card.slim .fig-toggle{flex:0 0 auto;margin-left:6px}
+.stat-card.slim .val .fig-toggle{margin-left:0}
+/* 数字纵向对齐（密探库 / 卡池排期 4 张卡）：
+   标签固定等宽 → 各卡数值区起点一致；数字右对齐 + 等宽数字 → 上下成一条竖线。
+   单位 small 也定宽，避免「位/个」宽窄不同把数字挤歪。 */
+.stat-card.slim .lbl.fixw{width:104px;flex:0 0 104px}
+.stat-card.slim .val.align{flex:1 1 auto;margin-left:0;text-align:right;font-variant-numeric:tabular-nums}
+.stat-card.slim .val.align>small{display:inline-block;width:24px;text-align:left}
 .stat-grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:13px}
 .stat-grid .stat-card{margin:0}
+.stat-stack>.stat-card{margin:0}
 .stat-card.accent{background:linear-gradient(135deg,#fdebd0,#f5d8a1);border-color:#e0b97a}
 .stat-card.accent .val{color:#a06c1f}
 .stat-card.cool{background:linear-gradient(135deg,#e8f1f7,#cfe0ef);border-color:#9ab8d4}
@@ -326,6 +341,53 @@ button{font:inherit;color:inherit;cursor:pointer}
   text-shadow:0 1px 2px rgba(200,128,26,.22)}
 .fig-strip{margin:-4px 0 9px;border:1px solid var(--line);border-radius:10px;
   background:#fffbf5;padding:8px;animation:slideDown .2s ease}
+
+/* ============ 概览 · 卡池排期表 ============ */
+.sch-strip{padding:0}
+.sch-tip{font-size:10.5px;color:var(--soft);margin:0 2px 7px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.sch-tip>span:first-child{margin-right:auto}
+.sch-legend{display:flex;align-items:center;gap:4px;color:var(--soft)}
+/* 「倒序 ▼ / 正序 ▲」切换钮；与展开钮同款，视觉更紧凑 */
+.sch-rev{font-size:10.5px;padding:1px 9px}
+.sch-table{border:1px solid var(--line);border-radius:8px;overflow:hidden;background:#fff}
+/* 4 列：序号 / 卡池名称 / UP密探 / 持续时间（类型列已删——卡片标题即类型）
+   排期分表后行数少（最多 31 行），故列宽放宽、字号加大，保证手机窄屏看全。 */
+.sch-row{display:grid;grid-template-columns:24px minmax(62px,1fr) minmax(60px,1.05fr) 96px;
+  align-items:center;gap:5px;padding:7px 8px;font-size:12px;color:var(--ink);
+  border-bottom:1px solid #f1e7d4}
+.sch-row:last-child{border-bottom:none}
+.sch-row:nth-child(odd){background:#fffdf9}
+/* 普池/周年池表：无「UP 密探」列 → 3 列网格 */
+.sch-row.no-up{grid-template-columns:32px minmax(62px,1fr) 96px}
+/* 普池/周年池表（带「卡池类型」列）：编号 / 名称 / 类型 / 持续时间 */
+.sch-row.no-up.with-kind{grid-template-columns:32px minmax(62px,1fr) 54px 96px}
+.sch-head{background:linear-gradient(180deg,#fdf6e9,#f5e9d2)!important;font-weight:700;font-size:10.5px;
+  color:#6b4a26;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:2}
+.sch-head>span{white-space:nowrap}
+.sch-row.ongoing{background:linear-gradient(90deg,#fff8e6,#fdf3dc)}
+.sch-row.ongoing .sch-name{color:#a06c1f;font-weight:800}
+.sch-row.ongoing .sch-name::after{content:'进行中';margin-left:4px;font-size:9px;font-weight:700;
+  color:#fff;background:var(--gold2);padding:1px 4px;border-radius:7px;vertical-align:1px}
+/* 编号列：右对齐贴住「卡池名称」，避免与名称之间出现大片空隙 */
+.sch-no{text-align:right;font-size:10px;color:var(--soft);font-weight:700;padding-right:2px}
+.sch-name{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sch-up{color:#5b4a35;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sch-time{color:var(--soft);font-size:10px;text-align:right;white-space:nowrap;letter-spacing:-.2px}
+.sch-empty{color:#cbb99c;font-weight:600}
+/* 「卡池类型」列：居中小胶囊（普池 / 300自选 / 18禁） */
+.sch-kind{font-size:10px;color:#7a5a3a;text-align:center;white-space:nowrap;overflow:hidden;
+  text-overflow:ellipsis}
+.sch-head .sch-kind{font-size:10px;color:#6b4a26}
+/* 复刻表：限定复刻 / 常驻复刻 之间的细分界线（短横线，两侧留白） */
+.sch-div{margin:5px auto;width:64%;height:1px;background:linear-gradient(90deg,transparent,var(--line2),transparent)}
+/* 复刻表分组头（卡池类型：限定复刻 / 常驻复刻）—— 居中 */
+.sch-grp{text-align:center;font-size:11.5px;font-weight:800;color:#a06c1f;letter-spacing:.06em;
+  padding:5px 0 4px;background:#fdf6e9;border-radius:7px;margin:0 0 1px}
+/* 类型小标签（仍保留，供别处复用） */
+.kt{display:inline-block;font-size:9px;font-weight:700;line-height:15px;height:15px;
+  padding:0 4px;border-radius:8px;background:var(--goldsoft);color:#8a6032;white-space:nowrap;
+  box-sizing:border-box;max-width:100%;overflow:hidden;text-overflow:ellipsis}
+.kt-limit{background:linear-gradient(135deg,#f3e0b6,#e8cd93);color:#7a5416;border:1px solid #d9bd7f}
 
 /* 排行榜 */
 .stat-block{margin-bottom:14px}
@@ -519,10 +581,11 @@ function poolImg(p){return 'images/pool/'+p.name+'.jpg'}
 function attrImg(attr){return 'images/attr/'+attr+'属性.jpg'}
 
 const POOL_CATALOG=[
- {name:'绣衣天下',type:'pu',tag:'普池',start:'2024-09-26',end:''},
- {name:'游说贤士',type:'anniv',tag:'1周年池',start:'2025-09-26',end:'2025-10-25'},
- {name:'东阁待贤',type:'anniv',tag:'1.5周年池',start:'2026-03-26',end:'2026-04-24'},
- {name:'燕金募秀',type:'anniv',tag:'18禁池',start:'2026-09-17',end:'2026-10-16'},
+ {name:'绣衣天下',type:'pu',tag:'普池',kind:'普池',start:'2024-09-26',end:''},
+ // ↑ kind：「卡池类型」列专用展示标签（纯展示，不参与逻辑；详见 scheduleGroups 注释）
+ {name:'游说贤士',type:'anniv',tag:'1周年池',kind:'300自选',start:'2025-09-26',end:'2025-10-25'},
+ {name:'东阁待贤',type:'anniv',tag:'1.5周年池',kind:'300自选',start:'2026-03-26',end:'2026-04-24'},
+ {name:'燕金募秀',type:'anniv',tag:'18禁池',kind:'18禁',start:'2026-09-17',end:'2026-10-16'},
  // 限定UP池：数据库按"老→新"顺序存档（弓剑江东最早、却月凌风最晚）
  // 渲染时会在 home 倒序成"新→老"，保持主页面视觉不变
  // start/end：卡池上下线日期（YYYY-MM-DD）；end 为空 = 永不结束（普池）
@@ -571,7 +634,7 @@ const VER_K='yiruanPool_prev_version';
 let pools=null;
 function rid(){return 'p'+Date.now()+Math.floor(Math.random()*999)}
 function rid2(){return 'p'+Date.now()+Math.floor(Math.random()*999)+'x'}
-function defPools(){return POOL_CATALOG.map(m=>({id:rid(),name:m.name,type:m.type,tag:m.tag,up1:m.up1||'',up2:m.up2||'',start:m.start||'',end:m.end||'',pity:40,joinedUps:m.type==='pu'?[]:undefined,records:[],stat:{}}))}
+function defPools(){return POOL_CATALOG.map(m=>({id:rid(),name:m.name,type:m.type,tag:m.tag,kind:m.kind||'',up1:m.up1||'',up2:m.up2||'',start:m.start||'',end:m.end||'',pity:40,joinedUps:m.type==='pu'?[]:undefined,records:[],stat:{}}))}
 /** v3 SEED 数据：xlsx「招募记录」表灌入的真实抽卡流水。仅 records 为空的池子在升级时被填充；用户已有数据不会被覆盖 */
 const SEED_POOL_RECORDS={};
 function defaultTag(t){if(t==='pu')return '普池';if(t==='limit')return '限定UP池';return ''}
@@ -626,13 +689,14 @@ function load(){
     if(p.name==='燕金募秀'&&p.tag==='2周年池')p.tag='18禁池';
     if(!p.stat)p.stat={}
     if(p.bannerUrl!=null)delete p.bannerUrl;   // 旧字段：自定义 banner 已取消，图片一律用代码内置
-    // 从内置清单补齐 UP / 上下线时间 / 标签（老数据可能缺这些字段；标签会随版本更新，如复刻池改 tag）
+    // 从内置清单补齐 UP / 上下线时间 / 标签 / 卡池类型（老数据可能缺这些字段；标签会随版本更新，如复刻池改 tag）
     const m=POOL_CATALOG.find(c=>c.name===p.name);
     if(m){
       if(!p.up1)p.up1=m.up1||'';if(!p.up2)p.up2=m.up2||'';
       p.start=m.start||p.start||'';
       p.end=(m.end!=null)?m.end:(p.end||'');
       if(m.tag)p.tag=m.tag;
+      if(m.kind)p.kind=m.kind;   // 「卡池类型」列专用展示标签（老存档没有此字段，需从代码补齐）
     } else {
       if(p.start==null)p.start='';
       if(p.end==null)p.end='';
@@ -641,7 +705,7 @@ function load(){
     // 增量同步：代码 POOL_CATALOG 里用户本地尚未拥有的池子，自动补建（只新增、不覆盖已有记录/保底）
     POOL_CATALOG.forEach(c=>{
       if(!pools.find(x=>x.name===c.name)){
-        pools.push({id:rid(),name:c.name,type:c.type,tag:c.tag,up1:c.up1||'',up2:c.up2||'',start:c.start||'',end:c.end||'',pity:40,joinedUps:c.type==='pu'?[]:undefined,records:[],stat:{}});
+        pools.push({id:rid(),name:c.name,type:c.type,tag:c.tag,kind:c.kind||'',up1:c.up1||'',up2:c.up2||'',start:c.start||'',end:c.end||'',pity:40,joinedUps:c.type==='pu'?[]:undefined,records:[],stat:{}});
       }
     });
 
@@ -673,13 +737,13 @@ function switchAccount(id){
   if(id===curAccId||!accOf(id))return;
   save();
   curAccId=id;lsSet(CUR_K,curAccId);
-  figOpen=false;chOpen=false;
+  ovwCollapseAll();
   load();markAllDirty();render();
   toast('已切换到「'+accName()+'」');
 }
 function createAccount(name,copyCur){
   save();   // 先把当前账户落盘
-  figOpen=false;chOpen=false;
+  ovwCollapseAll();
   name=String(name||'').trim()||('账户'+(accList.length+1));
   const id='a'+Date.now().toString(36)+Math.floor(Math.random()*1296).toString(36);
   let data;
@@ -810,6 +874,17 @@ function poolPeriod(p){
   if(!p||!p.start)return '';
   return fmtDate(p.start)+'~'+(p.end?fmtDate(p.end):'永久');
 }
+/** 排期表专用：年份只留后两位 → '2024-10-01' → '24/10/1'；空返回 '' */
+function fmtDateShort(d){
+  if(!d)return '';
+  const m=String(d).match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+  return m?(m[1].slice(-2)+'/'+(+m[2])+'/'+(+m[3])):d;
+}
+/** 排期表专用期间：'24/10/1~24/11/18'；永不结束显示 '24/9/26~永久' */
+function poolPeriodShort(p){
+  if(!p||!p.start)return '';
+  return fmtDateShort(p.start)+'~'+(p.end?fmtDateShort(p.end):'永久');
+}
 
 function curUps(){const l=pools.filter(p=>p.type==='limit');if(!l.length)return[];
   const x=l[l.length-1];return [x.up1,x.up2].filter(Boolean)}
@@ -890,6 +965,18 @@ let view='home', poolIdx=0, prevOpens={}, chF={attrs:[],jobs:[]};   // prevOpens
 let subView='overview'; // 副页内导航：overview / import / export / stats
 let figOpen=false;      // 副页概览「全图鉴瑕」缩略图是否展开（仅会话内，不持久化）
 let chOpen=false;       // 副页概览「密探库」网格是否展开（与首页密探库共用 yiruanPool_prev_chF 筛选）
+// 概览页折叠态（会话内，不持久化）；同一时刻只允许展开一个
+let schLimit=false, schPu=false, schRep=false;
+// 排期表排序方向：false = 倒序（最新在上，默认）；true = 正序（先开始的在上）
+let schAsc=false;
+// 通用：收起其他所有概览页折叠区（含密探库/全图鉴瑕与 3 张排期表）
+function ovwCollapseAll(except){
+  if(except!=='ch')chOpen=false;
+  if(except!=='fig')figOpen=false;
+  if(except!=='limit')schLimit=false;
+  if(except!=='pu')schPu=false;
+  if(except!=='rep')schRep=false;
+}
 // 招募页"未保存不持久化"：进入池子详情时把 pools[poolIdx] 深拷贝到 draft，
 // poolHTML/recModal 都用 draft；点"保存"才写回 pools；退出丢弃 draft
 let draft=null;
@@ -1039,21 +1126,47 @@ function act(a,el){
       });
     }
   }
-  // 副页概览「全图鉴瑕」：展开/收起缺失密探缩略图（重建副页，因为缩略图区块只在展开时渲染）
-  // 概览页同一时刻只允许展开一个：展开本项时自动收起「密探库」
+  // ===== 概览页折叠区：全部互斥（同一时刻只允许展开一个） =====
+  // 展开本项前先 ovwCollapseAll(本人)，再翻转本项；点已展开的则单纯收起。
+  // 副页概览「全图鉴瑕」
   else if(a==='figtoggle'){
     const on=!figOpen;
-    figOpen=on; if(on)chOpen=false;
-    _viewDirty['sub']=true;
-    render();
+    if(on)ovwCollapseAll('fig');
+    figOpen=on;
+    _viewDirty['sub']=true; render();
   }
-  // 副页概览「密探库」：展开/收起完整密探库网格（含属性/职业筛选，与首页密探库同一套筛选状态）
-  // 概览页同一时刻只允许展开一个：展开本项时自动收起「全图鉴瑕」
+  // 副页概览「密探库」（含属性/职业筛选，与首页密探库共用 chF）
   else if(a==='chartoggle'){
     const on=!chOpen;
-    chOpen=on; if(on)figOpen=false;
-    _viewDirty['sub']=true;
-    render();
+    if(on)ovwCollapseAll('ch');
+    chOpen=on;
+    _viewDirty['sub']=true; render();
+  }
+  // 副页概览「限定 UP 池排期」
+  else if(a==='schlimit'){
+    const on=!schLimit;
+    if(on)ovwCollapseAll('limit');
+    schLimit=on;
+    _viewDirty['sub']=true; render();
+  }
+  // 副页概览「普池/周年池排期」
+  else if(a==='schpu'){
+    const on=!schPu;
+    if(on)ovwCollapseAll('pu');
+    schPu=on;
+    _viewDirty['sub']=true; render();
+  }
+  // 副页概览「复刻池排期」展开（限定复刻 + 常驻复刻同表，细线分隔）
+  else if(a==='schrep'){
+    const on=!schRep;
+    if(on)ovwCollapseAll('rep');
+    schRep=on;
+    _viewDirty['sub']=true; render();
+  }
+  // 排期表「倒序 / 正序」切换：只改渲染方向，不影响展开态
+  else if(a==='schrev'){
+    schAsc=!schAsc;
+    _viewDirty['sub']=true; render();
   }
   // 副页概览里的属性/职业筛选：改 chF 后重建副页（首页的 'chip' 分支只重建主 pane，不适用于副页）
   else if(a==='subchip'){
@@ -1077,8 +1190,8 @@ function recordCellHTML(r,i,opts){
   return '<div class="cell rec '+toneCls+'" data-act="editrec" data-i="'+i+'">'+
     '<span class="seq">'+(i+1)+'</span>'+
     '<div class="frame">'+
-      '<img loading="eager" class="face-img" data-char-img="'+r.charName+'" src="'+charImg(r.charName)+'" alt="'+r.charName+'" onerror="window._replaceWithFace&&window._replaceWithFace(this,\'char\',this.dataset.charImg,this.dataset.charImg)"/>'+
-      (attr?'<img loading="eager" class="attr-icon" src="'+attrImg(attr)+'" alt="" onerror="window._replaceAttr&&window._replaceAttr(this,\''+attr+'\')"/>':'')+
+      '<img loading="eager" class="face-img" data-char-img="'+r.charName+'" src="'+charImg(r.charName)+'" alt="'+r.charName+'"  onload="window._imgRetryOK&&window._imgRetryOK(this)" onerror="window._replaceWithFace&&window._replaceWithFace(this,\'char\',this.dataset.charImg,this.dataset.charImg)"/>'+
+      (attr?'<img loading="eager" class="attr-icon" src="'+attrImg(attr)+'" alt=""  onload="window._imgRetryOK&&window._imgRetryOK(this)" onerror="window._replaceAttr&&window._replaceAttr(this,\''+attr+'\')"/>':'')+
       '<div class="cell-overlay"><span class="cnt">'+r.drawCount+'</span></div>'+
     '</div>'+
     (hideName?'':'<span class="nm">'+r.charName+'</span>')+'</div>';
@@ -1135,7 +1248,7 @@ function viewOrder(){
     if(sa&&sb){
       if(sa!==sb)return sa<sb?1:-1;               // 日期倒序
       const ra=isReprint(a)?1:0, rb=isReprint(b)?1:0;
-      if(ra!==rb)return rb-ra;                    // 同日：新池(0)在前，复刻池(1)在后
+      if(ra!==rb)return ra-rb;                    // 同日：新池(0)在前，复刻池(1)在后
     } else if(sa){return -1} else if(sb){return 1}
     // 其余情况（都无 start / 同日同类）：沿用 catalog 倒序兜底，自定义池排最前
     const ia=catOrder[a.name], ib=catOrder[b.name];
@@ -1165,9 +1278,9 @@ function homeHTML(){
       +'<span class="tk-v tk-v-warp">歪 '+x.count+' 次</span></div>').join('');
   return `
   <div class="kpis">
-    <div class="kpi"><img loading="eager" class="ico-img" src="images/home/总招募次数上面的图片.jpg" alt="" onerror="window._replaceKPI&&window._replaceKPI(this)"/><span class="v">${s.totalDraw}</span><span class="l">总招募次数</span></div>
-    <div class="kpi"><img loading="eager" class="ico-img" src="images/home/总绝密个数上面的图片.jpg" alt="" onerror="window._replaceKPI&&window._replaceKPI(this)"/><span class="v">${s.totalSecret}</span><span class="l">总绝密个数</span></div>
-    <div class="kpi"><img loading="eager" class="ico-img" src="images/home/平均出绝密次数上面的图片.jpg" alt="" onerror="window._replaceKPI&&window._replaceKPI(this)"/><span class="v">${s.avgDraw}</span><span class="l">平均出绝密次数</span></div>
+    <div class="kpi"><img loading="eager" class="ico-img" src="images/home/总招募次数上面的图片.jpg" alt=""  onload="window._imgRetryOK&&window._imgRetryOK(this)" onerror="window._replaceKPI&&window._replaceKPI(this)"/><span class="v">${s.totalDraw}</span><span class="l">总招募次数</span></div>
+    <div class="kpi"><img loading="eager" class="ico-img" src="images/home/总绝密个数上面的图片.jpg" alt=""  onload="window._imgRetryOK&&window._imgRetryOK(this)" onerror="window._replaceKPI&&window._replaceKPI(this)"/><span class="v">${s.totalSecret}</span><span class="l">总绝密个数</span></div>
+    <div class="kpi"><img loading="eager" class="ico-img" src="images/home/平均出绝密次数上面的图片.jpg" alt=""  onload="window._imgRetryOK&&window._imgRetryOK(this)" onerror="window._replaceKPI&&window._replaceKPI(this)"/><span class="v">${s.avgDraw}</span><span class="l">平均出绝密次数</span></div>
   </div>
   <div class="top2">
     <div class="tk-item">
@@ -1215,7 +1328,7 @@ function homeHTML(){
     <div class="pool" data-act="toggleprev" data-id="${p.id}">
       <div class="art" data-pool-id="${p.id}">
         <img loading="eager" class="art-img" src="${poolImg(p)}"
-          onerror="window._replaceWithFace && window._replaceWithFace(this,'pool','${p.id}','${p.name}')" alt="${p.name}"/>
+           onload="window._imgRetryOK&&window._imgRetryOK(this)" onerror="window._replaceWithFace && window._replaceWithFace(this,'pool','${p.id}','${p.name}')" alt="${p.name}"/>
         <span class="pn">${p.name}</span>
         ${showPoolTag(p) ? `<span class="pt">${p.tag}</span>` : ''}
       </div>
@@ -1257,7 +1370,7 @@ function poolHTML(){
   <div class="pool-detail">
   <div class="pd-banner">
     <img loading="eager" src="${poolImg(p)}"
-      onerror="window._replaceWithFace && window._replaceWithFace(this,'pool','${p.id}','${p.name}')" alt="${p.name}"/>
+       onload="window._imgRetryOK&&window._imgRetryOK(this)" onerror="window._replaceWithFace && window._replaceWithFace(this,'pool','${p.id}','${p.name}')" alt="${p.name}"/>
   </div>
   ${isLimit?`<div class="uprow-line">
     <span class="lbl">up角色：</span>
@@ -1296,8 +1409,8 @@ function charsHTML(){
     ${list.map(n=>{const attr=meta[n]&&meta[n].attr;
       return `<div class="cell" data-n="${n}">
         <div class="frame">
-          <img loading="eager" class="face-img" data-char-img="${n}" src="${charImg(n)}" alt="${n}" onerror="window._replaceWithFace&&window._replaceWithFace(this,'char',this.dataset.charImg,this.dataset.charImg)"/>
-          ${attr?`<img loading="eager" class="attr-icon" src="${attrImg(attr)}" alt="${attr}" onerror="window._replaceAttr&&window._replaceAttr(this,'${attr}')"/>`:''}
+          <img loading="eager" class="face-img" data-char-img="${n}" src="${charImg(n)}" alt="${n}"  onload="window._imgRetryOK&&window._imgRetryOK(this)" onerror="window._replaceWithFace&&window._replaceWithFace(this,'char',this.dataset.charImg,this.dataset.charImg)"/>
+          ${attr?`<img loading="eager" class="attr-icon" src="${attrImg(attr)}" alt="${attr}"  onload="window._imgRetryOK&&window._imgRetryOK(this)" onerror="window._replaceAttr&&window._replaceAttr(this,'${attr}')"/>`:''}
         </div>
         <span class="nm">${n}</span>
         <span class="mtx">${[meta[n].attr,meta[n].job].filter(Boolean).join(' · ')||'未配置'}</span>
@@ -1334,8 +1447,8 @@ function pickerModal(title,upList,exclude,onPick){
       '<div class="pg">'+(list.length?list.map(n=>{const attr=meta[n]&&meta[n].attr;
         return '<div class="cell '+(upList.indexOf(n)>=0?'upc2':'')+'" data-n="'+n+'">'+
           '<div class="frame">'+
-            '<img loading="eager" class="face-img" data-char-img="'+n+'" src="'+charImg(n)+'" alt="'+n+'" onerror="window._replaceWithFace&&window._replaceWithFace(this,\'char\',this.dataset.charImg,this.dataset.charImg)"/>'+
-            (attr?'<img loading="eager" class="attr-icon" src="'+attrImg(attr)+'" alt="" onerror="window._replaceAttr&&window._replaceAttr(this,\''+attr+'\')"/>':'')+
+            '<img loading="eager" class="face-img" data-char-img="'+n+'" src="'+charImg(n)+'" alt="'+n+'"  onload="window._imgRetryOK&&window._imgRetryOK(this)" onerror="window._replaceWithFace&&window._replaceWithFace(this,\'char\',this.dataset.charImg,this.dataset.charImg)"/>'+
+            (attr?'<img loading="eager" class="attr-icon" src="'+attrImg(attr)+'" alt=""  onload="window._imgRetryOK&&window._imgRetryOK(this)" onerror="window._replaceAttr&&window._replaceAttr(this,\''+attr+'\')"/>':'')+
           '</div>'+
           '<span class="nm">'+n+'</span></div>'}).join('')
         :'<div class="empty">没有符合条件的密探</div>')+'</div>'+
@@ -1435,9 +1548,9 @@ function renderUpCard(name,sel,tag){
   const attr=meta[name]&&meta[name].attr;
   return '<div class="upc '+(sel?'sel':'')+'" data-up="'+name+'">'+
     '<div class="up-frame">'+
-      '<img loading="eager" class="up-img" data-char-img="'+name+'" src="'+charImg(name)+'" alt="'+name+'" onerror="window._replaceWithFace&&window._replaceWithFace(this,\'char\',this.dataset.charImg,this.dataset.charImg)"/>'+
+      '<img loading="eager" class="up-img" data-char-img="'+name+'" src="'+charImg(name)+'" alt="'+name+'"  onload="window._imgRetryOK&&window._imgRetryOK(this)" onerror="window._replaceWithFace&&window._replaceWithFace(this,\'char\',this.dataset.charImg,this.dataset.charImg)"/>'+
       '<div class="up-pl">'+name[0]+'</div>'+
-      (attr?'<img loading="eager" class="up-attr" src="'+attrImg(attr)+'" alt="" onerror="window._replaceAttr&&window._replaceAttr(this,\''+attr+'\')"/>':'')+
+      (attr?'<img loading="eager" class="up-attr" src="'+attrImg(attr)+'" alt=""  onload="window._imgRetryOK&&window._imgRetryOK(this)" onerror="window._replaceAttr&&window._replaceAttr(this,\''+attr+'\')"/>':'')+
     '</div>'+
     '<span class="upnm">'+name+'</span>'+
     '<span class="uptg">'+tag+'</span></div>';
@@ -1446,8 +1559,8 @@ function renderPickedCard(name){
   const attr=meta[name]&&meta[name].attr;
   return '<div class="upc sel" data-rs="1">'+
     '<div class="up-frame">'+
-      '<img loading="eager" class="up-img" data-char-img="'+name+'" src="'+charImg(name)+'" alt="'+name+'" onerror="window._replaceWithFace&&window._replaceWithFace(this,\'char\',this.dataset.charImg,this.dataset.charImg)"/>'+
-      (attr?'<img loading="eager" class="up-attr" src="'+attrImg(attr)+'" alt="" onerror="window._replaceAttr&&window._replaceAttr(this,\''+attr+'\')"/>':'')+
+      '<img loading="eager" class="up-img" data-char-img="'+name+'" src="'+charImg(name)+'" alt="'+name+'"  onload="window._imgRetryOK&&window._imgRetryOK(this)" onerror="window._replaceWithFace&&window._replaceWithFace(this,\'char\',this.dataset.charImg,this.dataset.charImg)"/>'+
+      (attr?'<img loading="eager" class="up-attr" src="'+attrImg(attr)+'" alt=""  onload="window._imgRetryOK&&window._imgRetryOK(this)" onerror="window._replaceAttr&&window._replaceAttr(this,\''+attr+'\')"/>':'')+
     '</div>'+
     '<span class="upnm">'+name+'</span>'+
     '<span class="uptg" style="background:#8c5f2b">已选</span></div>';
@@ -1488,32 +1601,71 @@ function subHTML(){
 }
 
 // ========== 副页 · 概览 ==========
+
+/* 卡池类型短标签：普池 / 周年池 / 18禁池 / 限时UP / 常驻复刻 / 限定复刻
+   —— 取自 p.tag（非 limit 池直接用 tag）；limit 池用「限时UP」或 tag 里的「xxx复刻」 */
+function poolKindLabel(p){
+  if(!p)return '';
+  if(p.type!=='limit')return p.tag||'特殊池';
+  if(isReprint(p))return (String(p.tag||'').indexOf('常驻')>=0)?'常驻复刻':'限定复刻';
+  return '限时UP';
+}
+/* ===== 概览页排期分组 =====
+   limit 组：限定UP池排期   → type==='limit' 且非复刻
+   pu   组：普池/周年池排期 → type==='pu' 或 'anniv'
+   rep  组：复刻池排期      → type==='limit' 且是复刻，再分「限定复刻」「常驻复刻」两块，各带类型头
+   ⚠️ 序号 = **组内**上线时间正序（每组各自从 1 开始，各控件不混编），与显示顺序解耦：
+      rows 内部按时间升序存好（no 就是组内时间序号），显示时靠 rev 决定正序还是倒序。
+   默认倒序（最新在最上），用户可点「倒序」切正序。 */
+function scheduleGroups(){
+  const o=viewOrder();
+  // 组内独立编号：每张表各自从 1 开始（各控件不混编）
+  // → 先按时间升序排好，再依次赋 1,2,3…
+  const byTime=arr=>{
+    const sorted=arr.slice().sort((a,b)=>{
+      const sa=a.start||'', sb=b.start||'';
+      if(sa&&sb){ if(sa!==sb)return sa<sb?-1:1; return 0; }
+      if(sa)return -1;
+      if(sb)return 1;
+      return 0;
+    });
+    return sorted.map((p,i)=>({
+      no:i+1,
+      name:p.name,
+      up:[p.up1,p.up2].filter(Boolean).join(' / '),
+      period:poolPeriodShort(p),
+      ongoing:isOpen(p),
+      // kind = 「卡池类型」列的**专用展示标签**：只在本排期表内做区分，不参与任何逻辑判断，
+      //        刻意与 tag 分开（tag 供首页角标/导出/复刻判定等使用），改动 kind 不影响其它功能
+      kind:String(p.kind||'')
+    }));
+  };
+  const repAll=o.filter(p=>p.type==='limit'&&isReprint(p));
+  // 复刻池：限定复刻在前、常驻复刻在后（各按时间正序、各自从 1 编号）
+  const repLimit=byTime(repAll.filter(p=>String(p.tag||'').indexOf('常驻')<0));
+  const repChang=byTime(repAll.filter(p=>String(p.tag||'').indexOf('常驻')>=0));
+  return {
+    limit:byTime(o.filter(p=>p.type==='limit'&&!isReprint(p))),
+    pu:byTime(o.filter(p=>p.type==='pu'||p.type==='anniv')),
+    repLimit:repLimit,
+    repChang:repChang,
+    repAll:[...repLimit,...repChang]
+  };
+}
+
 function subOverviewHTML(){
   const o=overall();
-  const lim=pools.filter(p=>p.type==='limit').length;
-  const pu=pools.filter(p=>p.type==='pu'||p.type==='anniv').length;
   const cntChars=names().length;
-  const limWithData=pools.filter(p=>p.type==='limit'&&(p.records||[]).length).length;
   const miss=missingChars();
   const libList=filt(chF.attrs,chF.jobs);
-  return '<div class="subhd">抽卡总览</div>'+
-    '<div class="stat-grid-3">'+
-      '<div class="stat-card accent"><div class="lbl">总抽数</div><div class="val">'+o.totalDraw+'<small>次</small></div></div>'+
-      '<div class="stat-card"><div class="lbl">绝密密探</div><div class="val">'+o.totalSecret+'<small>位·次</small></div></div>'+
-      '<div class="stat-card cool"><div class="lbl">平均抽数</div><div class="val">'+o.avgDraw+'<small>抽/位</small></div></div>'+
-    '</div>'+
-    '<div class="subhd">卡池结构</div>'+
-    '<div class="stat-grid">'+
-      '<div class="stat-card"><div class="lbl">限定 UP 池</div><div class="val">'+lim+'<small>个（'+limWithData+' 有数据）</small></div></div>'+
-      '<div class="stat-card"><div class="lbl">普池/活动池</div><div class="val">'+pu+'<small>个</small></div></div>'+
-      '<div class="stat-card"><div class="lbl">密探库</div><div class="val">'+cntChars+'<small>位</small></div>'+
-        '<span class="fig-toggle" data-act="chartoggle">'+(chOpen?'收起 ▲':'展开 ▾')+'</span></div>'+
-      (miss.length
-        ? '<div class="stat-card"><div class="lbl">全图鉴瑕 <b class="fig-num">'+miss.length+'</b> 密探</div>'+
-          '<div class="val"><span class="fig-toggle" data-act="figtoggle">'+(figOpen?'收起 ▲':'展开 ▾')+'</span></div></div>'
-        : '<div class="stat-card fullfig"><span class="fig-congrats">恭喜殿下全图鉴！</span></div>')+
-    '</div>'+
-    (chOpen?'<div class="fig-strip"><div class="pnl" style="margin:0 0 10px">'+
+  const g=scheduleGroups();
+  const rev=!schAsc;   // 默认倒序（最新在上）
+  // 卡片 + 紧贴其下的展开区，纵向堆叠：展开内容永远属于**它自己那张卡**
+  const pair=(card,body)=>({card:card,body:body});
+  // --- 抽卡总览 ---
+  const cDraw='<div class="stat-card slim"><div class="lbl fixw">密探库</div><div class="val align">'+cntChars+'<small>位</small></div>'+
+      '<span class="fig-toggle" data-act="chartoggle">'+(chOpen?'收起 ▲':'展开 ▾')+'</span></div>';
+  const bDraw=(chOpen?'<div class="fig-strip" style="margin-top:8px"><div class="pnl" style="margin:0 0 10px">'+
       '<span class="lbl">属性 <span style="font-size:10px;color:#b99567">（可多选，再点已选可取消）</span></span><div class="chips">'+chipRow('a',ATTRS,chF.attrs,'subchip')+'</div>'+
       '<span class="lbl">职业 <span style="font-size:10px;color:#b99567">（可多选）</span></span><div class="chips">'+chipRow('j',JOBS,chF.jobs,'subchip')+'</div>'+
     '</div>'+
@@ -1521,18 +1673,98 @@ function subOverviewHTML(){
     '<div class="prev-grid">'+
       libList.map(n=>{const at=meta[n]&&meta[n].attr;
         return '<div class="cell"><div class="frame">'+
-          '<img loading="eager" class="face-img" data-char-img="'+escHtml(n)+'" src="'+charImg(n)+'" alt="'+escHtml(n)+'" onerror="window._replaceWithFace&&window._replaceWithFace(this,\'char\',this.dataset.charImg,this.dataset.charImg)"/>'+
-          (at?'<img loading="eager" class="attr-icon" src="'+attrImg(at)+'" alt="'+at+'" onerror="window._replaceAttr&&window._replaceAttr(this,\''+at+'\')"/>':'')+
+          '<img loading="eager" class="face-img" data-char-img="'+escHtml(n)+'" src="'+charImg(n)+'" alt="'+escHtml(n)+'"  onload="window._imgRetryOK&&window._imgRetryOK(this)" onerror="window._replaceWithFace&&window._replaceWithFace(this,\'char\',this.dataset.charImg,this.dataset.charImg)"/>'+
+          (at?'<img loading="eager" class="attr-icon" src="'+attrImg(at)+'" alt="'+at+'"  onload="window._imgRetryOK&&window._imgRetryOK(this)" onerror="window._replaceAttr&&window._replaceAttr(this,\''+at+'\')"/>':'')+
           '</div><span class="nm">'+escHtml(n)+'</span>'+
           '<span class="mtx">'+[meta[n].attr,meta[n].job].filter(Boolean).join(' · ')+'</span></div>'}).join('')+
-    '</div></div>':'')+
-    (figOpen&&miss.length?'<div class="fig-strip"><div class="prev-grid">'+
+    '</div></div>':'');
+  const cMiss=miss.length
+      ? '<div class="stat-card slim"><div class="lbl">全图鉴瑕 <b class="fig-num">'+miss.length+'</b> 密探</div>'+
+        '<span class="fig-toggle" data-act="figtoggle" style="margin-left:auto">'+(figOpen?'收起 ▲':'展开 ▾')+'</span></div>'
+      : '<div class="stat-card fullfig"><span class="fig-congrats">恭喜殿下全图鉴！</span></div>';
+  const bMiss=(figOpen&&miss.length?'<div class="fig-strip" style="margin-top:8px"><div class="prev-grid">'+
       miss.map(n=>'<div class="cell"><div class="frame">'+
-        '<img loading="eager" class="face-img" data-char-img="'+escHtml(n)+'" src="'+charImg(n)+'" alt="'+escHtml(n)+'" onerror="window._replaceWithFace&&window._replaceWithFace(this,\'char\',this.dataset.charImg,this.dataset.charImg)"/>'+
-        (meta[n]&&meta[n].attr?'<img loading="eager" class="attr-icon" src="'+attrImg(meta[n].attr)+'" alt="'+meta[n].attr+'" onerror="window._replaceAttr&&window._replaceAttr(this,\''+meta[n].attr+'\')"/>':'')+
+        '<img loading="eager" class="face-img" data-char-img="'+escHtml(n)+'" src="'+charImg(n)+'" alt="'+escHtml(n)+'"  onload="window._imgRetryOK&&window._imgRetryOK(this)" onerror="window._replaceWithFace&&window._replaceWithFace(this,\'char\',this.dataset.charImg,this.dataset.charImg)"/>'+
+        (meta[n]&&meta[n].attr?'<img loading="eager" class="attr-icon" src="'+attrImg(meta[n].attr)+'" alt="'+meta[n].attr+'"  onload="window._imgRetryOK&&window._imgRetryOK(this)" onerror="window._replaceAttr&&window._replaceAttr(this,\''+meta[n].attr+'\')"/>':'')+
         '</div><span class="nm">'+escHtml(n)+'</span></div>').join('')+
-      '</div></div>':'')+
-    '<div class="warn" style="margin-top:14px">副页独立模块：<b>导入</b> 从 xlsx 抽取抽卡记录、<b>导出</b> 把当前代码里的抽卡数据回写成 xlsx、<b>统计</b> 给限定池做细化排名。点顶部 tab 切换。<span style="opacity:.6">（页面版本 0919e）</span></div>';
+      '</div></div>':'');
+  // --- 卡池排期：3 张排期卡，各自展开在自身下方 ---
+  // 「倒序/正序」切换按钮（放在表头右上的 tip 行）
+  const revBtn='<span class="fig-toggle sch-rev" data-act="schrev">'+(rev?'倒序 ▼':'正序 ▲')+'</span>';
+  const cLimit='<div class="stat-card slim"><div class="lbl fixw">限定 UP 池排期</div><div class="val align">'+g.limit.length+'<small>个</small></div>'+
+      '<span class="fig-toggle" data-act="schlimit">'+(schLimit?'收起 ▲':'展开 ▾')+'</span></div>';
+  const bLimit=(schLimit?'<div class="fig-strip" style="margin-top:8px"><div class="sch-strip">'+
+      '<div class="sch-tip"><span>共 '+g.limit.length+' 个卡池 · 组内按上线时间编号</span>'+revBtn+'</div>'+
+      schTableRows(g.limit,rev)+'</div></div>':'');
+  const cPu='<div class="stat-card slim"><div class="lbl fixw">普池/周年池排期</div><div class="val align">'+g.pu.length+'<small>个</small></div>'+
+      '<span class="fig-toggle" data-act="schpu">'+(schPu?'收起 ▲':'展开 ▾')+'</span></div>';
+  const bPu=(schPu?'<div class="fig-strip" style="margin-top:8px"><div class="sch-strip">'+
+      '<div class="sch-tip"><span>共 '+g.pu.length+' 个卡池 · 组内按上线时间编号</span>'+revBtn+'</div>'+
+      schTableRows(g.pu,rev,null,true,true)+'</div></div>':'');
+  const cRep='<div class="stat-card slim"><div class="lbl fixw">复刻池排期</div><div class="val align">'+g.repAll.length+'<small>个</small></div>'+
+      '<span class="fig-toggle" data-act="schrep">'+(schRep?'收起 ▲':'展开 ▾')+'</span></div>';
+  // 复刻表：限定复刻 / 常驻复刻 两块，各带居中类型头 + 自己的列头，序号组内从 1 起
+  const bRep=(schRep?'<div class="fig-strip" style="margin-top:8px"><div class="sch-strip">'+
+      '<div class="sch-tip"><span>限定复刻 '+g.repLimit.length+' · 常驻复刻 '+g.repChang.length+' · 组内按上线时间编号</span>'+revBtn+'</div>'+
+      schTableRows(null,rev,[{title:'限定复刻',rows:g.repLimit},{title:'常驻复刻',rows:g.repChang}])+
+      '</div></div>':'');
+  return '<div class="subhd">抽卡总览</div>'+
+    '<div class="stat-grid-3">'+
+      '<div class="stat-card accent"><div class="lbl">总抽数</div><div class="val">'+o.totalDraw+'<small>次</small></div></div>'+
+      '<div class="stat-card"><div class="lbl">绝密密探</div><div class="val">'+o.totalSecret+'<small>位·次</small></div></div>'+
+      '<div class="stat-card cool"><div class="lbl">平均抽数</div><div class="val">'+o.avgDraw+'<small>抽/位</small></div></div>'+
+    '</div>'+
+    '<div class="stat-stack">'+
+      // 全图鉴瑕 卡 + 展开（放在密探库上面）
+      (miss.length?cMiss+bMiss:'')+
+      // 密探库 卡 + 展开
+      cDraw+bDraw+
+    '</div>'+
+    '<div class="subhd">卡池排期</div>'+
+    '<div class="stat-stack">'+
+      cLimit+bLimit+
+      cPu+bPu+
+      cRep+bRep+
+    '</div>'+
+    '<div class="warn" style="margin-top:14px">副页独立模块：<b>导入</b> 从 xlsx 抽取抽卡记录、<b>导出</b> 把当前代码里的抽卡数据回写成 xlsx、<b>统计</b> 给限定池做细化排名。点顶部 tab 切换。<span style="opacity:.6">（页面版本 0919f）</span></div>';
+}
+/* 生成表体（列头 + 行）。rows 必须按组内时间升序存好（no = 1,2,3…）。
+   rev = true 倒序渲染（最新在上）。
+   group = 可选分组：[{title:'限定复刻', rows:[...]}, {title:'常驻复刻', rows:[...]}]。
+   给了 group 就按组分块渲染 —— 每组一个居中「卡池类型」表头 + 自己的列头，组内编号从 1 起。
+   hideUp = true 时不渲染「UP 密探」列；showKind = true 时在「卡池名称」后插入「卡池类型」列。
+   （普池/周年池：无 UP 密探，改用「卡池类型」列 —— 普池 / 300自选 / 18禁。） */
+function schTableRows(rows,rev,group,hideUp,showKind){
+  const rowCls=(hideUp?' no-up':'')+(showKind?' with-kind':'')+' sch-head';
+  const colHead='<div class="sch-row'+rowCls+'">'+
+    '<span class="sch-no"></span>'+
+    '<span class="sch-name">卡池名称</span>'+
+    (showKind?'<span class="sch-kind">卡池类型</span>':'')+
+    (hideUp?'':'<span class="sch-up">UP 密探</span>')+
+    '<span class="sch-time">持续时间</span></div>';
+  const rowHTML=r=>{
+    const cls=(hideUp?' no-up':'')+(showKind?' with-kind':'')+(r.ongoing?' ongoing':'');
+    return '<div class="sch-row'+cls+'">'+
+      '<span class="sch-no">'+r.no+'</span>'+
+      '<span class="sch-name">'+escHtml(r.name)+'</span>'+
+      (showKind?'<span class="sch-kind">'+(r.kind?escHtml(r.kind):'<b class="sch-empty">—</b>')+'</span>':'')+
+      (hideUp?'':'<span class="sch-up">'+(r.up?escHtml(r.up):'<b class="sch-empty">—</b>')+'</span>')+
+      '<span class="sch-time">'+(r.period?escHtml(r.period):'<b class="sch-empty">—</b>')+'</span>'+
+    '</div>';
+  };
+  // 分组模式：每组 = 居中类型头 + 列头 + 行（组间细线分隔）
+  if(group&&group.length){
+    return '<div class="sch-table">'+group.map((grp,gi)=>{
+      const list=grp.rows.slice();
+      if(rev)list.reverse();               // reverse 作用于副本，不动入参
+      return (gi>0?'<div class="sch-div"></div>':'')+
+        '<div class="sch-grp">'+escHtml(grp.title)+'</div>'+
+        colHead+list.map(rowHTML).join('');
+    }).join('')+'</div>';
+  }
+  const list=rows.slice();
+  if(rev)list.reverse();
+  return '<div class="sch-table">'+colHead+list.map(rowHTML).join('')+'</div>';
 }
 
 /** 表2「距离下次保底还需多少次招募」解析："-" / 空 / 非数字 → 40（未抽，不计垫抽） */
@@ -2090,8 +2322,32 @@ function rankList(items){
   ).join('')+'</div>';
 }
 
-/* 图片加载失败统一兜底：默认 jpg 失败（404/损坏）→ 占位（JPEG 全设备兼容，无二级回退） */
+/* ========== 图片加载失败自动重试（网络抖动/超时） ==========
+   策略：失败先不换占位，隔几秒自动带 cache-buster 重拉；
+   连续 RETRY_MAX 次仍失败，才落到「待填充」占位（避免空图影响观感）。
+   重试期间隐藏原图，避免显示浏览器裂图。 */
+var IMG_RETRY_MAX=4;                    // 最多再重试 4 次（首次失败算第 0 次）
+var IMG_RETRY_DELAY=[1200,3000,6000,10000]; // 每次重试间隔（毫秒），逐次拉长
+window._retryImg=function(img, kind, key, name){
+  var n=parseInt(img.dataset.retryN||'0',10);
+  if(n>=IMG_RETRY_MAX)return false;     // 次数用尽 → 交给上层落占位
+  n++;
+  img.dataset.retryN=n;
+  var delay=IMG_RETRY_DELAY[n-1]||10000;
+  var base=img.dataset.imgBase||img.getAttribute('src')||'';
+  if(!img.dataset.imgBase){img.dataset.imgBase=base; img.style.visibility='hidden'}
+  setTimeout(function(){
+    if(!img.isConnected)return;         // 已被移除（页面重建）→ 放弃
+    // 加 ?_r= 绕开浏览器对失败请求的负缓存；SW 以完整 URL 为键，重试命中率不受影响
+    img.src=base+(base.indexOf('?')>=0?'&':'?')+'_r='+n+'_'+Date.now();
+  },delay);
+  return true;                          // 已排队重试
+};
+/* 图片加载失败统一兜底：反复重试后仍失败 → 占位（JPEG 全设备兼容，无二级回退）。
+   onerror 里先调 _retryImg：返回 true = 已排队重试（不动 DOM）；
+   返回 false = 重试次数用尽，才真正换成占位。 */
 window._replaceWithFace=function(img, kind, key, name){
+  if(window._retryImg(img, kind, key, name))return;
   const box=img.parentNode; if(!box) return;
   img.remove();
   if(kind==='pool'){
@@ -2105,18 +2361,27 @@ window._replaceWithFace=function(img, kind, key, name){
       +(key||name)[0]+'</span><span style="margin-top:6px;letter-spacing:1px;font-size:11px;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.4);opacity:.9">待填充</span>';
   }
 };
-/* 属性图标 jpg 失败 → 直接隐藏（不打断页面） */
+/* 属性图标 jpg 失败 → 先重试，仍失败则隐藏（不打断页面） */
 window._replaceAttr=function(img, attr){
+  if(window._retryImg(img,'attr',attr,attr))return;
   img.style.display='none';
 };
-/* 顶部 KPI 图标失败 → 隐藏原图并在后面插入圆形占位块，不再显示浏览器裂图 */
+/* 顶部 KPI 图标失败 → 先重试；仍失败则隐藏原图并在后面插入圆形占位块，
+   不再显示浏览器裂图 */
 window._replaceKPI=function(img){
+  if(window._retryImg(img,'kpi','',img.getAttribute('alt')||'图'))return;
   const box=img.parentNode; if(!box) return;
   img.style.display='none';
   const ph=document.createElement('div'); ph.className='kpi-ph';
   const txt=img.getAttribute('alt')||img.src.split('/').pop().split('.')[0];
   ph.textContent=(txt||'图')[0];
   box.insertBefore(ph, img.nextSibling);
+};
+/* 重试成功后：把重试期间隐藏的图恢复显示，并清掉重试计数（下次真正失败可再重试） */
+window._imgRetryOK=function(img){
+  if(!img)return;
+  img.style.visibility='';
+  img.dataset.retryN='';            // 计数清零：本次已成功，后续若再失败重新计一轮
 };
 
 $('#bk').onclick=()=>go('home');

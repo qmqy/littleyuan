@@ -1,5 +1,5 @@
 /* 如鸢招募 · Service Worker（本地缓存，加载过一次后秒开、断网也能用） */
-const VERSION = 'v0917i';
+const VERSION = 'v0919f';
 const CORE_CACHE = 'yiruan-core-' + VERSION;
 const IMG_CACHE  = 'yiruan-img-'  + VERSION;
 
