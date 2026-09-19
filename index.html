@@ -1716,7 +1716,9 @@ function subOverviewHTML(){
     '</div>'+
     '<div class="stat-stack">'+
       // 全图鉴瑕 卡 + 展开（放在密探库上面）
-      (miss.length?cMiss+bMiss:'')+
+      // ⚠️ 不要在这里再套 miss.length 判断：cMiss 内部已区分「有瑕 / 满图鉴·恭喜」，
+      //    外层再加一层会导致满图鉴时整块被置空，「恭喜殿下全图鉴！」永远不显示。
+      cMiss+bMiss+
       // 密探库 卡 + 展开
       cDraw+bDraw+
     '</div>'+
@@ -1726,7 +1728,7 @@ function subOverviewHTML(){
       cPu+bPu+
       cRep+bRep+
     '</div>'+
-    '<div class="warn" style="margin-top:14px">副页独立模块：<b>导入</b> 从 xlsx 抽取抽卡记录、<b>导出</b> 把当前代码里的抽卡数据回写成 xlsx、<b>统计</b> 给限定池做细化排名。点顶部 tab 切换。<span style="opacity:.6">（页面版本 0919f）</span></div>';
+    '<div class="warn" style="margin-top:14px">副页独立模块：<b>导入</b> 从 xlsx 抽取抽卡记录、<b>导出</b> 把当前代码里的抽卡数据回写成 xlsx、<b>统计</b> 给限定池做细化排名。点顶部 tab 切换。<span style="opacity:.6">（页面版本 0920a）</span></div>';
 }
 /* 生成表体（列头 + 行）。rows 必须按组内时间升序存好（no = 1,2,3…）。
    rev = true 倒序渲染（最新在上）。
