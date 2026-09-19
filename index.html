@@ -251,9 +251,9 @@ button{font:inherit;color:inherit;cursor:pointer}
 .d-fire{background:#e74c3c}.d-earth{background:#8b5a2b}.d-wind{background:#5fb87a}
 .d-water{background:#3b82f6}.d-yang{background:#fbbf24}.d-yin{background:#8b5cf6}.d-chaos{background:#111827}
 
-.mask{position:absolute;inset:0;background:rgba(75,53,32,.45);display:flex;align-items:center;justify-content:center;padding:16px;z-index:50}
+.mask{position:absolute;inset:0;background:rgba(75,53,32,.45);display:flex;align-items:center;justify-content:center;padding:16px;z-index:70}
 .mask .pop{position:relative;z-index:1}
-.mask.nested{z-index:60}
+.mask.nested{z-index:80}
 .pop{background:#fffbf5;border-radius:14px;padding:16px;width:100%;max-height:88%;overflow-y:auto;box-shadow:0 8px 30px rgba(0,0,0,.25)}
 .pop .ti{text-align:center;font-size:16px;font-weight:700;margin-bottom:14px}
 .fi{margin-bottom:12px}
@@ -1429,7 +1429,7 @@ function subOverviewHTML(){
       '<div class="stat-card"><div class="lbl">密探库</div><div class="val">'+cntChars+'<small>位</small></div></div>'+
       '<div class="stat-card"><div class="lbl">抽到最多的密探</div><div class="val" style="font-size:15px">'+o.mostDrawn.name+'<small> · '+o.mostDrawn.count+'次</small></div></div>'+
     '</div>'+
-    '<div class="warn" style="margin-top:14px">副页独立模块：<b>导入</b> 从 xlsx 抽取抽卡记录、<b>导出</b> 把当前代码里的抽卡数据回写成 xlsx、<b>统计</b> 给限定池做细化排名。点顶部 tab 切换。<span style="opacity:.6">（页面版本 0919b）</span></div>';
+    '<div class="warn" style="margin-top:14px">副页独立模块：<b>导入</b> 从 xlsx 抽取抽卡记录、<b>导出</b> 把当前代码里的抽卡数据回写成 xlsx、<b>统计</b> 给限定池做细化排名。点顶部 tab 切换。<span style="opacity:.6">（页面版本 0919c）</span></div>';
 }
 
 /** 表2「距离下次保底还需多少次招募」解析："-" / 空 / 非数字 → 40（未抽，不计垫抽） */
