@@ -51,6 +51,9 @@ button{font:inherit;color:inherit;cursor:pointer}
 .accnew{padding:10px 14px;border-top:1px solid var(--line);display:flex;gap:8px;align-items:center}
 .accnew .inp{flex:1}
 #body{flex:1;overflow-y:auto;padding:12px}
+/* 招募页：pane 逐层撑满高度（否则 100% 高度算不出来 → 整页又滚回去、保存被顶上去） */
+#body.pool-view{padding:0;display:flex;flex-direction:column}
+#body.pool-view>div{flex:1 1 auto;min-height:0;display:flex;flex-direction:column}
 .hide{display:none!important}
 
 .btn{padding:9px 16px;border-radius:8px;border:1px solid var(--gold);background:#fffbf5;font-size:14px}
@@ -62,12 +65,19 @@ button{font:inherit;color:inherit;cursor:pointer}
 .btnrow{display:flex;gap:8px}
 .btnrow .btn{flex:1}
 
-/* 招募页：详情页容器（padding-bottom 给底部保存键留位，savebar 随手机壳 absolute 定位） */
-.pool-detail{position:relative;min-height:100%;padding-bottom:90px}
-.savebar{position:absolute;left:0;right:0;bottom:0;z-index:50;
-  background:linear-gradient(180deg,rgba(253,246,233,0) 0%,rgba(253,246,233,.9) 30%,#fdf6e9 60%);
-  padding:14px 14px calc(18px + env(safe-area-inset-bottom));display:flex;justify-content:center;pointer-events:none}
-.savebar .btn{pointer-events:auto;width:100%;max-width:360px;padding:14px 0;font-size:15px;font-weight:700;border-radius:24px;box-shadow:0 2px 8px rgba(75,53,32,.25)}
+/* 招募页：整页不滚，只有密探网格(.pd-scroll)滚动；savebar 固定最底部。
+   招募页给 #body 去掉 padding（#body.pool-view），savebar 下不留空隙 → 「保存」贴底。 */
+.pool-detail{position:relative;flex:1 1 auto;min-height:0;display:flex;flex-direction:column;padding:12px 12px 0}
+.pool-detail>*{flex-shrink:0}
+.pool-detail .pd-scroll{flex:1 1 auto;min-height:80px;overflow-y:auto;
+  overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+.pool-detail .savebar{flex-shrink:0;z-index:50;margin-top:0;background:transparent;
+  padding:6px 0 calc(8px + env(safe-area-inset-bottom));display:flex;justify-content:center}
+/* 详情页面板更紧凑：减小行距、缩小提示字号 */
+.pool-detail .pnl{padding:9px 10px}
+.pool-detail .pnl .rw{line-height:1.35}
+.pool-detail .pnl .tip{font-size:10.5px;margin-top:2px;line-height:1.45}
+.savebar .btn{width:100%;max-width:360px;padding:14px 0;font-size:15px;font-weight:700;border-radius:24px;box-shadow:0 2px 8px rgba(75,53,32,.25)}
 
 .addp-mini{font-size:11px;color:var(--gold);padding:2px 8px;border:1px solid var(--gold2);
   border-radius:10px;background:#fff;cursor:pointer}
@@ -195,6 +205,27 @@ button{font:inherit;color:inherit;cursor:pointer}
 .uprow-line .nm{font-size:14px;font-weight:700;color:var(--ink)}
 .uprow-line .nm i{color:var(--gold);font-style:normal;font-weight:600}
 .pd-period{margin:-2px 0 10px;padding:0 4px;font-size:12px;color:var(--soft);letter-spacing:.02em;text-align:right}
+/* 300自选 / 累充自选 控件（一行：左边说明，右边密探名，居右不换行） */
+.ps-panel{padding:9px 10px}
+.ps-row{display:flex;align-items:center;gap:8px}
+.ps-txt{flex:0 0 auto;font-size:11px;color:var(--ink);font-weight:600;white-space:nowrap}
+.ps-txt .mi{width:46px;padding:2px 4px;font-size:12px;margin-left:4px;vertical-align:middle}
+.ps-names{flex:1 1 auto;min-width:0;text-align:right;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.2}
+/* 可点的「+」：高亮、字号大；已选名字：小一号 + 虚线下划线提示可点 */
+.psnm{color:var(--gold);cursor:pointer;font-size:15px;font-weight:800;line-height:1;padding:0 3px}
+.psnm.on{color:var(--ink);font-size:11.5px;font-weight:600;border-bottom:1px dashed var(--gold2);padding-bottom:1px}
+.pssep{color:var(--soft);font-size:11px}
+/* 自选 UP 行（辕门遣将，可点击更换；未选满时高亮） */
+.up-pickset{display:inline-flex;align-items:center;gap:5px}
+.up-pickline .upset{border-bottom:1px dashed var(--gold2);padding:0 2px;cursor:pointer}
+.up-pickline .upsep{color:var(--soft)}
+.up-pickline.hl{border-color:var(--gold2);background:var(--goldsoft);box-shadow:0 0 0 1px var(--gold2) inset}
+/* 首页「周年自选」汇总（每个周年一行） */
+.self-box{background:#fdf6e9;border:1px solid var(--line);border-radius:10px;padding:8px 12px;margin-bottom:10px}
+.self-row{font-size:11.5px;color:var(--ink);line-height:1.8}
+.self-nm{color:#c07615;font-weight:700}   /* 密探名：深橙金色高亮 */
+.self-sep{color:var(--soft);margin:0 3px}
 
 /* 池子属性编辑（仅 anniv） */
 .pnl{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px;margin-top:9px}
@@ -232,6 +263,7 @@ button{font:inherit;color:inherit;cursor:pointer}
 
 /* 招募页密探卡：左上序号（第几个抽出，正序）+ 底部抽数条；默认金棕，仅限定UP池"歪"的密探为红 */
 .cell.rec{cursor:pointer}
+.cell.rec.no-edit{cursor:default}
 /* 序号折角：数字牌只搭在密探左上角，做成水滴/折角效果 */
 .cell.rec .seq{
   font-size:13px;font-weight:800;letter-spacing:.5px;color:#fff;
@@ -383,6 +415,14 @@ button{font:inherit;color:inherit;cursor:pointer}
 /* 复刻表分组头（卡池类型：限定复刻 / 常驻复刻）—— 居中 */
 .sch-grp{text-align:center;font-size:11.5px;font-weight:800;color:#a06c1f;letter-spacing:.06em;
   padding:5px 0 4px;background:#fdf6e9;border-radius:7px;margin:0 0 1px}
+/* 概览页展开区：超出 10 项时内部滚动，不撑长整页 */
+.ovw-scroll{max-height:var(--ovw-h,360px);overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+.ovw-scroll::-webkit-scrollbar{width:5px}
+.ovw-scroll::-webkit-scrollbar-thumb{background:#d8c49b;border-radius:3px}
+.ovw-scroll::-webkit-scrollbar-track{background:transparent}
+.ovw-grid{--ovw-h:250px}
+.ovw-list{--ovw-h:320px}
+
 /* 类型小标签（仍保留，供别处复用） */
 .kt{display:inline-block;font-size:9px;font-weight:700;line-height:15px;height:15px;
   padding:0 4px;border-radius:8px;background:var(--goldsoft);color:#8a6032;white-space:nowrap;
@@ -441,11 +481,28 @@ button{font:inherit;color:inherit;cursor:pointer}
 .btn-down{display:inline-flex;align-items:center;gap:5px;padding:10px 18px;font-size:13.5px;font-weight:700;color:#fff;background:linear-gradient(135deg,var(--gold),#a06c1f);border-radius:10px;border:none;cursor:pointer;box-shadow:0 2px 0 #8c5f2b;transition:all .15s}
 .btn-down:hover{transform:translateY(-1px);box-shadow:0 3px 0 #8c5f2b}
 .btn-down:active{transform:translateY(1px);box-shadow:0 1px 0 #8c5f2b}
+/* 导出页两个下载按钮：竖排、拉开间距 */
+.exp-btns{display:flex;flex-direction:column;align-items:flex-start;gap:14px;margin-top:2px}
 .warn{background:#fff4dd;border:1px solid #e6c88a;border-radius:8px;padding:8px 10px;font-size:11.5px;color:#a06c1f;margin-bottom:11px}
 .pg{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;max-height:44vh;overflow-y:auto}
 .pg .cell{border:1px solid var(--line2);border-radius:7px;overflow:hidden;background:#fff}
 .pg .cell.upc2 .nm{color:#a06c1f;font-weight:700}
 .empty{text-align:center;color:#999;font-size:12px;padding:24px 0;grid-column:1/-1}
+
+/* 选择密探弹窗：取消固定底部，网格 5 列，首屏内完整显示 */
+.pop.picker-pop{display:flex;flex-direction:column;max-height:85%;padding:0;overflow:hidden}
+.pop.picker-pop .picker-head{padding:16px 16px 4px;flex-shrink:0}
+.pop.picker-pop .picker-head .ti{padding:0;border:0;margin:0}
+.pop.picker-pop .picker-body{flex:1;min-height:0;overflow:hidden;padding:0 14px;display:flex;flex-direction:column}
+/* 属性/职业筛选区固定不滑动，仅下方密探网格滚动 */
+.pop.picker-pop #pk{display:flex;flex-direction:column;flex:1;min-height:0}
+.pop.picker-pop .pk-filters{flex:0 0 auto}
+.pop.picker-pop .pk-grid{flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding-bottom:8px}
+.pop.picker-pop .picker-foot{padding:10px 14px calc(10px + env(safe-area-inset-bottom));border-top:1px solid var(--line);flex-shrink:0}
+.pop.picker-pop .picker-foot .btn{width:100%}
+.pop.picker-pop .pg{max-height:none;grid-template-columns:repeat(5,1fr);gap:5px;margin:0 0 8px}
+.pop.picker-pop .chips{margin-bottom:8px}
+.pop.picker-pop .lbl{margin-top:4px;margin-bottom:4px}
 
 /* 弹窗里的 UP 密探宫格 */
 .uprow{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px}
@@ -459,9 +516,9 @@ button{font:inherit;color:inherit;cursor:pointer}
 .upc .up-attr{position:absolute;right:3px;top:3px;width:20px;height:20px;z-index:2;border-radius:50%;background:#fff;padding:1px;box-shadow:0 1px 2px rgba(0,0,0,.25)}
 .upc .upnm{font-size:12px;padding:2px 6px;margin:3px 4px 4px;color:var(--ink);background:#fff;border:1px solid var(--gold2);border-radius:14px;font-weight:600;display:inline-block}
 .upc .uptg{position:absolute;top:3px;left:3px;background:var(--danger);color:#fff;font-size:9px;padding:1px 5px;border-radius:4px;z-index:3}
-.upc.more{border-style:dashed;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;cursor:pointer;padding:6px 6px 8px}
-.upc.more .pls{width:38px;height:38px;border:2px solid #b99567;border-radius:6px;display:flex;align-items:center;justify-content:center;color:var(--gold);font-size:28px;font-weight:300;margin-bottom:4px}
-.upc.more .upnm{color:var(--gold);padding:0}
+.upc.more{border-style:dashed;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;padding:6px 6px 8px;aspect-ratio:3/4}
+.upc.more .pls{width:50px;height:62px;border:2px solid #b99567;border-radius:6px;display:flex;align-items:center;justify-content:center;color:var(--gold);font-size:26px;font-weight:300;line-height:1;margin-bottom:28px}
+.upc.more .upnm{color:var(--gold);padding:0;border:0;background:none;border-radius:0}
 .pk-tip{background:#fff4dd;border:1px solid #e6c88a;border-radius:8px;padding:7px 10px;font-size:12px;color:#a06c1f;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center}
 .pk-tip b{color:var(--gold)}
 .pk-tip .rs{font-size:11px;color:var(--gold);text-decoration:underline}
@@ -488,7 +545,7 @@ button{font:inherit;color:inherit;cursor:pointer}
   overflow:hidden;background:#1f1611;
   margin-bottom:10px;border:1px solid var(--line2)}
 .pd-banner img{width:100%;height:auto;display:block}
-.pd-banner.placeholder{background:repeating-linear-gradient(45deg,#3a2c20,#3a2c20 8px,#2a1f17 8px,#2a1f17 16px)}
+.pd-banner.placeholder{background:repeating-linear-gradient(45deg,#3a2c20,#3a2c20 8px,#2a1f17 8px,#2a1f17 16px);aspect-ratio:15/4}
 .pd-banner.placeholder .ph-text{position:absolute;inset:0;display:flex;align-items:center;
   justify-content:center;color:#b89876;font-size:13px;letter-spacing:2px;font-weight:500}
 .pool .art.placeholder{color:#b89876;font-size:11px;font-weight:500;
@@ -583,13 +640,14 @@ function attrImg(attr){return 'images/attr/'+attr+'属性.jpg'}
 const POOL_CATALOG=[
  {name:'绣衣天下',type:'pu',tag:'普池',kind:'普池',start:'2024-09-26',end:''},
  // ↑ kind：「卡池类型」列专用展示标签（纯展示，不参与逻辑；详见 scheduleGroups 注释）
- {name:'游说贤士',type:'anniv',tag:'1周年池',kind:'300自选',start:'2025-09-26',end:'2025-10-25'},
- {name:'东阁待贤',type:'anniv',tag:'1.5周年池',kind:'300自选',start:'2026-03-26',end:'2026-04-24'},
+ {name:'游说贤士',type:'anniv',tag:'1周年池',kind:'300自选',start:'2025-09-26',end:'2025-10-25',pick300:1},
+ {name:'东阁待贤',type:'anniv',tag:'1.5周年池',kind:'300自选',start:'2026-03-26',end:'2026-04-24',pick300:1},
  {name:'燕金募秀',type:'anniv',tag:'18禁池',kind:'18禁',start:'2026-09-17',end:'2026-10-16'},
  // 限定UP池：数据库按"老→新"顺序存档（弓剑江东最早、却月凌风最晚）
  // 渲染时会在 home 倒序成"新→老"，保持主页面视觉不变
  // start/end：卡池上下线日期（YYYY-MM-DD）；end 为空 = 永不结束（普池）
- // 复刻池 tag 为「常驻复刻」/「限定复刻」：其密探早已在普池，不参与普池候选排除
+ // 复刻池 tag 为「常驻复刻」/「限定复刻」：都不参与候选排除
+ //   （一个角色的普池归属，只看它的「限定UP池」是否已结束；复刻不改变这一点）
  {name:'弓剑江东',type:'limit',tag:'限定UP池',up1:'孙权',  up2:'孙尚香',start:'2024-10-01',end:'2024-11-18'},
  {name:'动如雷霆',type:'limit',tag:'限定UP池',up1:'张辽',  up2:'马超',  start:'2024-10-03',end:'2024-10-23'},
  {name:'九门磔攘',type:'limit',tag:'限定UP池',up1:'周瑜',  up2:'干吉',  start:'2024-10-24',end:'2024-12-04'},
@@ -610,7 +668,7 @@ const POOL_CATALOG=[
  {name:'云雨滂润',type:'limit',tag:'限定UP池',up1:'诸葛诞',up2:'诸葛瑾',start:'2025-07-03',end:'2025-08-06'},
  {name:'金相玉质',type:'limit',tag:'限定UP池',up1:'孔融',  up2:'黄月英',start:'2025-07-31',end:'2025-08-27'},
  {name:'腾陵张胆',type:'limit',tag:'限定UP池',up1:'凌统',  up2:'安期',  start:'2025-08-21',end:'2025-10-01'},
- {name:'谨司天英',type:'limit',tag:'限定复刻',up1:'曹植',  up2:'董奉',  start:'2025-09-11',end:'2025-10-08'},
+ {name:'谨司天英',type:'limit',tag:'限定UP池',up1:'曹植',  up2:'董奉',  start:'2025-09-11',end:'2025-10-08'},
  {name:'风兴云蒸',type:'limit',tag:'限定UP池',up1:'蒯越',  up2:'祢衡',  start:'2025-10-16',end:'2025-11-26'},
  {name:'英徽弥亮',type:'limit',tag:'限定UP池',up1:'诸葛亮',up2:'司马徽',start:'2025-11-06',end:'2025-12-03'},
  {name:'蛇蟒之蛰',type:'limit',tag:'限定UP池',up1:'满宠',  up2:'刘繇',  start:'2025-12-11',end:'2026-01-21'},
@@ -620,11 +678,13 @@ const POOL_CATALOG=[
  {name:'形谍成光',type:'limit',tag:'限定UP池',up1:'庞羲',  up2:'马腾',  start:'2026-04-02',end:'2026-05-13'},
  {name:'铁弦千钧',type:'limit',tag:'限定UP池',up1:'钟繇',  up2:'程普',  start:'2026-05-21',end:'2026-06-17'},
  {name:'珠渊玉水',type:'limit',tag:'限定UP池',up1:'刘璋',  up2:'夏侯渊',start:'2026-05-28',end:'2026-07-08'},
- {name:'奉天华盖',type:'limit',tag:'限定UP池',up1:'黄盖',  up2:'董奉',  start:'2026-07-09',end:'2026-07-22'},
+ {name:'奉天华盖',type:'limit',tag:'限定复刻',up1:'黄盖',  up2:'董奉',  start:'2026-07-09',end:'2026-07-22'},
  {name:'桓桓先征',type:'limit',tag:'限定UP池',up1:'曹丕',  up2:'吕布',  start:'2026-07-23',end:'2026-09-02'},
  {name:'却月凌风',type:'limit',tag:'限定复刻',up1:'黄月英',up2:'凌统',  start:'2026-07-23',end:'2026-08-05'},
  {name:'王侯秉德',type:'limit',tag:'限定UP池',up1:'庞德',  up2:'郭女王',start:'2026-09-10',end:'2026-10-07'},
- {name:'言简理直',type:'limit',tag:'限定UP池',up1:'简雍',  up2:'法正',  start:'2026-09-17',end:'2026-10-28'}
+ {name:'言简理直',type:'limit',tag:'限定UP池',up1:'简雍',  up2:'法正',  start:'2026-09-17',end:'2026-10-28'},
+ {name:'辕门遣将',type:'anniv',tag:'2周年池',kind:'2周年',start:'2026-09-26',end:'2026-10-25',pick300:1,upPick:2,
+  rule:'40次招募后必得绝密密探；开放期间可自选2位密探概率提升。每300次招募通过「征召册」自选密探1次（活动期间最多3次）。自选范围：仅含2026-09-26已加入「绣衣天下」卡池的密探。'}
 ];
 const SEED_VERSION=3;
 
@@ -634,7 +694,7 @@ const VER_K='yiruanPool_prev_version';
 let pools=null;
 function rid(){return 'p'+Date.now()+Math.floor(Math.random()*999)}
 function rid2(){return 'p'+Date.now()+Math.floor(Math.random()*999)+'x'}
-function defPools(){return POOL_CATALOG.map(m=>({id:rid(),name:m.name,type:m.type,tag:m.tag,kind:m.kind||'',up1:m.up1||'',up2:m.up2||'',start:m.start||'',end:m.end||'',pity:40,joinedUps:m.type==='pu'?[]:undefined,records:[],stat:{}}))}
+function defPools(){return POOL_CATALOG.map(m=>({id:rid(),name:m.name,type:m.type,tag:m.tag,kind:m.kind||'',up1:m.up1||'',up2:m.up2||'',start:m.start||'',end:m.end||'',pity:40,joinedUps:m.type==='pu'?[]:undefined,rule:m.rule||'',pick300:m.pick300||0,upPick:m.upPick||0,sel300:[],selRchN:0,selRch:[],records:[],stat:{}}))}
 /** v3 SEED 数据：xlsx「招募记录」表灌入的真实抽卡流水。仅 records 为空的池子在升级时被填充；用户已有数据不会被覆盖 */
 const SEED_POOL_RECORDS={};
 function defaultTag(t){if(t==='pu')return '普池';if(t==='limit')return '限定UP池';return ''}
@@ -688,6 +748,10 @@ function load(){
     if(p.tag==null)p.tag=defaultTag(p.type);
     if(p.name==='燕金募秀'&&p.tag==='2周年池')p.tag='18禁池';
     if(!p.stat)p.stat={}
+    // 300自选 / 累充自选 记录字段（老存档没有则初始化；已有数据原样保留）
+    if(!Array.isArray(p.sel300))p.sel300=[];
+    if(!Array.isArray(p.selRch))p.selRch=[];
+    if(p.selRchN==null)p.selRchN=0;
     if(p.bannerUrl!=null)delete p.bannerUrl;   // 旧字段：自定义 banner 已取消，图片一律用代码内置
     // 从内置清单补齐 UP / 上下线时间 / 标签 / 卡池类型（老数据可能缺这些字段；标签会随版本更新，如复刻池改 tag）
     const m=POOL_CATALOG.find(c=>c.name===p.name);
@@ -697,6 +761,9 @@ function load(){
       p.end=(m.end!=null)?m.end:(p.end||'');
       if(m.tag)p.tag=m.tag;
       if(m.kind)p.kind=m.kind;   // 「卡池类型」列专用展示标签（老存档没有此字段，需从代码补齐）
+      if(m.rule)p.rule=m.rule;   // 卡池规则说明（老存档可能没有，从代码补齐）
+      if(m.pick300)p.pick300=1;  // 300抽自选池标记
+      if(m.upPick)p.upPick=m.upPick;  // 自选 UP 位数（辕门遣将）
     } else {
       if(p.start==null)p.start='';
       if(p.end==null)p.end='';
@@ -705,7 +772,7 @@ function load(){
     // 增量同步：代码 POOL_CATALOG 里用户本地尚未拥有的池子，自动补建（只新增、不覆盖已有记录/保底）
     POOL_CATALOG.forEach(c=>{
       if(!pools.find(x=>x.name===c.name)){
-        pools.push({id:rid(),name:c.name,type:c.type,tag:c.tag,kind:c.kind||'',up1:c.up1||'',up2:c.up2||'',start:c.start||'',end:c.end||'',pity:40,joinedUps:c.type==='pu'?[]:undefined,records:[],stat:{}});
+        pools.push({id:rid(),name:c.name,type:c.type,tag:c.tag,kind:c.kind||'',up1:c.up1||'',up2:c.up2||'',start:c.start||'',end:c.end||'',pity:40,joinedUps:c.type==='pu'?[]:undefined,rule:c.rule||'',pick300:c.pick300||0,upPick:c.upPick||0,sel300:[],selRchN:0,selRch:[],records:[],stat:{}});
       }
     });
 
@@ -886,32 +953,70 @@ function poolPeriodShort(p){
   return fmtDateShort(p.start)+'~'+(p.end?fmtDateShort(p.end):'永久');
 }
 
-function curUps(){const l=pools.filter(p=>p.type==='limit');if(!l.length)return[];
-  const x=l[l.length-1];return [x.up1,x.up2].filter(Boolean)}
-/** 普池当前可出的绝密密探：全集 −「限定UP池且仍在进行中」的 up1/up2。
-    复刻池（常驻复刻/限定复刻）不排除——其密探早已在普池；特殊池（周年/18禁）同样不参与。
-    这样并立多个 UP 池时，每个未结束的新池都正确排除。 */
-function puCand(){
+/** 规则1 · 卡池候选排除：某密探 C 是卡池 Q 的 up，只要「Q 的结束时间 ≥ P 的上线时间」
+    （即 P 上线时 Q 还没结束），C 就不能在 P 里选择/被抽到；反之 Q 在 P 上线前已结束，C 才进候选。
+    · 普池（绣衣天下）：它的"上线时间"按"当前"算 → 等价于原来的"排除目前进行中的 UP 密探"。
+    · **排除来源只认「限定UP池」**：一个角色在它的「限定UP池」结束后才算进了普池，
+      此后所有池子都能抽到它。复刻池（限定复刻 / 常驻复刻）**不参与**排除
+      ——常驻角色本就在普池（开服即有），复刻也不改变角色的普池归属。
+    · P 自己的 up1/up2 也一并排除（本池 UP 不属于普通候选；辕门遣将的自选 up 同理）。
+    · end 为空 = 永不结束（按 9999-12-31 处理）。 */
+function poolExcl(p){
   const ex=[];
-  pools.forEach(p=>{
-    if(p.type!=='limit')return;
-    if(isReprint(p))return;
-    if(!isOpen(p))return;
-    [p.up1,p.up2].filter(Boolean).forEach(n=>{if(ex.indexOf(n)<0)ex.push(n)});
+  if(!p)return ex;
+  const T=(p.type==='pu')?todayStr():(p.start||todayStr());
+  const push=n=>{if(n&&ex.indexOf(n)<0)ex.push(n)};
+  push(p.up1);push(p.up2);
+  pools.forEach(q=>{
+    if(!q||q.name===p.name)return;
+    if(String(q.tag||'').indexOf('限定UP池')<0)return;   // 只认限定UP池为来源（复刻池不管）
+    const ups=[q.up1,q.up2].filter(Boolean);
+    if(!ups.length)return;
+    const qEnd=q.end||'9999-12-31';
+    if(qEnd>=T)ups.forEach(push);
   });
+  return ex;
+}
+/** 普池当前可出的绝密密探 = 全集 − poolExcl(普池) */
+function puCand(){
+  const pu=pools.find(p=>p.type==='pu');
+  const ex=pu?poolExcl(pu):[];
   return names().filter(n=>ex.indexOf(n)<0);
 }
 
 function recalc(p){
   const r=p.records||[];let td=0,st=0,sn=0,ns=true;
+  const upPick=!!p.upPick;
   for(let i=0;i<r.length;i++){const x=r[i];td+=+x.drawCount||0;
     if(p.type==='limit'){const iu=x.charName===p.up1||x.charName===p.up2;
       if(ns){x.isSmall=true;x.isWarp=!iu;st++;if(iu)sn++;ns=iu}else{x.isSmall=false;x.isWarp=false;ns=true}}
+    else if(upPick){const hasUp=!!(p.up1||p.up2);
+      x.isSmall=false; x.isWarp=hasUp?!(x.charName===p.up1||x.charName===p.up2):false}   // 自选UP池（辕门遣将）：只按 up 着色，无大保底；未选 up 前不着色
     else{x.isSmall=false;x.isWarp=false}}
   const ts=r.length;
   // 垫池抽数：保底剩余 pity 的反面（pity=40 → 垫0；pity=37 → 已垫3抽）；计入总抽数
   const dai=Math.max(0,Math.min(40,40-(+p.pity||40)))||0;
   p.stat={totalDraw:td+dai,totalSecret:ts,avgDraw:ts?+((td+dai)/ts).toFixed(1):0,warpRate:st?+((sn/st)*100).toFixed(1):0,dai:dai};
+  normSelf(p);
+}
+/** 归一化 300自选 / 累充自选（只有 pick300 池才有）：
+    · X = min(3, ⌊总抽数/300⌋)，sel300 超出的自动裁掉；
+    · 累充盒子数 selRchN 夹到 0~2，selRch 超出的自动裁掉。 */
+/** 原地去空 + 截断到 cap。⚠️ 必须原地改，不能 filter() 换新数组——
+    否则调用方（自选弹窗）持有的旧引用会失效，点「删除」删不掉。 */
+function compactList(a,cap){
+  for(let k=a.length-1;k>=0;k--)if(!a[k])a.splice(k,1);
+  if(a.length>cap)a.length=cap;
+}
+function normSelf(p){
+  if(!p||!p.pick300)return;
+  if(!Array.isArray(p.sel300))p.sel300=[];
+  if(!Array.isArray(p.selRch))p.selRch=[];
+  const X=Math.min(3,Math.floor(poolTotalDraw(p)/300));
+  compactList(p.sel300,X);
+  let z=Math.round(+p.selRchN||0); if(!(z>=0))z=0; z=Math.max(0,Math.min(2,z));
+  p.selRchN=z;
+  compactList(p.selRch,z);
 }
 function recalcAll(){pools.forEach(recalc)}
 function validate(p,test){
@@ -990,7 +1095,9 @@ let _tabSwitch=false;// 本次 render 是否由 tab 切换触发
 let _curPane=null;   // 当前挂在 #body 上的 pane
 function markAllDirty(){Object.keys(_viewEl).forEach(k=>{_viewDirty[k]=true})}
 
-function go(v){
+function go(v,push){
+  if(push===undefined)push=true;   // 默认 true：常规导航会 push 历史；popstate 消费时传 false
+  const prev=view;
   view=v;
   // 主页缩略图展开状态（prevOpens）只由点击控制，进出详情不再自动收起
   // 进入池子详情时深拷贝当前池为 draft，所有改动在 draft 上，"保存"才写回
@@ -1001,6 +1108,10 @@ function go(v){
     recalc(draft);  // 用内存里的 records 重算 draft 的 stat
   } else {
     draft=null;
+  }
+  // 从首页进入非首页视图（pool/chars/sub）时 push 一条历史，使安卓侧滑 / 浏览器后退可返回首页
+  if(push && v!=='home' && prev==='home'){
+    pushNav({kind:'view',view:v});
   }
   $('#bk').classList.toggle('hide',v==='home'||v==='sub');
   $('#barT').textContent='小鸢助手';
@@ -1017,6 +1128,7 @@ function go(v){
 function render(){
   const b=$('#body');
   const v=view;
+  b.classList.toggle('pool-view',v==='pool');   // 招募页去掉 #body padding（两种 render 分支都要）
   // tab 切换且缓存仍有效 → 把之前摘下的 DOM 直接挂回来，不重建（图片不必重新解码）
   if(_tabSwitch && _viewEl[v] && !_viewDirty[v]){
     _tabSwitch=false;
@@ -1034,6 +1146,32 @@ function render(){
   _viewEl[v]=pane; _viewDirty[v]=false; _curPane=pane;
   // 内部 data-act 元素不冒泡触发外层卡片
   b.querySelectorAll('[data-act]').forEach(el=>el.onclick=(e)=>{e.stopPropagation();act(el.dataset.act,el)});
+  // 招募页：保底数一改，300抽自选那行即时重算（总抽数 = 各条抽出数 + 垫池数）
+  const pe=$('#pity');
+  if(pe){
+    pe.oninput=()=>{
+      if(!draft)return;
+      const n=+pe.value;
+      if(n>=1&&n<=40){
+        draft.pity=n;
+        const t=document.querySelector('.pool-detail .ps-panel .ps-txt');
+        if(t)t.textContent=p300Line(draft);
+      }
+    };
+    pe.onchange=()=>{
+      if(!draft)return;
+      const n=+pe.value;
+      if(n<1||n>40){pe.value=draft.pity;return;}
+      draft.pity=n; recalc(draft); render();
+    };
+  }
+  // 300自选池：累充盒子数量输入（0~2），改完即时刷新「+」槽数量
+  const rn=$('#rchN');
+  if(rn)rn.onchange=()=>{
+    let z=Math.round(+rn.value||0); z=Math.max(0,Math.min(2,z));
+    rn.value=z;
+    if(draft){draft.selRchN=z;normSelf(draft);render();}
+  };
 
   // 副页面内 subtabs 切换
   b.querySelectorAll('#subtabs .stab').forEach(el=>{
@@ -1074,6 +1212,13 @@ function render(){
   const bd=$('#expDownload');if(bd)bd.onclick=()=>exportToXlsx();
 }
 
+/** 池子详情页里未保存的输入（保底 pity）收回 draft，避免重绘时被重置 */
+function poolInputSync(){
+  if(!draft)return;
+  const el=$('#pity');
+  if(el){const n=+el.value; if(n>=1&&n<=40)draft.pity=n;}
+}
+
 function act(a,el){
   if(a==='pool'){poolIdx=idxById(el.dataset.id);go('pool')}
   else if(a==='toggleprev'){
@@ -1098,6 +1243,25 @@ function act(a,el){
     pools[poolIdx]=JSON.parse(JSON.stringify(draft));
     pools[poolIdx].stat=draft.stat;
     save();toast('已保存到首页');
+  }
+  // ===== 300自选池 / 自选UP（辕门遣将）=====
+  // 点「+」或已选名字 → 开选择密探弹窗；候选按规则1排除（池自己的 UP 可选）
+  else if(a==='p300pick'||a==='rchpick'){
+    if(!draft)return;
+    const i=+el.dataset.i;
+    const list=(a==='p300pick')?draft.sel300:draft.selRch;
+    if(!Array.isArray(list)||!(i>=0))return;
+    poolInputSync();
+    if(list[i])selfPickModal(a,i);      // 已选 → 编辑弹窗（点卡换人 / 删除）
+    else openSelfPicker(a,i,null);      // 空槽「+」→ 直接开选择密探
+  }
+  else if(a==='upick'){
+    if(!draft)return;
+    const i=+el.dataset.i;
+    poolInputSync();
+    const cur=(i===0?draft.up1:draft.up2);
+    const ex=poolExcl(draft).filter(n=>n!==cur);
+    pickerModal('选择up角色',[],ex,n=>{ if(i===0)draft.up1=n; else draft.up2=n; recalc(draft); render(); });
   }
   else if(a==='chip'){
     const g=el.dataset.g,v=el.dataset.v;
@@ -1128,39 +1292,12 @@ function act(a,el){
   }
   // ===== 概览页折叠区：全部互斥（同一时刻只允许展开一个） =====
   // 展开本项前先 ovwCollapseAll(本人)，再翻转本项；点已展开的则单纯收起。
-  // 副页概览「全图鉴瑕」
-  else if(a==='figtoggle'){
-    const on=!figOpen;
-    if(on)ovwCollapseAll('fig');
-    figOpen=on;
-    _viewDirty['sub']=true; render();
-  }
-  // 副页概览「密探库」（含属性/职业筛选，与首页密探库共用 chF）
-  else if(a==='chartoggle'){
-    const on=!chOpen;
-    if(on)ovwCollapseAll('ch');
-    chOpen=on;
-    _viewDirty['sub']=true; render();
-  }
-  // 副页概览「限定 UP 池排期」
-  else if(a==='schlimit'){
-    const on=!schLimit;
-    if(on)ovwCollapseAll('limit');
-    schLimit=on;
-    _viewDirty['sub']=true; render();
-  }
-  // 副页概览「普池/周年池排期」
-  else if(a==='schpu'){
-    const on=!schPu;
-    if(on)ovwCollapseAll('pu');
-    schPu=on;
-    _viewDirty['sub']=true; render();
-  }
-  // 副页概览「复刻池排期」展开（限定复刻 + 常驻复刻同表，细线分隔）
-  else if(a==='schrep'){
-    const on=!schRep;
-    if(on)ovwCollapseAll('rep');
-    schRep=on;
+  // 不进返回栈：侧滑返回只管弹窗（概览页展开不纳入返回栈，避免操作繁琐）。
+  else if(a==='figtoggle'||a==='chartoggle'||a==='schlimit'||a==='schpu'||a==='schrep'){
+    const key={figtoggle:'fig',chartoggle:'ch',schlimit:'limit',schpu:'pu',schrep:'rep'}[a];
+    const open={ch:chOpen,fig:figOpen,limit:schLimit,pu:schPu,rep:schRep}[key];
+    if(!open){ ovwCollapseAll(key); }
+    setOvw(key,!open);
     _viewDirty['sub']=true; render();
   }
   // 排期表「倒序 / 正序」切换：只改渲染方向，不影响展开态
@@ -1181,13 +1318,13 @@ function act(a,el){
 
 // 招募页密探卡 / 预览条密探卡：左上序号（第几条被抽到）+ 底部长方形蒙版（UP/歪），蒙版上显示抽数（密探库仍用 .cell）
 function recordCellHTML(r,i,opts){
-  const isLimit=opts.isLimit,up1=opts.up1,up2=opts.up2,hideName=opts.hideName;
+  const isLimit=opts.isLimit,up1=opts.up1,up2=opts.up2,hideName=opts.hideName,noEdit=opts.noEdit;
   const isUp=isLimit && (r.charName===up1||r.charName===up2);
   const isWarp=isLimit && r.isWarp;
   // 配色：默认金棕；仅限定UP池"歪"的密探标红（cm-warp）
   const toneCls=isWarp?'cm-warp':'';
   const attr=meta[r.charName]&&meta[r.charName].attr;
-  return '<div class="cell rec '+toneCls+'" data-act="editrec" data-i="'+i+'">'+
+  return '<div class="cell rec '+toneCls+(noEdit?' no-edit':'')+'" '+(noEdit?'':'data-act="editrec" data-i="'+i+'"')+'>'+
     '<span class="seq">'+(i+1)+'</span>'+
     '<div class="frame">'+
       '<img loading="eager" class="face-img" data-char-img="'+r.charName+'" src="'+charImg(r.charName)+'" alt="'+r.charName+'"  onload="window._imgRetryOK&&window._imgRetryOK(this)" onerror="window._replaceWithFace&&window._replaceWithFace(this,\'char\',this.dataset.charImg,this.dataset.charImg)"/>'+
@@ -1260,6 +1397,27 @@ function viewOrder(){
   return [...pu, ...annivAll, ...limit];
 }
 
+/** 首页：周年「自选角色」汇总（300抽自选 / 累充自选）。
+    按周年 start 正序；每个周年最多两行（累充在前、300抽在后）；无数据整行隐藏。 */
+function selfRowsHTML(){
+  const ps=pools.filter(p=>p.pick300).slice().sort((a,b)=>{
+    const sa=a.start||'', sb=b.start||'';
+    if(sa&&sb&&sa!==sb)return sa<sb?-1:1;
+    return 0;
+  });
+  let out='';
+  ps.forEach(p=>{
+    const label=escHtml(String(p.tag||'').replace(/池$/,''));
+    const rch=(p.selRch||[]).filter(Boolean);
+    const s3=(p.sel300||[]).filter(Boolean);
+    const segs=[];
+    if(rch.length)segs.push(label+'累充自选：<span class="self-nm">'+rch.map(escHtml).join('、')+'</span>');
+    if(s3.length)segs.push(label+'池300抽自选：<span class="self-nm">'+s3.map(escHtml).join('、')+'</span>');
+    if(segs.length)out+='<div class="self-row">'+segs.join('<span class="self-sep">｜</span>')+'</div>';
+  });
+  return out?'<div class="self-box">'+out+'</div>':'';
+}
+
 function homeHTML(){
   const s=overall();
   const list=viewOrder();
@@ -1282,6 +1440,7 @@ function homeHTML(){
     <div class="kpi"><img loading="eager" class="ico-img" src="images/home/总绝密个数上面的图片.jpg" alt=""  onload="window._imgRetryOK&&window._imgRetryOK(this)" onerror="window._replaceKPI&&window._replaceKPI(this)"/><span class="v">${s.totalSecret}</span><span class="l">总绝密个数</span></div>
     <div class="kpi"><img loading="eager" class="ico-img" src="images/home/平均出绝密次数上面的图片.jpg" alt=""  onload="window._imgRetryOK&&window._imgRetryOK(this)" onerror="window._replaceKPI&&window._replaceKPI(this)"/><span class="v">${s.avgDraw}</span><span class="l">平均出绝密次数</span></div>
   </div>
+  ${selfRowsHTML()}
   <div class="top2">
     <div class="tk-item">
       <div class="it"><div><span class="lbl">抽出次数最多的绝密密探</span><span class="nm">${s.mostDrawn.name}</span></div>
@@ -1352,12 +1511,99 @@ function renderPrevStrip(p){
   const inDrawOrder=(p.records||[]).map((r,i)=>({r,i})).reverse();
   return '<div class="prev-strip">'+
     '<div class="prev-grid">'+
-      inDrawOrder.map(({r,i})=>recordCellHTML(r,i,{isLimit:p.type==='limit',up1:p.up1,up2:p.up2,hideName:true})).join('')+
+      inDrawOrder.map(({r,i})=>recordCellHTML(r,i,{isLimit:(p.type==='limit'||!!p.upPick),up1:p.up1,up2:p.up2,hideName:true,noEdit:true})).join('')+
     '</div></div>';
 }
 
 // 由池子 id 反查 pools 数组里的真实索引（避免 viewOrder 渲染顺序影响编辑/savepool）
 function idxById(id){return pools.findIndex(p=>p.id===id)}
+
+/** 卡池招募总次数 = 各条记录的抽出数之和 + 垫池数(= 40 − 保底剩余 pity) */
+function poolTotalDraw(p){
+  const r=(p&&p.records)||[]; let td=0;
+  for(let i=0;i<r.length;i++)td+=+r[i].drawCount||0;
+  const dai=Math.max(0,Math.min(40,40-(+p.pity||40)))||0;
+  return td+dai;
+}
+/** 300抽自选行文案：X=⌊总抽/300⌋ 上限 3；X=3 显示已达上限 */
+function p300Line(p){
+  const td=poolTotalDraw(p);
+  const X=Math.min(3,Math.floor(td/300));
+  const Y=300-(td-300*X);
+  return (X>=3)?'已触发300抽自选 3 次，已达上限':('已触发300抽自选 '+X+' 次，距下次触发还需 '+Y+' 抽');
+}
+/** 300自选池：保底行下方、选择密探上方两块控件（300抽自选 + 累充自选）。
+    每块一行：左边说明，右边自选密探名（居右、不换行、无外框，点击可更换）。 */
+function p300PanelHTML(p){
+  if(!p||!p.pick300)return '';
+  const X=Math.min(3,Math.floor(poolTotalDraw(p)/300));
+  const line=p300Line(p);
+  const s300=p.sel300||[], sRch=p.selRch||[], z=+p.selRchN||0;
+  const names=(arr,cnt,key)=>{
+    if(cnt<=0)return '';
+    const parts=[];
+    for(let i=0;i<cnt;i++){
+      const n=arr[i];
+      parts.push(n
+        ? '<span class="psnm on" data-act="'+key+'" data-i="'+i+'">'+escHtml(n)+'</span>'
+        : '<span class="psnm" data-act="'+key+'" data-i="'+i+'">+</span>');
+    }
+    return parts.join('<span class="pssep">、</span>');
+  };
+  return ''+
+   '<div class="pnl ps-panel"><div class="ps-row">'+
+     '<span class="ps-txt">'+line+'</span>'+
+     '<span class="ps-names">'+names(s300,X,'p300pick')+'</span>'+
+   '</div></div>'+
+   '<div class="pnl ps-panel"><div class="ps-row">'+
+     '<span class="ps-txt">累充自选盒子数量：<input class="mi" type="number" id="rchN" min="0" max="2" value="'+z+'"/></span>'+
+     '<span class="ps-names">'+names(sRch,z,'rchpick')+'</span>'+
+   '</div></div>';
+}
+/** 自选 UP 行（辕门遣将）：未选满时整行高亮；选满后取消高亮 */
+function upPickRowHTML(p){
+  const n=+p.upPick||0; if(!n)return '';
+  const one=(i,name)=>name
+    ? '<i class="upset on" data-act="upick" data-i="'+i+'">'+escHtml(name)+'</i>'
+    : '<i class="upset" data-act="upick" data-i="'+i+'">+</i>';
+  const arr=[];
+  for(let i=0;i<n;i++)arr.push(one(i,i===0?p.up1:p.up2));
+  const picked=[p.up1,p.up2].filter(Boolean).length;
+  const hl=picked<n;   // 还没选满 → 高亮提示
+  return '<div class="uprow-line up-pickline'+(hl?' hl':'')+'">'+
+    '<span class="lbl">'+(picked?'up角色：':'请选择up角色：')+'</span>'+
+    '<span class="nm up-pickset">'+arr.join('<span class="upsep">/</span>')+'</span>'+
+  '</div>';
+}
+/** 打开「选择密探」并把结果写进自选槽；after 用于弹窗内再刷新一次。
+    每次都用 getSelfList() 现取数组，避免 normSelf 之后引用过期。 */
+function getSelfList(key){ return ((key==='p300pick')?draft.sel300:draft.selRch)||[]; }
+function openSelfPicker(key,i,after){
+  if(!draft)return;
+  if(!Array.isArray(getSelfList(key)))return;
+  poolInputSync();
+  const own=[draft.up1,draft.up2];   // 盒子可选本池自己的 up
+  const ex=poolExcl(draft).filter(n=>own.indexOf(n)<0);
+  pickerModal('选择密探',[],ex,n=>{ getSelfList(key)[i]=n; normSelf(draft); render(); if(after)after(); });
+}
+/** 点已选的自选密探名 → 「编辑自选密探」弹窗：显示已选卡（点卡换人），可删除 */
+function selfPickModal(key,i){
+  if(!draft)return;
+  if(!Array.isArray(getSelfList(key)))return;
+  modal('<div class="ti">编辑自选密探</div><div id="sp"></div>',false,true);
+  function draw(){
+    const name=getSelfList(key)[i]||'';
+    $('#sp').innerHTML='<div class="uprow uprow-1">'+renderPickedCard(name)+'</div>'+
+      '<div class="btnrow" style="margin-top:14px">'+
+        '<button class="btn del" data-del="1">删除</button>'+
+        '<button class="btn" data-x="1">取消</button></div>';
+    const card=$('#sp').querySelector('[data-rs]');
+    if(card)card.onclick=()=>openSelfPicker(key,i,draw);   // 点密探图 → 更换
+    $('#sp').querySelector('[data-del]').onclick=()=>{ getSelfList(key).splice(i,1); normSelf(draft); render(); closeTopNav(); };
+    $('#sp').querySelector('[data-x]').onclick=()=>closeTopNav();
+  }
+  draw();
+}
 
 function poolHTML(){
   // 池子详情页只显示 draft（未保存），draft 还没准备好时 fallback 到 pools[poolIdx]
@@ -1365,6 +1611,7 @@ function poolHTML(){
   // 最新抽到的排最前；序号仍是"第几个抽出"（原始索引+1），所以最前面的数字最大
   const order=(p.records||[]).map((r,i)=>({r,i})).reverse();
   const isLimit=p.type==='limit';
+  const isUpPick=!!p.upPick;
   const up1Str=p.up1||'未设置', up2Str=p.up2||'未设置';
   return `
   <div class="pool-detail">
@@ -1376,18 +1623,22 @@ function poolHTML(){
     <span class="lbl">up角色：</span>
     <span class="nm"><i>${up1Str}</i> / <i>${up2Str}</i></span>
   </div>`:''}
+  ${isUpPick?upPickRowHTML(p):''}
   ${poolPeriod(p)?`<div class="pd-period">${poolPeriod(p)}</div>`:''}
   <div class="pnl" style="margin-top:0">
     <div class="rw"><span>距离下次保底还需多少次招募</span>
       <input class="mi" type="number" id="pity" value="${p.pity}" min="1" max="40"/></div>
     <div class="tip">本页面为未保存草稿；点页面底部「保存」才同步到首页。</div>
   </div>
+  ${p300PanelHTML(p)}
   ${p.type==='pu'?`<div class="pnl">
     <span class="pl">本池可出绝密密探 <b>${puCand().length}</b> 位（已自动排除当期限定 UP）</span>
   </div>`:''}
-  <div class="grid" style="padding-bottom:80px">
+  <div class="pd-scroll">
+  <div class="grid" style="padding-bottom:10px">
     <div class="cell add" data-act="addrec"><span>+</span></div>
-    ${order.map(({r,i})=>recordCellHTML(r,i,{isLimit:isLimit,up1:p.up1,up2:p.up2})).join('')}
+    ${order.map(({r,i})=>recordCellHTML(r,i,{isLimit:(isLimit||isUpPick),up1:p.up1,up2:p.up2})).join('')}
+  </div>
   </div>
   <div class="savebar">
     <button class="btn pri big-save" data-act="savepool">保存</button>
@@ -1418,11 +1669,51 @@ function charsHTML(){
   </div>`;
 }
 
-function modal(inner,nested){
+// ===== 系统返回手势（安卓 PWA / Chrome 边缘侧滑返回）支持 =====
+// 思路：① 从首页进入「卡池编辑 / 密探库 / 副页」等内页时 push 一条历史；
+//       ② 打开纳入返回栈的弹窗时再 push 一条历史。
+//       系统侧滑返回会触发 popstate，优先关弹窗，无弹窗时回到首页，而不是直接退出网页。
+// 网页内点「关闭 / 收起」也走 closeTopNav()=history.back()，与手势返回共用同一条恢复路径，
+// 保证历史栈与视图状态严格一致（不会出现点了关闭、历史却残留、下次侧滑直接退出的更糟情况）。
+// 注意：history.state 只能存可结构化克隆的数据，因此 modal 的 DOM 引用存在 _modalStack，
+//       不进 history.state；expand 的快照是纯对象，可放心存。
+let _modalStack=[];
+function _navSnapshot(){return {ch:chOpen,fig:figOpen,limit:schLimit,pu:schPu,rep:schRep};}
+function _navApply(s){chOpen=!!(s&&s.ch);figOpen=!!(s&&s.fig);schLimit=!!(s&&s.limit);schPu=!!(s&&s.pu);schRep=!!(s&&s.rep);}
+function setOvw(key,v){if(key==='ch')chOpen=v;else if(key==='fig')figOpen=v;else if(key==='limit')schLimit=v;else if(key==='pu')schPu=v;else if(key==='rep')schRep=v;}
+function pushNav(state){ try{ history.pushState(state,''); }catch(e){ /* file:// 等受限环境忽略：手势返回不可用，但弹窗仍正常开/关 */ } }
+function closeTopNav(){
+  // 优先走 history.back()（与系统手势返回对称）；
+  // 若 pushState 未生效（file:// 等无 History API 环境），直接移除最上层弹窗兜底，避免误退出网页
+  if(history.state&&history.state.kind==='modal'){ history.back(); }
+  else if(_modalStack.length){ const el=_modalStack.pop(); if(el&&el.parentNode)el.remove(); }
+}
+function onPopState(){
+  // 优先处理弹窗：只要 DOM 上还有 modal，系统返回=关最上层弹窗（不依赖 history.state，兼容 file:// 等受限环境）
+  if(_modalStack.length){
+    const el=_modalStack.pop();
+    if(el&&el.parentNode)el.remove();
+    return;
+  }
+  // 没有弹窗时：当前若在非首页视图（pool/chars/sub），返回首页
+  if(view!=='home'){
+    go('home',false);
+    return;
+  }
+  // 已在首页：不拦截，让浏览器执行默认返回（退出网页）
+}
+window.addEventListener('popstate', onPopState);
+if(!history.state) history.replaceState({kind:'top'}, '');
+
+// 弹窗：track=true 时纳入返回栈（打开 push 一条、关闭走 closeTopNav）；
+//       账户菜单 / 确认框等默认不纳入（保留原 d.remove() 行为，避免与切账户等全局操作冲突）。
+function modal(inner,nested,track,cls){
   const d=document.createElement('div');d.className='mask'+(nested?' nested':'');
-  d.innerHTML='<div class="pop">'+inner+'</div>';
-  d.addEventListener('click',e=>{if(e.target===d)d.remove()});
-  $('#phone').appendChild(d);return d;
+  d.innerHTML='<div class="pop'+(cls?' '+cls:'')+'">'+inner+'</div>';
+  d.addEventListener('click',e=>{ if(e.target===d){ if(track)closeTopNav(); else d.remove(); } });
+  $('#phone').appendChild(d);
+  if(track){ _modalStack.push(d); history.pushState({kind:'modal'}, ''); }
+  return d;
 }
 
 // 自定义确认弹窗（避免浏览器 confirm 被某些环境屏蔽）
@@ -1436,30 +1727,31 @@ function confirmModal(msg,onYes){
 
 function pickerModal(title,upList,exclude,onPick){
   let a=[],j=[];
-  const d=modal('<div class="ti">'+title+'</div><div id="pk"></div>',true);
+  const d=modal('<div class="picker-head"><div class="ti">'+title+'</div></div><div class="picker-body"><div id="pk"></div></div><div class="picker-foot"><button class="btn" data-x="1">取消</button></div>',true,true,'picker-pop');
   function draw(){
     let list=filt(a,j,exclude);
     const ups=upList.filter(n=>list.indexOf(n)>=0);
     list=ups.concat(list.filter(n=>upList.indexOf(n)<0));
     $('#pk').innerHTML=
-      '<span class="lbl">属性 <span style="font-size:10px;color:#b99567">（可多选）</span></span><div class="chips">'+chipRow('a',ATTRS,a)+'</div>'+
-      '<span class="lbl">职业 <span style="font-size:10px;color:#b99567">（可多选）</span></span><div class="chips">'+chipRow('j',JOBS,j)+'</div>'+
-      '<div class="pg">'+(list.length?list.map(n=>{const attr=meta[n]&&meta[n].attr;
+      '<div class="pk-filters">'+
+        '<span class="lbl">属性 <span style="font-size:10px;color:#b99567">（可多选）</span></span><div class="chips">'+chipRow('a',ATTRS,a)+'</div>'+
+        '<span class="lbl">职业 <span style="font-size:10px;color:#b99567">（可多选）</span></span><div class="chips">'+chipRow('j',JOBS,j)+'</div>'+
+      '</div>'+
+      '<div class="pk-grid"><div class="pg">'+(list.length?list.map(n=>{const attr=meta[n]&&meta[n].attr;
         return '<div class="cell '+(upList.indexOf(n)>=0?'upc2':'')+'" data-n="'+n+'">'+
           '<div class="frame">'+
             '<img loading="eager" class="face-img" data-char-img="'+n+'" src="'+charImg(n)+'" alt="'+n+'"  onload="window._imgRetryOK&&window._imgRetryOK(this)" onerror="window._replaceWithFace&&window._replaceWithFace(this,\'char\',this.dataset.charImg,this.dataset.charImg)"/>'+
             (attr?'<img loading="eager" class="attr-icon" src="'+attrImg(attr)+'" alt=""  onload="window._imgRetryOK&&window._imgRetryOK(this)" onerror="window._replaceAttr&&window._replaceAttr(this,\''+attr+'\')"/>':'')+
           '</div>'+
           '<span class="nm">'+n+'</span></div>'}).join('')
-        :'<div class="empty">没有符合条件的密探</div>')+'</div>'+
-      '<div class="btnrow" style="margin-top:12px"><button class="btn" data-x="1">取消</button></div>';
+        :'<div class="empty">没有符合条件的密探</div>')+'</div></div>';
     $('#pk').querySelectorAll('[data-act=chip]').forEach(c=>c.onclick=()=>{
       const g=c.dataset.g,v=c.dataset.v;
       if(v===''){(g==='a'?a:j).length=0}
       else{const arr=(g==='a')?a:j;const i=arr.indexOf(v);if(i>=0)arr.splice(i,1);else arr.push(v)}
       draw();});
-    $('#pk').querySelectorAll('.cell[data-n]').forEach(c=>c.onclick=()=>{onPick(c.dataset.n);d.remove()});
-    $('#pk').querySelector('[data-x]').onclick=()=>d.remove();
+    $('#pk').querySelectorAll('.cell[data-n]').forEach(c=>c.onclick=()=>{onPick(c.dataset.n);closeTopNav()});
+    d.querySelector('[data-x]').onclick=()=>closeTopNav();
   }
   draw();
 }
@@ -1469,8 +1761,8 @@ function recModal(idx){
   const p=draft||pools[poolIdx];
   const edit=idx>=0;
   const st={charName:edit?p.records[idx].charName:'',drawCount:edit?p.records[idx].drawCount:''};
-  const ex=p.type==='pu'?curUps():[];
-  const ups=p.type==='limit'?[p.up1,p.up2].filter(Boolean):[];
+  const ex=poolExcl(p);   // 规则1：统一排除「上线时还没结束的 UP」
+  const ups=(p.type==='limit'||p.upPick)?[p.up1,p.up2].filter(Boolean):[];
   let tip='';
   if(p.type==='limit'){
     const test=p.records.map(r=>({charName:r.charName,drawCount:r.drawCount}));
@@ -1480,7 +1772,7 @@ function recModal(idx){
   }
   // 判断是否有 UP：UP 限定池 → 3 列；普池/周年活动池 → 1 列
   const hasUp=ups.length>0;
-  const d=modal('<div class="ti">'+(edit?'编辑招募记录':'新增招募记录')+'</div><div id="rm"></div>');
+  const d=modal('<div class="ti">'+(edit?'编辑招募记录':'新增招募记录')+'</div><div id="rm"></div>',false,true);
   function draw(){
     if(hasUp){
       // 限定池：3 列 — UP1 / UP2 / 第三格（+ 或 已选）
@@ -1520,11 +1812,11 @@ function recModal(idx){
       if(rs)rs.onclick=()=>pickerModal('选择密探',ups,ex,n=>{st.charName=n;draw()});
     }
     const rd=$('#rd');rd.oninput=e=>st.drawCount=e.target.value;
-    $('#rm').querySelector('[data-x]').onclick=()=>d.remove();
+    $('#rm').querySelector('[data-x]').onclick=()=>closeTopNav();
     const dl=$('#rm').querySelector('[data-del]');
     // 草稿模式：确认提交只写到 draft，不持久化；删除单条记录同样写 draft
     if(dl)dl.onclick=()=>{
-      p.records.splice(idx,1);recalc(p);d.remove();render();toast('已删除（未保存）');
+      p.records.splice(idx,1);recalc(p);poolInputSync();render();closeTopNav();toast('已删除（未保存）');
     };
     $('#rm').querySelector('[data-ok]').onclick=()=>{
       if(!st.charName)return toast('请选择密探');
@@ -1537,7 +1829,8 @@ function recModal(idx){
       if(edit)p.records[idx]={charName:st.charName,drawCount:n};
       else p.records.push({charName:st.charName,drawCount:n});
       recalc(p);
-      d.remove();render();toast('已记录（未保存，点底部「保存」同步到首页）');
+      poolInputSync();render();
+      closeTopNav();toast('已记录（未保存，点底部「保存」同步到首页）');
     };
   }
   draw();
@@ -1670,24 +1963,24 @@ function subOverviewHTML(){
       '<span class="lbl">职业 <span style="font-size:10px;color:#b99567">（可多选）</span></span><div class="chips">'+chipRow('j',JOBS,chF.jobs,'subchip')+'</div>'+
     '</div>'+
     '<div class="sech" style="margin:0 2px 8px"><span class="t" style="font-size:12px;color:#7a5a3a">共 '+libList.length+' 位</span></div>'+
-    '<div class="prev-grid">'+
+    '<div class="ovw-scroll ovw-grid"><div class="prev-grid">'+
       libList.map(n=>{const at=meta[n]&&meta[n].attr;
         return '<div class="cell"><div class="frame">'+
           '<img loading="eager" class="face-img" data-char-img="'+escHtml(n)+'" src="'+charImg(n)+'" alt="'+escHtml(n)+'"  onload="window._imgRetryOK&&window._imgRetryOK(this)" onerror="window._replaceWithFace&&window._replaceWithFace(this,\'char\',this.dataset.charImg,this.dataset.charImg)"/>'+
           (at?'<img loading="eager" class="attr-icon" src="'+attrImg(at)+'" alt="'+at+'"  onload="window._imgRetryOK&&window._imgRetryOK(this)" onerror="window._replaceAttr&&window._replaceAttr(this,\''+at+'\')"/>':'')+
           '</div><span class="nm">'+escHtml(n)+'</span>'+
           '<span class="mtx">'+[meta[n].attr,meta[n].job].filter(Boolean).join(' · ')+'</span></div>'}).join('')+
-    '</div></div>':'');
+    '</div></div></div>':'');
   const cMiss=miss.length
       ? '<div class="stat-card slim"><div class="lbl">全图鉴瑕 <b class="fig-num">'+miss.length+'</b> 密探</div>'+
         '<span class="fig-toggle" data-act="figtoggle" style="margin-left:auto">'+(figOpen?'收起 ▲':'展开 ▾')+'</span></div>'
       : '<div class="stat-card fullfig"><span class="fig-congrats">恭喜殿下全图鉴！</span></div>';
-  const bMiss=(figOpen&&miss.length?'<div class="fig-strip" style="margin-top:8px"><div class="prev-grid">'+
+  const bMiss=(figOpen&&miss.length?'<div class="fig-strip" style="margin-top:8px"><div class="ovw-scroll ovw-grid"><div class="prev-grid">'+
       miss.map(n=>'<div class="cell"><div class="frame">'+
         '<img loading="eager" class="face-img" data-char-img="'+escHtml(n)+'" src="'+charImg(n)+'" alt="'+escHtml(n)+'"  onload="window._imgRetryOK&&window._imgRetryOK(this)" onerror="window._replaceWithFace&&window._replaceWithFace(this,\'char\',this.dataset.charImg,this.dataset.charImg)"/>'+
         (meta[n]&&meta[n].attr?'<img loading="eager" class="attr-icon" src="'+attrImg(meta[n].attr)+'" alt="'+meta[n].attr+'"  onload="window._imgRetryOK&&window._imgRetryOK(this)" onerror="window._replaceAttr&&window._replaceAttr(this,\''+meta[n].attr+'\')"/>':'')+
         '</div><span class="nm">'+escHtml(n)+'</span></div>').join('')+
-      '</div></div>':'');
+      '</div></div></div>':'');
   // --- 卡池排期：3 张排期卡，各自展开在自身下方 ---
   // 「倒序/正序」切换按钮（放在表头右上的 tip 行）
   const revBtn='<span class="fig-toggle sch-rev" data-act="schrev">'+(rev?'倒序 ▼':'正序 ▲')+'</span>';
@@ -1695,23 +1988,23 @@ function subOverviewHTML(){
       '<span class="fig-toggle" data-act="schlimit">'+(schLimit?'收起 ▲':'展开 ▾')+'</span></div>';
   const bLimit=(schLimit?'<div class="fig-strip" style="margin-top:8px"><div class="sch-strip">'+
       '<div class="sch-tip"><span>共 '+g.limit.length+' 个卡池 · 组内按上线时间编号</span>'+revBtn+'</div>'+
-      schTableRows(g.limit,rev)+'</div></div>':'');
+      '<div class="ovw-scroll ovw-list">'+schTableRows(g.limit,rev)+'</div></div></div>':'');
   const cPu='<div class="stat-card slim"><div class="lbl fixw">普池/周年池排期</div><div class="val align">'+g.pu.length+'<small>个</small></div>'+
       '<span class="fig-toggle" data-act="schpu">'+(schPu?'收起 ▲':'展开 ▾')+'</span></div>';
   const bPu=(schPu?'<div class="fig-strip" style="margin-top:8px"><div class="sch-strip">'+
       '<div class="sch-tip"><span>共 '+g.pu.length+' 个卡池 · 组内按上线时间编号</span>'+revBtn+'</div>'+
-      schTableRows(g.pu,rev,null,true,true)+'</div></div>':'');
+      '<div class="ovw-scroll ovw-list">'+schTableRows(g.pu,rev,null,true,true)+'</div></div></div>':'');
   const cRep='<div class="stat-card slim"><div class="lbl fixw">复刻池排期</div><div class="val align">'+g.repAll.length+'<small>个</small></div>'+
       '<span class="fig-toggle" data-act="schrep">'+(schRep?'收起 ▲':'展开 ▾')+'</span></div>';
   // 复刻表：限定复刻 / 常驻复刻 两块，各带居中类型头 + 自己的列头，序号组内从 1 起
   const bRep=(schRep?'<div class="fig-strip" style="margin-top:8px"><div class="sch-strip">'+
       '<div class="sch-tip"><span>限定复刻 '+g.repLimit.length+' · 常驻复刻 '+g.repChang.length+' · 组内按上线时间编号</span>'+revBtn+'</div>'+
-      schTableRows(null,rev,[{title:'限定复刻',rows:g.repLimit},{title:'常驻复刻',rows:g.repChang}])+
-      '</div></div>':'');
+      '<div class="ovw-scroll ovw-list">'+schTableRows(null,rev,[{title:'限定复刻',rows:g.repLimit},{title:'常驻复刻',rows:g.repChang}])+
+      '</div></div></div>':'');
   return '<div class="subhd">抽卡总览</div>'+
     '<div class="stat-grid-3">'+
       '<div class="stat-card accent"><div class="lbl">总抽数</div><div class="val">'+o.totalDraw+'<small>次</small></div></div>'+
-      '<div class="stat-card"><div class="lbl">绝密密探</div><div class="val">'+o.totalSecret+'<small>位·次</small></div></div>'+
+      '<div class="stat-card"><div class="lbl">总绝密个数</div><div class="val">'+o.totalSecret+'<small>位·次</small></div></div>'+
       '<div class="stat-card cool"><div class="lbl">平均抽数</div><div class="val">'+o.avgDraw+'<small>抽/位</small></div></div>'+
     '</div>'+
     '<div class="stat-stack">'+
@@ -1728,7 +2021,7 @@ function subOverviewHTML(){
       cPu+bPu+
       cRep+bRep+
     '</div>'+
-    '<div class="warn" style="margin-top:14px">副页独立模块：<b>导入</b> 从 xlsx 抽取抽卡记录、<b>导出</b> 把当前代码里的抽卡数据回写成 xlsx、<b>统计</b> 给限定池做细化排名。点顶部 tab 切换。<span style="opacity:.6">（页面版本 0920a）</span></div>';
+    '<div class="warn" style="margin-top:14px">副页独立模块：<b>导入</b> 从 xlsx 抽取抽卡记录、<b>导出</b> 把当前代码里的抽卡数据回写成 xlsx、<b>统计</b> 给限定池做细化排名。点顶部 tab 切换。<span style="opacity:.6">（页面版本 0920m）</span></div>';
 }
 /* 生成表体（列头 + 行）。rows 必须按组内时间升序存好（no = 1,2,3…）。
    rev = true 倒序渲染（最新在上）。
@@ -2053,8 +2346,10 @@ function subExportHTML(){
       '<div class="exp-row"><span>绝密密探抽出次数</span><span class="v">'+o.totalSecret+'</span></div>'+
       '<div class="exp-row"><span>密探库密探数</span><span class="v">'+names().length+'</span></div>'+
     '</div>'+
-    '<button class="btn-down" id="expDownload">⬇ 下载 '+exportFileName()+'</button>'+
-    '<button class="btn-down" id="bakDownload" style="background:linear-gradient(180deg,#7a8c5a,#5f7043)">💾 备份 JSON（'+backupName()+'）</button>'+
+    '<div class="exp-btns">'+
+      '<button class="btn-down" id="expDownload">⬇ 下载 '+exportFileName()+'</button>'+
+      '<button class="btn-down" id="bakDownload" style="background:linear-gradient(180deg,#7a8c5a,#5f7043)">💾 备份 JSON（'+backupName()+'）</button>'+
+    '</div>'+
     '<div class="subhint" style="margin-top:9px">备份<b>全部账户</b>的抽卡记录、保底剩余和长按换过的所有图片，文件名带当天日期。换设备或清缓存后，到「导入」页选这个 json 恢复即可（xlsx 装不下图片，所以图片只能走备份）。</div>';
 }
 
@@ -2349,12 +2644,21 @@ window._retryImg=function(img, kind, key, name){
    onerror 里先调 _retryImg：返回 true = 已排队重试（不动 DOM）；
    返回 false = 重试次数用尽，才真正换成占位。 */
 window._replaceWithFace=function(img, kind, key, name){
-  if(window._retryImg(img, kind, key, name))return;
+  // 卡池 banner 是本地静态图，缺失就是 404，重试无意义；直接落占位，避免「时有时无」。
+  // 其余图片（密探立绘 / 头像）保留重试，抵御网络抖动。
+  if(kind!=='pool' && window._retryImg(img, kind, key, name))return;
   const box=img.parentNode; if(!box) return;
   img.remove();
   if(kind==='pool'){
     box.classList.add('placeholder');
-    box.innerHTML='<div class="ph-text">待填充图片</div>';
+    // ⚠️ 不能清空 innerHTML：首页卡片里还有池名(.pn)/标签(.pt)，清了就没名字了。
+    //    只把图移除、把「待填充图片」追加进去，名字与标签照常显示。
+    if(!box.querySelector('.ph-text')){
+      const ph=document.createElement('div');
+      ph.className='ph-text';
+      ph.textContent='待填充图片';
+      box.appendChild(ph);
+    }
   } else {
     box.style.background='linear-gradient(135deg,#b99567,#8c5f2b)';
     box.style.display='flex'; box.style.alignItems='center';
@@ -2386,7 +2690,10 @@ window._imgRetryOK=function(img){
   img.dataset.retryN='';            // 计数清零：本次已成功，后续若再失败重新计一轮
 };
 
-$('#bk').onclick=()=>go('home');
+$('#bk').onclick=()=>{
+  if(_modalStack.length){ closeTopNav(); return; }
+  if(view!=='home') history.back();
+};
 // 顶部账户按钮（多账户切换入口）
 $('#accBtn').onclick=openAccMenu;
 // 顶部主 nav 切换：主页 / 副页（一次性绑定，DOM 不会被 render 重写）
