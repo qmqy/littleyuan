@@ -1111,6 +1111,7 @@ function overall(){
 }
 const $=s=>document.querySelector(s);
 let view='home', poolIdx=0, prevOpens={}, chF={attrs:[],jobs:[]};   // prevOpens：主页展开的缩略图集合（可同时展开多个，只受点击控制）
+let _viewScroll={};    // 每个视图离开时的滚动位置：从卡池详情返回首页时回到原处，不用重新往下翻
 let subView='overview'; // 副页内导航：overview / import / export / stats
 let figOpen=false;      // 副页概览「全图鉴瑕」缩略图是否展开（仅会话内，不持久化）
 let chOpen=false;       // 副页概览「密探库」网格是否展开（与首页密探库共用 yiruanPool_prev_chF 筛选）
@@ -1143,6 +1144,9 @@ function go(v,push){
   if(push===undefined)push=true;   // 默认 true：常规导航会 push 历史；popstate 消费时传 false
   const prev=view;
   view=v;
+  // 记住离开时的滚动位置：详情页返回首页/密探库时恢复原位（连着填多个卡池不用反复往下翻）
+  try{_viewScroll[prev]=$('#body').scrollTop}catch(e){}
+  if(v==='pool')_viewScroll.pool=0;   // 卡池详情每次都从顶部看
   // 主页缩略图展开状态（prevOpens）只由点击控制，进出详情不再自动收起
   // 进入池子详情时深拷贝当前池为 draft，所有改动在 draft 上，"保存"才写回
   if(v==='pool'){
@@ -1166,10 +1170,10 @@ function go(v,push){
   _tabSwitch=true;
   // 池子详情依赖 draft、副页依赖 subView，上下文会变 → 这两个不复用，必须重建
   if(v==='pool'||v==='sub')_viewDirty[v]=true;
-  render();
+  render(true);
 }
 
-function render(){
+function render(restore){   // restore=true：挂载后恢复该视图的滚动位置（go() 视图切换时传；act 内局部重绘不传）
   const b=$('#body');
   const v=view;
   b.classList.toggle('pool-view',v==='pool');   // 招募页去掉 #body padding（两种 render 分支都要）
@@ -1180,6 +1184,7 @@ function render(){
     if(_curPane&&_curPane.parentNode)_curPane.parentNode.removeChild(_curPane);
     b.appendChild(_viewEl[v]);
     _curPane=_viewEl[v];
+    if(restore)b.scrollTop=_viewScroll[v]||0;
     return;
   }
   _tabSwitch=false;
@@ -1189,6 +1194,7 @@ function render(){
   pane.innerHTML = v==='home'?homeHTML():v==='pool'?poolHTML():v==='sub'?subHTML():charsHTML();
   b.appendChild(pane);
   _viewEl[v]=pane; _viewDirty[v]=false; _curPane=pane;
+  if(restore)b.scrollTop=_viewScroll[v]||0;
   // 内部 data-act 元素不冒泡触发外层卡片
   b.querySelectorAll('[data-act]').forEach(el=>el.onclick=(e)=>{e.stopPropagation();act(el.dataset.act,el)});
   // 招募页：保底数一改，300抽自选那行即时重算（总抽数 = 各条抽出数 + 垫池数）
@@ -2067,7 +2073,7 @@ function subOverviewHTML(){
       cPu+bPu+
       cRep+bRep+
     '</div>'+
-    '<div class="warn" style="margin-top:14px">副页独立模块：<b>导入</b> 从 xlsx 抽取抽卡记录、<b>导出</b> 把当前代码里的抽卡数据回写成 xlsx、<b>统计</b> 给限定池做细化排名。点顶部 tab 切换。<span style="opacity:.6">（页面版本 0920r）</span></div>';
+    '<div class="warn" style="margin-top:14px">副页独立模块：<b>导入</b> 从 xlsx 抽取抽卡记录、<b>导出</b> 把当前代码里的抽卡数据回写成 xlsx、<b>统计</b> 给限定池做细化排名。点顶部 tab 切换。<span style="opacity:.6">（页面版本 0920s）</span></div>';
 }
 /* 生成表体（列头 + 行）。rows 必须按组内时间升序存好（no = 1,2,3…）。
    rev = true 倒序渲染（最新在上）。
