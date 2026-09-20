@@ -458,7 +458,7 @@ button{font:inherit;color:inherit;cursor:pointer}
 .ovw-scroll::-webkit-scrollbar{width:4px}
 .ovw-scroll::-webkit-scrollbar-thumb{background:#d8c49b;border-radius:3px}
 .ovw-scroll::-webkit-scrollbar-track{background:transparent}
-.ovw-grid{--ovw-h:380px}
+.ovw-grid{--ovw-h:330px}
 .ovw-list{--ovw-h:320px}
 
 /* 类型小标签（仍保留，供别处复用） */
@@ -2036,8 +2036,8 @@ function subOverviewHTML(){
         return '<div class="cell"><div class="frame">'+
           '<img loading="eager" class="face-img" data-char-img="'+escHtml(n)+'" src="'+charImg(n)+'" alt="'+escHtml(n)+'"  onload="window._imgRetryOK&&window._imgRetryOK(this)" onerror="window._replaceWithFace&&window._replaceWithFace(this,\'char\',this.dataset.charImg,this.dataset.charImg)"/>'+
           (at?'<img loading="eager" class="attr-icon" src="'+attrImg(at)+'" alt="'+at+'"  onload="window._imgRetryOK&&window._imgRetryOK(this)" onerror="window._replaceAttr&&window._replaceAttr(this,\''+at+'\')"/>':'')+
-          '</div><span class="nm">'+escHtml(n)+'</span>'+
-          '<span class="mtx">'+[meta[n].attr,meta[n].job].filter(Boolean).join(' · ')+'</span></div>'}).join('')+
+          // 概览密探库：只显示立绘 + 名字（属性/职业不再标注，图片右下角仍有属性小图标）
+          '</div><span class="nm">'+escHtml(n)+'</span></div>'}).join('')+
     '</div></div></div>':'');
   const cMiss=miss.length
       ? '<div class="stat-card slim"><div class="lbl">全图鉴瑕 <b class="fig-num">'+miss.length+'</b> 密探</div>'+
@@ -2089,7 +2089,7 @@ function subOverviewHTML(){
       cPu+bPu+
       cRep+bRep+
     '</div>'+
-    '<div class="warn" style="margin-top:14px">副页独立模块：<b>导入</b> 从 xlsx 抽取抽卡记录、<b>导出</b> 把当前代码里的抽卡数据回写成 xlsx、<b>统计</b> 给限定池做细化排名。点顶部 tab 切换。<span style="opacity:.6">（页面版本 0920u）</span></div>';
+    '<div class="warn" style="margin-top:14px">副页独立模块：<b>导入</b> 从 xlsx 抽取抽卡记录、<b>导出</b> 把当前代码里的抽卡数据回写成 xlsx、<b>统计</b> 给限定池做细化排名。点顶部 tab 切换。<span style="opacity:.6">（页面版本 0920v）</span></div>';
 }
 /* 生成表体（列头 + 行）。rows 必须按组内时间升序存好（no = 1,2,3…）。
    rev = true 倒序渲染（最新在上）。

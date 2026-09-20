@@ -1,5 +1,5 @@
 /* 如鸢招募 · Service Worker（本地缓存，加载过一次后秒开、断网也能用） */
-const VERSION = 'v0920u';
+const VERSION = 'v0920v';
 const CORE_CACHE = 'yiruan-core-' + VERSION;
 /* 图片缓存名**不带代码版本号**：改代码（0920m→n→o…）不再清空 120 张图，
    只有真正换了图片内容时才手动 bump IMG_VERSION。 */
