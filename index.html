@@ -463,6 +463,9 @@ button{font:inherit;color:inherit;cursor:pointer}
 
 /* 排行榜 */
 .stat-block{margin-bottom:14px}
+/* 统计页底部免责声明：小字灰色、上缘虚线分隔（仿常见网站 footer 声明），随内容排在最后 */
+.disclaim{font-size:9.5px;line-height:1.7;color:#b3a084;margin-top:14px;padding:8px 2px 0;
+  border-top:1px dashed var(--line);text-align:justify;word-break:break-all}
 .subhd.stat-toggle{cursor:pointer;display:flex;align-items:center;gap:7px;margin:14px 0 8px;font-size:14px;color:var(--ink);font-weight:700;padding:8px 10px;border-radius:8px;background:linear-gradient(180deg,#fdf6e9,#f5e9d2);border:1px solid var(--line);user-select:none;transition:background .15s}
 .subhd.stat-toggle::before{content:'';width:4px;height:14px;background:linear-gradient(180deg,var(--gold),#a06c1f);border-radius:2px;flex-shrink:0}
 .subhd.stat-toggle:hover{background:linear-gradient(180deg,#f5e9d2,#ecd5a5)}
@@ -2064,7 +2067,7 @@ function subOverviewHTML(){
       cPu+bPu+
       cRep+bRep+
     '</div>'+
-    '<div class="warn" style="margin-top:14px">副页独立模块：<b>导入</b> 从 xlsx 抽取抽卡记录、<b>导出</b> 把当前代码里的抽卡数据回写成 xlsx、<b>统计</b> 给限定池做细化排名。点顶部 tab 切换。<span style="opacity:.6">（页面版本 0920q）</span></div>';
+    '<div class="warn" style="margin-top:14px">副页独立模块：<b>导入</b> 从 xlsx 抽取抽卡记录、<b>导出</b> 把当前代码里的抽卡数据回写成 xlsx、<b>统计</b> 给限定池做细化排名。点顶部 tab 切换。<span style="opacity:.6">（页面版本 0920r）</span></div>';
 }
 /* 生成表体（列头 + 行）。rows 必须按组内时间升序存好（no = 1,2,3…）。
    rev = true 倒序渲染（最新在上）。
@@ -2651,7 +2654,10 @@ function subStatsHTML(){
     '<div class="subhd stat-toggle"><span class="arr">▾</span> 小保底不歪比例 <span class="hint">点击展开</span></div>'+
     (byWarp.length?rankList(byWarp.map(x=>({nm:x.p.name+'（'+x.p.up1+' / '+x.p.up2+'）',v:(x.r||0).toFixed(1)+'%',sub:'小保底命中 UP 比例'}))):
      '<div class="subhint">尚无数据</div>')+
-    '</div>';
+    '</div>'+
+
+    /* 免责声明（统计页最底部，小字灰色，仿常见网站 footer 声明样式；三段，单换行紧凑排） */
+    '<div class="disclaim">本网页为玩家自制同人记录工具，非《如鸢》官方，也非辟雍学府原版。网页界面设计参考辟雍学府，功能逻辑独立实现。致敬辟雍学府，感谢原作者付出。<br>本网页仅用于玩家本地记录，无广无商业用途，不存储隐私账号数据。<br>所有游戏相关资料版权归属灵犀互娱，辟雍学府相关内容版权归其原制作者所有。如原作者要求，会立即下架。</div>';
 }
 
 function rankList(items){
