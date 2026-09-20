@@ -51,6 +51,8 @@ button{font:inherit;color:inherit;cursor:pointer}
 .accnew{padding:10px 14px;border-top:1px solid var(--line);display:flex;gap:8px;align-items:center}
 .accnew .inp{flex:1}
 #body{flex:1;overflow-y:auto;padding:12px}
+/* 副页：顶部不留 padding，subtabs 吸顶条直接贴滚动区最顶（内容不可能从它上方露出） */
+#body.sub-view{padding-top:0}
 /* 招募页：pane 逐层撑满高度（否则 100% 高度算不出来 → 整页又滚回去、保存被顶上去） */
 #body.pool-view{padding:0;display:flex;flex-direction:column}
 #body.pool-view>div{flex:1 1 auto;min-height:0;display:flex;flex-direction:column}
@@ -172,6 +174,12 @@ button{font:inherit;color:inherit;cursor:pointer}
   padding:2px 9px;border-radius:10px;z-index:3;font-weight:600;
   box-shadow:0 1px 3px rgba(0,0,0,.4);
 }
+/* 预告池（还没到上线日）：首页卡整体置灰 + 名字后灰色「待上线」小角标 */
+.pool.soon .art-img{filter:grayscale(.7) brightness(.92)}
+.pool.soon .pn{background:linear-gradient(135deg,#a99a83,#7d7160)}
+.pool.soon .pn::after{content:'待上线';margin-left:6px;font-size:9px;font-weight:700;
+  color:#fff;background:rgba(255,255,255,.28);padding:1px 5px;border-radius:7px;vertical-align:1px}
+.pool.soon .pt{background:rgba(120,105,85,.92)}
 .pool .mt{flex:1;padding:11px 14px;display:flex;flex-direction:column;justify-content:center;background:#1f1611;color:#d8cbb8;min-width:0}
 .pool .ln{display:block;font-size:11.5px;color:#d8cbb8;line-height:1.7}
 .pool .ln i{color:#ffd28a;font-style:normal;font-weight:600}
@@ -300,8 +308,9 @@ button{font:inherit;color:inherit;cursor:pointer}
 
 .hint{background:#fff4dd;border:1px solid #e6c88a;border-radius:8px;padding:9px 10px;font-size:11.5px;color:#a06c1f;line-height:1.6;margin-bottom:9px}
 .lbl{display:block;font-size:12px;color:var(--soft);margin:6px 0 5px}
-.chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
-.chip{padding:4px 11px;border-radius:14px;border:1px solid var(--line2);background:#fff;font-size:12px}
+/* chips 更紧凑：全部+5 个职业 6 枚能排进一行（360px 屏、面板内 ≈316px 可用） */
+.chips{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px}
+.chip{padding:4px 9px;border-radius:14px;border:1px solid var(--line2);background:#fff;font-size:12px}
 .chip.on{background:var(--gold);color:#fff;border-color:var(--gold)}
 .dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:4px}
 .d-fire{background:#e74c3c}.d-earth{background:#8b5a2b}.d-wind{background:#5fb87a}
@@ -330,8 +339,14 @@ button{font:inherit;color:inherit;cursor:pointer}
 .subhd{display:flex;align-items:center;gap:7px;margin:14px 0 10px;font-size:14px;color:var(--ink);font-weight:700}
 .subhd::before{content:'';width:4px;height:14px;background:linear-gradient(180deg,var(--gold),#a06c1f);border-radius:2px}
 .subhint{font-size:11px;color:var(--soft);margin:-7px 0 10px;line-height:1.5}
-.subtabs{display:flex;gap:6px;margin-bottom:14px;background:#f5e9d2;border-radius:8px;padding:3px}
-.subtabs .stab{flex:1;text-align:center;padding:7px 4px;font-size:12.5px;color:var(--soft);border-radius:6px;cursor:pointer;font-weight:600;transition:all .15s}
+/* 副页顶部 tab（概览/导入/导出/统计）：吸顶、直接贴滚动区最顶，无缝隙。
+   左右用负 margin 抵消 #body 内边距实现通栏；底色不透明遮住滚过的内容。
+   ⚠️ 不用负 margin-top：它是 pane 的首子元素，负上边距会与父级发生 margin 塌缩，产生顶部缝隙。 */
+.subtabs{position:sticky;top:0;z-index:30;display:flex;gap:6px;
+  margin:0 -12px 12px;padding:10px 12px;background:var(--bg);
+  box-shadow:0 2px 6px rgba(75,53,32,.07)}
+.subtabs .stab{flex:1;text-align:center;padding:7px 4px;font-size:12.5px;color:var(--soft);
+  background:#f5e9d2;border-radius:6px;cursor:pointer;font-weight:600;transition:all .15s}
 .subtabs .stab.on{background:var(--gold);color:#fff}
 
 /* 概览 / 统计卡片 */
@@ -382,6 +397,8 @@ button{font:inherit;color:inherit;cursor:pointer}
 
 /* ============ 概览 · 卡池排期表 ============ */
 .sch-strip{padding:0}
+/* 排期表的滚动条往右贴：抵消 fig-strip 右侧 8px 内边距的大半，给表格多腾 6px 列宽 */
+.sch-strip .ovw-scroll{margin-right:-6px}
 .sch-tip{font-size:10.5px;color:var(--soft);margin:0 2px 7px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
 .sch-tip>span:first-child{margin-right:auto}
 .sch-legend{display:flex;align-items:center;gap:4px;color:var(--soft)}
@@ -390,15 +407,17 @@ button{font:inherit;color:inherit;cursor:pointer}
 .sch-table{border:1px solid var(--line);border-radius:8px;overflow:hidden;background:#fff}
 /* 4 列：序号 / 卡池名称 / UP密探 / 持续时间（类型列已删——卡片标题即类型）
    排期分表后行数少（最多 31 行），故列宽放宽、字号加大，保证手机窄屏看全。 */
-.sch-row{display:grid;grid-template-columns:24px minmax(62px,1fr) minmax(60px,1.05fr) 96px;
+/* 限定UP池表：序号列 21px（3 位数编号也放得下：3×6px+2px padding），名称列 minmax 下限 72px
+   （保证「进行中/待上线」角标完整显示），UP 列 .95fr 弹性，时间列 96px 不动 */
+.sch-row{display:grid;grid-template-columns:21px minmax(72px,1fr) minmax(56px,.95fr) 96px;
   align-items:center;gap:5px;padding:7px 8px;font-size:12px;color:var(--ink);
   border-bottom:1px solid #f1e7d4}
 .sch-row:last-child{border-bottom:none}
 .sch-row:nth-child(odd){background:#fffdf9}
-/* 普池/周年池表：无「UP 密探」列 → 3 列网格 */
-.sch-row.no-up{grid-template-columns:32px minmax(62px,1fr) 96px}
+/* 普池/周年池表：无「UP 密探」列 → 3 列网格（序号列 26px，3 位数够放且比原 32px 窄） */
+.sch-row.no-up{grid-template-columns:26px minmax(62px,1fr) 96px}
 /* 普池/周年池表（带「卡池类型」列）：编号 / 名称 / 类型 / 持续时间 */
-.sch-row.no-up.with-kind{grid-template-columns:32px minmax(62px,1fr) 54px 96px}
+.sch-row.no-up.with-kind{grid-template-columns:26px minmax(62px,1fr) 54px 96px}
 .sch-head{background:linear-gradient(180deg,#fdf6e9,#f5e9d2)!important;font-weight:700;font-size:10.5px;
   color:#6b4a26;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:2}
 .sch-head>span{white-space:nowrap}
@@ -406,6 +425,11 @@ button{font:inherit;color:inherit;cursor:pointer}
 .sch-row.ongoing .sch-name{color:#a06c1f;font-weight:800}
 .sch-row.ongoing .sch-name::after{content:'进行中';margin-left:4px;font-size:9px;font-weight:700;
   color:#fff;background:var(--gold2);padding:1px 4px;border-radius:7px;vertical-align:1px}
+/* 预告池（还没到上线日）：整行置灰 + 灰色「待上线」角标 */
+.sch-row.soon{opacity:.6}
+.sch-row.soon .sch-name{color:var(--soft);font-weight:600}
+.sch-row.soon .sch-name::after{content:'待上线';margin-left:4px;font-size:9px;font-weight:700;
+  color:#fff;background:#b3a084;padding:1px 4px;border-radius:7px;vertical-align:1px}
 /* 编号列：右对齐贴住「卡池名称」，避免与名称之间出现大片空隙 */
 .sch-no{text-align:right;font-size:10px;color:var(--soft);font-weight:700;padding-right:2px}
 .sch-name{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -422,8 +446,10 @@ button{font:inherit;color:inherit;cursor:pointer}
 .sch-grp{text-align:center;font-size:11.5px;font-weight:800;color:#a06c1f;letter-spacing:.06em;
   padding:5px 0 4px;background:#fdf6e9;border-radius:7px;margin:0 0 1px}
 /* 概览页展开区：超出 10 项时内部滚动，不撑长整页 */
-.ovw-scroll{max-height:var(--ovw-h,360px);overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
-.ovw-scroll::-webkit-scrollbar{width:5px}
+/* 展开区滚动条更细（4px）：少占横向空间，排期表能多 1~2px 列宽 */
+.ovw-scroll{max-height:var(--ovw-h,360px);overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;
+  scrollbar-width:thin;scrollbar-color:#d8c49b transparent}
+.ovw-scroll::-webkit-scrollbar{width:4px}
 .ovw-scroll::-webkit-scrollbar-thumb{background:#d8c49b;border-radius:3px}
 .ovw-scroll::-webkit-scrollbar-track{background:transparent}
 .ovw-grid{--ovw-h:250px}
@@ -925,8 +951,11 @@ function todayStr(){
   const p=n=>String(n).padStart(2,'0');
   return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate());
 }
-/** 该池是否「仍在进行中」：有结束日且今天 < 结束日 → true；无结束日（普池）→ false */
-function isOpen(p){return !!(p&&p.end&&todayStr()<p.end)}
+/** 该池是否「进行中」：已到上线日（有 start 且今天 ≥ start），且（有结束日时）今天 < 结束日。
+    无结束日（普池）→ false（排期表里普池不标「进行中」）；还没到上线日的预告池 → false（走 isUpcoming）。 */
+function isOpen(p){if(!p||!p.end)return false;if(p.start&&todayStr()<p.start)return false;return todayStr()<p.end}
+/** 该池是否「待上线」：填了上线日且还没到（预告池，排期表置灰 + 灰色「待上线」角标） */
+function isUpcoming(p){return !!(p&&p.start&&todayStr()<p.start)}
 /** 池子是否属于复刻（tag 含「复刻」）——复刻池密探早已在普池，不参与普池候选排除 */
 function isReprint(p){return !!p&&String(p.tag||'').indexOf('复刻')>=0}
 /** 首页卡池卡片右上角是否显示标签：普池/周年池等非 limit 池显示；
@@ -1135,6 +1164,7 @@ function render(){
   const b=$('#body');
   const v=view;
   b.classList.toggle('pool-view',v==='pool');   // 招募页去掉 #body padding（两种 render 分支都要）
+  b.classList.toggle('sub-view',v==='sub');     // 副页去掉 #body 顶部 padding：subtabs 吸顶贴最顶
   // tab 切换且缓存仍有效 → 把之前摘下的 DOM 直接挂回来，不重建（图片不必重新解码）
   if(_tabSwitch && _viewEl[v] && !_viewDirty[v]){
     _tabSwitch=false;
@@ -1490,7 +1520,7 @@ function homeHTML(){
     </span>
   </div>
   ${list.map((p,i)=>`
-    <div class="pool" data-act="toggleprev" data-id="${p.id}">
+    <div class="pool${isUpcoming(p)?' soon':''}" data-act="toggleprev" data-id="${p.id}">
       <div class="art" data-pool-id="${p.id}">
         <img loading="eager" class="art-img" src="${poolImg(p)}"
            onload="window._imgRetryOK&&window._imgRetryOK(this)" onerror="window._replaceWithFace && window._replaceWithFace(this,'pool','${p.id}','${p.name}')" alt="${p.name}"/>
@@ -1934,6 +1964,7 @@ function scheduleGroups(){
       up:[p.up1,p.up2].filter(Boolean).join(' / '),
       period:poolPeriodShort(p),
       ongoing:isOpen(p),
+      upcoming:isUpcoming(p),
       // kind = 「卡池类型」列的**专用展示标签**：只在本排期表内做区分，不参与任何逻辑判断，
       //        刻意与 tag 分开（tag 供首页角标/导出/复刻判定等使用），改动 kind 不影响其它功能
       kind:String(p.kind||'')
@@ -2027,7 +2058,7 @@ function subOverviewHTML(){
       cPu+bPu+
       cRep+bRep+
     '</div>'+
-    '<div class="warn" style="margin-top:14px">副页独立模块：<b>导入</b> 从 xlsx 抽取抽卡记录、<b>导出</b> 把当前代码里的抽卡数据回写成 xlsx、<b>统计</b> 给限定池做细化排名。点顶部 tab 切换。<span style="opacity:.6">（页面版本 0920o）</span></div>';
+    '<div class="warn" style="margin-top:14px">副页独立模块：<b>导入</b> 从 xlsx 抽取抽卡记录、<b>导出</b> 把当前代码里的抽卡数据回写成 xlsx、<b>统计</b> 给限定池做细化排名。点顶部 tab 切换。<span style="opacity:.6">（页面版本 0920p）</span></div>';
 }
 /* 生成表体（列头 + 行）。rows 必须按组内时间升序存好（no = 1,2,3…）。
    rev = true 倒序渲染（最新在上）。
@@ -2044,7 +2075,7 @@ function schTableRows(rows,rev,group,hideUp,showKind){
     (hideUp?'':'<span class="sch-up">UP 密探</span>')+
     '<span class="sch-time">持续时间</span></div>';
   const rowHTML=r=>{
-    const cls=(hideUp?' no-up':'')+(showKind?' with-kind':'')+(r.ongoing?' ongoing':'');
+    const cls=(hideUp?' no-up':'')+(showKind?' with-kind':'')+(r.ongoing?' ongoing':(r.upcoming?' soon':''));
     return '<div class="sch-row'+cls+'">'+
       '<span class="sch-no">'+r.no+'</span>'+
       '<span class="sch-name">'+escHtml(r.name)+'</span>'+
