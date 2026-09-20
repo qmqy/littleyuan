@@ -308,8 +308,14 @@ button{font:inherit;color:inherit;cursor:pointer}
 
 .hint{background:#fff4dd;border:1px solid #e6c88a;border-radius:8px;padding:9px 10px;font-size:11.5px;color:#a06c1f;line-height:1.6;margin-bottom:9px}
 .lbl{display:block;font-size:12px;color:var(--soft);margin:6px 0 5px}
-/* chips 更紧凑：全部+5 个职业 6 枚能排进一行（360px 屏、面板内 ≈316px 可用） */
+/* chips 更紧凑：`tight` = 不换行一行排开、间距更小（属性 7 枚 / 职业 5 枚都在同一行） */
 .chips{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px}
+.chips.tight{display:flex;flex-wrap:nowrap;gap:8px;margin-bottom:5px}
+/* 筛选面板收紧：内边距/行距都比普通面板小一档 */
+.pnl.ch-filters{padding:7px 8px 5px;margin-top:0}
+.ch-filters .lbl{margin:3px 0 3px}
+.ch-filters .chips{margin-bottom:3px}
+.ch-filters .chips:last-of-type{margin-bottom:1px}
 .chip{padding:4px 9px;border-radius:14px;border:1px solid var(--line2);background:#fff;font-size:12px}
 .chip.on{background:var(--gold);color:#fff;border-color:var(--gold)}
 .dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:4px}
@@ -452,7 +458,7 @@ button{font:inherit;color:inherit;cursor:pointer}
 .ovw-scroll::-webkit-scrollbar{width:4px}
 .ovw-scroll::-webkit-scrollbar-thumb{background:#d8c49b;border-radius:3px}
 .ovw-scroll::-webkit-scrollbar-track{background:transparent}
-.ovw-grid{--ovw-h:250px}
+.ovw-grid{--ovw-h:380px}
 .ovw-list{--ovw-h:320px}
 
 /* 类型小标签（仍保留，供别处复用） */
@@ -561,21 +567,28 @@ button{font:inherit;color:inherit;cursor:pointer}
   padding:9px 16px;border-radius:20px;font-size:13px;z-index:99;opacity:0;transition:.2s;pointer-events:none;white-space:nowrap}
 .tst.on{opacity:1}
 
-/* ============ 属性大圆 chip（图在上字在下）============ */
-.chips-attr{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px}
-.chip-attr{display:flex;flex-direction:column;align-items:center;gap:3px;
-  cursor:pointer;padding:5px 8px;border-radius:10px;border:1px solid transparent;
-  background:#fffbf5;min-width:50px;user-select:none}
+/* 属性 chip 等比缩小（圆图 32→26，内边距 5/8→3/4，字号 12→10.5），一行 7 枚排得下 */
+.chip-attr{display:flex;flex-direction:column;align-items:center;gap:2px;
+  cursor:pointer;padding:3px 3px;border-radius:9px;border:1px solid transparent;
+  background:#fffbf5;min-width:32px;user-select:none}
 .chip-attr.on{background:var(--goldsoft);border-color:var(--gold2)}
-.chip-attr .ico{width:32px;height:32px;border-radius:50%;background-size:cover;
+.chip-attr .ico{width:24px;height:24px;border-radius:50%;background-size:cover;
   background-position:center;flex-shrink:0;border:1px solid var(--line);
   background-color:#fdf6e9}
-.chip-attr .nm{font-size:12px;color:var(--ink);font-weight:600;letter-spacing:.5px}
+.chip-attr .nm{font-size:10.5px;color:var(--ink);font-weight:600;letter-spacing:0}
 .chip-attr.all .ico{background:linear-gradient(135deg,#b99567,#8c5f2b);
   display:flex;align-items:center;justify-content:center;
   font-size:11px;font-weight:700;color:#fff}
 
-/* ============ 详情页大 banner（长按换图）============ */
+/* ============ 密探库页：筛选固定在上方，只有密探网格滚动 ============ */
+#body.chars-view{padding:12px 12px 0;display:flex;flex-direction:column}
+#body.chars-view>div{flex:1 1 auto;min-height:0;display:flex;flex-direction:column}
+.chars-page{flex:1 1 auto;min-height:0;display:flex;flex-direction:column}
+.chars-page>*{flex-shrink:0}
+.chars-page .ch-grid{flex:1 1 auto;min-height:120px;overflow-y:auto;
+  overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+
+/* ============ 详情页大 banner ============ */
 .pd-banner{position:relative;width:100%;border-radius:10px;
   overflow:hidden;background:#1f1611;
   margin-bottom:10px;border:1px solid var(--line2)}
@@ -619,7 +632,7 @@ button{font:inherit;color:inherit;cursor:pointer}
 </div>
 
 <script>
-const ATTRS=['火','地','风','水','阳','阴','混沌'];
+const ATTRS=['水','火','风','地','阳','阴','混沌'];
 const JOBS=['破军','龙盾','岐黄','神纪','诡道'];
 const AC={'火':'fire','地':'earth','风':'wind','水':'water','阳':'yang','阴':'yin','混沌':'chaos'};
 const SEED=[
@@ -879,7 +892,7 @@ function renameAccount(id){
 function deleteAccount(id){
   if(accList.length<=1)return toast('至少保留一个账户');
   const a=accOf(id);if(!a)return;
-  confirmModal('删除账户「'+escHtml(a.name)+'」？<br>该账户的<b>全部记录、保底、自定义图片</b>将一并删除，且无法恢复。',()=>{
+  confirmModal('删除账户「'+escHtml(a.name)+'」？<br>该账户的<b>全部记录、保底</b>将一并删除，且无法恢复。',()=>{
     accList=accList.filter(x=>x.id!==id);
     try{localStorage.removeItem(accDataKey(id))}catch(e){}
     if(curAccId===id){curAccId=accList[0].id;lsSet(CUR_K,curAccId);load()}
@@ -1178,6 +1191,7 @@ function render(restore){   // restore=true：挂载后恢复该视图的滚动�
   const v=view;
   b.classList.toggle('pool-view',v==='pool');   // 招募页去掉 #body padding（两种 render 分支都要）
   b.classList.toggle('sub-view',v==='sub');     // 副页去掉 #body 顶部 padding：subtabs 吸顶贴最顶
+  b.classList.toggle('chars-view',v==='chars'); // 密探库：筛选固定上方、只有网格滚动
   // tab 切换且缓存仍有效 → 把之前摘下的 DOM 直接挂回来，不重建（图片不必重新解码）
   if(_tabSwitch && _viewEl[v] && !_viewDirty[v]){
     _tabSwitch=false;
@@ -1386,19 +1400,17 @@ function recordCellHTML(r,i,opts){
 }
 
 // act 默认 "chip"（首页密探库）；副页概览里传 "subchip"（因副页重绘走独立路径）
+// 不再渲染「全部」：未勾选任何项 = 全部（filt() 里 a.length===0 即不过滤），点已选项即取消
 function chipRow(g,items,arr,act){
   const A=act||'chip';
   if(g==='a'){
-    // 属性大圆 chip（图在上字在下）
-    const head='<span class="chip-attr '+(arr.length===0?'on':'')+' all" data-act="'+A+'" data-g="a" data-v="">'
-      +'<div class="ico">全部</div><div class="nm">全部</div></span>';
-    return head+items.map(i=>'<span class="chip-attr '+(arr.indexOf(i)>=0?'on':'')+'" data-act="'+A+'" data-g="a" data-v="'+i+'">'
+    // 属性 chip（图在上字在下）
+    return items.map(i=>'<span class="chip-attr '+(arr.indexOf(i)>=0?'on':'')+'" data-act="'+A+'" data-g="a" data-v="'+i+'">'
       +'<div class="ico" style="background-image:url(images/attr/'+i+'属性.jpg)"></div>'
       +'<div class="nm">'+i+'</div></span>').join('');
   }
   // 职业 chip（文字）
-  const head='<span class="chip '+(arr.length===0?'on':'')+'" data-act="'+A+'" data-g="'+g+'" data-v="">全部</span>';
-  return head+items.map(i=>'<span class="chip '+(arr.indexOf(i)>=0?'on':'')+'" data-act="'+A+'" data-g="'+g+'" data-v="'+i+'">'+i+'</span>').join('');
+  return items.map(i=>'<span class="chip '+(arr.indexOf(i)>=0?'on':'')+'" data-act="'+A+'" data-g="'+g+'" data-v="'+i+'">'+i+'</span>').join('');
 }
 
 function viewOrder(){
@@ -1700,13 +1712,15 @@ function poolHTML(){
 
 function charsHTML(){
   const list=filt(chF.attrs,chF.jobs);
+  // 属性/职业筛选固定在上方，只有密探网格滚动（.chars-page 撑满高度 + .ch-grid 为唯一滚动区）
   return `
-  <div class="hint">点击密探可改属性/职业；卡池上新后点「新建密探」添加。</div>
-  <div class="pnl">
-    <span class="lbl">属性 <span style="font-size:10px;color:#b99567">（可多选，再点已选可取消）</span></span><div class="chips">${chipRow('a',ATTRS,chF.attrs)}</div>
-    <span class="lbl">职业 <span style="font-size:10px;color:#b99567">（可多选）</span></span><div class="chips">${chipRow('j',JOBS,chF.jobs)}</div>
+  <div class="chars-page">
+  <div class="pnl ch-filters">
+    <span class="lbl">属性 <span style="font-size:10px;color:#b99567">（可多选，再点已选可取消；都不选＝全部）</span></span><div class="chips tight">${chipRow('a',ATTRS,chF.attrs)}</div>
+    <span class="lbl">职业 <span style="font-size:10px;color:#b99567">（可多选，都不选＝全部）</span></span><div class="chips tight">${chipRow('j',JOBS,chF.jobs)}</div>
   </div>
   <div class="sech"><span class="t" style="font-size:12px;color:#7a5a3a">共 ${list.length} 位</span></div>
+  <div class="ch-grid">
   <div class="grid">
     ${list.map(n=>{const attr=meta[n]&&meta[n].attr;
       return `<div class="cell" data-n="${n}">
@@ -1717,6 +1731,8 @@ function charsHTML(){
         <span class="nm">${n}</span>
         <span class="mtx">${[meta[n].attr,meta[n].job].filter(Boolean).join(' · ')||'未配置'}</span>
       </div>`}).join('')}
+  </div>
+  </div>
   </div>`;
 }
 
@@ -2010,9 +2026,9 @@ function subOverviewHTML(){
   // --- 抽卡总览 ---
   const cDraw='<div class="stat-card slim"><div class="lbl fixw">密探库</div><div class="val align">'+cntChars+'<small>位</small></div>'+
       '<span class="fig-toggle" data-act="chartoggle">'+(chOpen?'收起 ▲':'展开 ▾')+'</span></div>';
-  const bDraw=(chOpen?'<div class="fig-strip" style="margin-top:8px"><div class="pnl" style="margin:0 0 10px">'+
-      '<span class="lbl">属性 <span style="font-size:10px;color:#b99567">（可多选，再点已选可取消）</span></span><div class="chips">'+chipRow('a',ATTRS,chF.attrs,'subchip')+'</div>'+
-      '<span class="lbl">职业 <span style="font-size:10px;color:#b99567">（可多选）</span></span><div class="chips">'+chipRow('j',JOBS,chF.jobs,'subchip')+'</div>'+
+  const bDraw=(chOpen?'<div class="fig-strip" style="margin-top:8px"><div class="pnl ch-filters">'+
+      '<span class="lbl">属性 <span style="font-size:10px;color:#b99567">（可多选，再点已选取消；都不选＝全部）</span></span><div class="chips tight">'+chipRow('a',ATTRS,chF.attrs,'subchip')+'</div>'+
+      '<span class="lbl">职业 <span style="font-size:10px;color:#b99567">（可多选，都不选＝全部）</span></span><div class="chips tight">'+chipRow('j',JOBS,chF.jobs,'subchip')+'</div>'+
     '</div>'+
     '<div class="sech" style="margin:0 2px 8px"><span class="t" style="font-size:12px;color:#7a5a3a">共 '+libList.length+' 位</span></div>'+
     '<div class="ovw-scroll ovw-grid"><div class="prev-grid">'+
@@ -2039,18 +2055,18 @@ function subOverviewHTML(){
   const cLimit='<div class="stat-card slim"><div class="lbl fixw">限定 UP 池排期</div><div class="val align">'+g.limit.length+'<small>个</small></div>'+
       '<span class="fig-toggle" data-act="schlimit">'+(schLimit?'收起 ▲':'展开 ▾')+'</span></div>';
   const bLimit=(schLimit?'<div class="fig-strip" style="margin-top:8px"><div class="sch-strip">'+
-      '<div class="sch-tip"><span>共 '+g.limit.length+' 个卡池 · 组内按上线时间编号</span>'+revBtn+'</div>'+
+      '<div class="sch-tip"><span>共 '+g.limit.length+' 个</span>'+revBtn+'</div>'+
       '<div class="ovw-scroll ovw-list">'+schTableRows(g.limit,rev)+'</div></div></div>':'');
   const cPu='<div class="stat-card slim"><div class="lbl fixw">普池/周年池排期</div><div class="val align">'+g.pu.length+'<small>个</small></div>'+
       '<span class="fig-toggle" data-act="schpu">'+(schPu?'收起 ▲':'展开 ▾')+'</span></div>';
   const bPu=(schPu?'<div class="fig-strip" style="margin-top:8px"><div class="sch-strip">'+
-      '<div class="sch-tip"><span>共 '+g.pu.length+' 个卡池 · 组内按上线时间编号</span>'+revBtn+'</div>'+
+      '<div class="sch-tip"><span>共 '+g.pu.length+' 个</span>'+revBtn+'</div>'+
       '<div class="ovw-scroll ovw-list">'+schTableRows(g.pu,rev,null,true,true)+'</div></div></div>':'');
   const cRep='<div class="stat-card slim"><div class="lbl fixw">复刻池排期</div><div class="val align">'+g.repAll.length+'<small>个</small></div>'+
       '<span class="fig-toggle" data-act="schrep">'+(schRep?'收起 ▲':'展开 ▾')+'</span></div>';
   // 复刻表：限定复刻 / 常驻复刻 两块，各带居中类型头 + 自己的列头，序号组内从 1 起
   const bRep=(schRep?'<div class="fig-strip" style="margin-top:8px"><div class="sch-strip">'+
-      '<div class="sch-tip"><span>限定复刻 '+g.repLimit.length+' · 常驻复刻 '+g.repChang.length+' · 组内按上线时间编号</span>'+revBtn+'</div>'+
+      '<div class="sch-tip"><span>限定复刻 '+g.repLimit.length+' · 常驻复刻 '+g.repChang.length+'</span>'+revBtn+'</div>'+
       '<div class="ovw-scroll ovw-list">'+schTableRows(null,rev,[{title:'限定复刻',rows:g.repLimit},{title:'常驻复刻',rows:g.repChang}])+
       '</div></div></div>':'');
   return '<div class="subhd">抽卡总览</div>'+
@@ -2073,7 +2089,7 @@ function subOverviewHTML(){
       cPu+bPu+
       cRep+bRep+
     '</div>'+
-    '<div class="warn" style="margin-top:14px">副页独立模块：<b>导入</b> 从 xlsx 抽取抽卡记录、<b>导出</b> 把当前代码里的抽卡数据回写成 xlsx、<b>统计</b> 给限定池做细化排名。点顶部 tab 切换。<span style="opacity:.6">（页面版本 0920t）</span></div>';
+    '<div class="warn" style="margin-top:14px">副页独立模块：<b>导入</b> 从 xlsx 抽取抽卡记录、<b>导出</b> 把当前代码里的抽卡数据回写成 xlsx、<b>统计</b> 给限定池做细化排名。点顶部 tab 切换。<span style="opacity:.6">（页面版本 0920u）</span></div>';
 }
 /* 生成表体（列头 + 行）。rows 必须按组内时间升序存好（no = 1,2,3…）。
    rev = true 倒序渲染（最新在上）。
@@ -2146,21 +2162,22 @@ function findSpecialPool(s){
 let _impParsed=null;
 function subImportHTML(){
   const hasXLSX=typeof XLSX!=='undefined';
+  // 举例文件名带当天日期（与导出/备份命名规则一致），不再写死过期示例
+  const fn=exportFileName(), bj=backupName();
   return '<div class="subhd">从 xlsx 导入招募数据</div>'+
-    '<div class="subhint">文件应包含三张表：<b>招募记录明细</b>（限定UP池 / 普池 / 东阁待贤 / 游说贤士 四个列组，序号全局连续，"-" 表示未抽）、<b>卡池+up密探</b>（B/C/D = 卡池名 + 两个 UP 密探；<b>E = 限定池「距离下次保底还需多少次招募」</b>；<b>H/I = 普池·周年池 名称 + 保底剩余</b>，"-" / 空 / 不填 都按 40 计，即不计垫抽）、<b>密探库密探顺序</b>（按游戏上线先后排列）'+(hasXLSX?'':'<br><span style="color:#7a5a3a">首次使用「导入/导出」会自动加载组件（仅一次，之后走本地缓存）</span>')+
-    '<div class="warn" style="margin-top:8px">导入规则：表里有的池子 <b>全量覆盖</b>；表里没有的池子（跳过未抽）<b>保留不动</b>；表里有但代码还没有的池子 <b>自动新建</b>。</div>'+
+    '<div class="subhint">选择之前导出的 xlsx：有记录的池子<b>覆盖更新</b>，没抽的池子<b>保留不动</b>，新池子<b>自动补上</b>。'+(hasXLSX?'':'<br><span style="color:#7a5a3a">首次使用会自动加载组件（仅一次）</span>')+
     '</div>'+
     '<label class="imp-pick" id="impPick">'+
       '<strong>📂 选择 xlsx 文件 / 拖到此处</strong>'+
-      '<span>点击或拖入「小鸢助手26.9.11.xlsx」</span>'+
+      '<span>点击或拖入「'+fn+'」</span>'+
       '<input type="file" id="impFile" accept=".xlsx"/>'+
     '</label>'+
     '<div id="impResult"></div>'+
     '<div class="subhd">从 JSON 备份恢复</div>'+
-    '<div class="subhint">换设备、清缓存后选之前备份的 json，恢复<b>抽卡记录 + 保底剩余 + 自定义图片</b>。池子清单和 UP 配置以代码为准，备份里多出来的池子/密探会自动跳过，不会动代码里新增的内容。</div>'+
+    '<div class="subhint">换设备或清缓存后，选之前备份的 json 即可恢复<b>抽卡记录 + 保底剩余</b>。</div>'+
     '<label class="imp-pick" id="bakPick">'+
       '<strong>📂 选择备份 json / 拖到此处</strong>'+
-      '<span>文件名形如「小鸢助手备份26.9.11.json」</span>'+
+      '<span>文件名形如「'+bj+'」</span>'+
       '<input type="file" id="bakFile" accept=".json,application/json"/>'+
     '</label>';
 }
@@ -2208,7 +2225,7 @@ function renderImpResult(){
     '<div class="imp-result"><h4>📋 表3 · 密探库顺序 <span class="tag '+(orderNew.length?'ok':'warn')+'">'+
     (orderNew.length?orderNew.length+' 位密探顺序可用':'未检测到顺序')+'</span></h4>'+
     '<div class="subhint" style="margin:4px 0">'+
-    (orderNew.length?'最早：'+orderNew.slice(0,3).join(' / ')+' … 最新：'+orderNew.slice(-3).join(' / ')+'（代码里倒序展示，最新在最前）':'未传第三张表，密探库按当前顺序')+
+    (orderNew.length?'最早：'+orderNew.slice(0,3).join(' / ')+' … 最新：'+orderNew.slice(-3).join(' / ')+'（密探库按上线先后倒序展示）':'未传第三张表，密探库按当前顺序')+
     '</div></div>'+
     ((limitPools.length||upRows.length||Object.keys(groupItems).length)?'<div class="imp-actions">'+
       '<button class="btn pri" id="impApply">✅ 应用到代码</button>'+
@@ -2389,7 +2406,7 @@ function exportFileName(){
 function subExportHTML(){
   const o=overall();
   return '<div class="subhd">导出当前招募数据</div>'+
-    '<div class="subhint">导出文件名：<b>小鸢助手 + 当日日期</b>（如「小鸢助手26.9.11.xlsx」）。三张表：<b>招募记录明细</b>（限定/普池 / 各周年·特殊池 多列组（自动随卡池增减），0 抽的池子不导出，表头带总抽数公式）、<b>卡池+up密探</b>（含每个限定池的「距离下次保底还需多少次招募」E 列，以及普池/周年池的 H/I 列）、<b>密探库密探顺序</b>。导回可再导入，逻辑完全对称。</div>'+
+    '<div class="subhint">导出为 xlsx 表格，文件名自动带当天日期；之后可以随时再导入回来。</div>'+
     '<div class="exp-area">'+
       '<p><b>当前数据快照</b></p>'+
       '<div class="exp-row"><span>限定池数量</span><span class="v">'+pools.filter(p=>p.type==='limit').length+'</span></div>'+
@@ -2402,7 +2419,7 @@ function subExportHTML(){
       '<button class="btn-down" id="expDownload">⬇ 下载 '+exportFileName()+'</button>'+
       '<button class="btn-down" id="bakDownload" style="background:linear-gradient(180deg,#7a8c5a,#5f7043)">💾 备份 JSON（'+backupName()+'）</button>'+
     '</div>'+
-    '<div class="subhint" style="margin-top:9px">备份<b>全部账户</b>的抽卡记录、保底剩余和长按换过的所有图片，文件名带当天日期。换设备或清缓存后，到「导入」页选这个 json 恢复即可（xlsx 装不下图片，所以图片只能走备份）。</div>';
+    '<div class="subhint" style="margin-top:9px">备份<b>全部账户</b>的抽卡记录、保底剩余和自选密探，文件名带当天日期。换设备或清缓存后，到「导入」页选这个 json 恢复即可。</div>';
 }
 
 async function exportToXlsx(){
@@ -2636,42 +2653,46 @@ function subStatsHTML(){
   // 排名 4：小保底不歪比例排行（所有池子）
   const byWarp=withData.map(p=>({p,r:p.stat.warpRate||0})).sort((a,b)=>b.r-a.r);
 
+  // 说明文字与数据行统一装进 .rank 卡片：收起时随 .rank 一起隐藏，展开时也在卡片内（不再悬在卡外）
   return '<div class="stat-block collapsed">'+
     '<div class="subhd stat-toggle"><span class="arr">▾</span> 总抽数排行 <span class="hint">点击展开</span></div>'+
-    (byTotal.length?rankList(byTotal.map(x=>({nm:x.name+'（'+x.up1+' / '+x.up2+'）',v:x.stat.totalDraw,sub:'抽 · 绝密密探共 '+x.stat.totalSecret+' 个'}))):
-     '<div class="subhint">尚未抽卡</div>')+
-    '</div>'+
+    '<div class="rank">'+
+    (byTotal.length?rankRows(byTotal.map(x=>({nm:x.name+'（'+x.up1+' / '+x.up2+'）',v:x.stat.totalDraw,sub:'抽 · 绝密密探共 '+x.stat.totalSecret+' 个'}))):
+     '<div class="subhint" style="margin:8px 12px">尚未抽卡</div>')+
+    '</div></div>'+
 
     '<div class="stat-block collapsed">'+
     '<div class="subhd stat-toggle"><span class="arr">▾</span> 抽齐双UP抽数 <span class="hint">点击展开</span></div>'+
-    '<div class="subhint" style="margin:-7px 0 10px">从开池到两个 UP 全部首次出现的累计抽数</div>'+
-    (byFastest.length?rankList(byFastest.map(x=>({nm:x.p.name+'（'+x.p.up1+' / '+x.p.up2+'）',v:x.n+' 抽',sub:''}))):
-     '<div class="subhint">尚未抽到双 UP</div>')+
-    '</div>'+
+    '<div class="rank">'+
+    (byFastest.length?rankRows(byFastest.map(x=>({nm:x.p.name+'（'+x.p.up1+' / '+x.p.up2+'）',v:x.n+' 抽',sub:''}))):
+     '<div class="subhint" style="margin:8px 12px">尚未抽到双 UP</div>')+
+    '</div></div>'+
 
     '<div class="stat-block collapsed">'+
     '<div class="subhd stat-toggle"><span class="arr">▾</span> UP 命中率 <span class="hint">点击展开</span></div>'+
-    '<div class="subhint" style="margin:-7px 0 10px">（抽到 UP 的次数 ÷ 总抽数）× 100%</div>'+
-    (upRates.length?rankList(upRates.map(x=>({nm:x.p.name+'（'+x.p.up1+' / '+x.p.up2+'）',v:x.rate.toFixed(1)+'%',sub:'/'+x.total+' 抽中 '+(x.up1c+x.up2c)+' 个 UP'}))):
-     '<div class="subhint">尚无数据</div>')+
-    '</div>'+
+    '<div class="rank">'+
+    (upRates.length?rankRows(upRates.map(x=>({nm:x.p.name+'（'+x.p.up1+' / '+x.p.up2+'）',v:x.rate.toFixed(1)+'%',sub:'/'+x.total+' 抽中 '+(x.up1c+x.up2c)+' 个 UP'}))):
+     '<div class="subhint" style="margin:8px 12px">尚无数据</div>')+
+    '</div></div>'+
 
     '<div class="stat-block collapsed">'+
     '<div class="subhd stat-toggle"><span class="arr">▾</span> 小保底不歪比例 <span class="hint">点击展开</span></div>'+
-    (byWarp.length?rankList(byWarp.map(x=>({nm:x.p.name+'（'+x.p.up1+' / '+x.p.up2+'）',v:(x.r||0).toFixed(1)+'%',sub:'小保底命中 UP 比例'}))):
-     '<div class="subhint">尚无数据</div>')+
-    '</div>'+
+    '<div class="rank">'+
+    (byWarp.length?rankRows(byWarp.map(x=>({nm:x.p.name+'（'+x.p.up1+' / '+x.p.up2+'）',v:(x.r||0).toFixed(1)+'%',sub:''}))):
+     '<div class="subhint" style="margin:8px 12px">尚无数据</div>')+
+    '</div></div>'+
 
     /* 免责声明（统计页最底部，小字灰色，仿常见网站 footer 声明样式；三段，单换行紧凑排） */
     '<div class="disclaim">本网页为玩家自制同人记录工具，非《如鸢》官方，也非辟雍学府原版。网页界面设计参考辟雍学府，功能逻辑独立实现。致敬辟雍学府，感谢原作者付出。<br>本网页仅用于玩家本地记录，无广无商业用途，不存储隐私账号数据。<br>所有游戏相关资料版权归属灵犀互娱，辟雍学府相关内容版权归其原制作者所有。如原作者要求，会立即下架。</div>';
 }
 
-function rankList(items){
-  return '<div class="rank">'+items.map((x,i)=>
+// 排行数据行（不含 .rank 外壳——外壳由调用方包，便于把说明文字也装进卡片）
+function rankRows(items){
+  return items.map((x,i)=>
     '<div class="ri"><span class="rk">'+(i+1)+'</span>'+
     '<span class="nm">'+x.nm+'</span>'+
     '<span class="v">'+x.v+(x.sub?'<span class="sub">'+x.sub+'</span>':'')+'</span></div>'
-  ).join('')+'</div>';
+  ).join('');
 }
 
 /* ========== 图片加载失败自动重试（网络抖动/超时） ==========
