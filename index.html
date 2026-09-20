@@ -74,10 +74,16 @@ button{font:inherit;color:inherit;cursor:pointer}
 .pool-detail .savebar{flex-shrink:0;z-index:50;margin-top:0;background:transparent;
   padding:6px 0 calc(8px + env(safe-area-inset-bottom));display:flex;justify-content:center}
 /* 详情页面板更紧凑：减小行距、缩小提示字号 */
-.pool-detail .pnl{padding:9px 10px}
-.pool-detail .pnl .rw{line-height:1.35}
-.pool-detail .pnl .tip{font-size:10.5px;margin-top:2px;line-height:1.45}
-.savebar .btn{width:100%;max-width:360px;padding:14px 0;font-size:15px;font-weight:700;border-radius:24px;box-shadow:0 2px 8px rgba(75,53,32,.25)}
+.pool-detail .pnl{padding:6px 10px;margin-top:6px}
+.pool-detail .pnl .rw{line-height:1.25}
+.pool-detail .pnl .mi{padding:2px 4px;font-size:13px}
+.pool-detail .pnl .tip{font-size:10px;margin-top:1px;line-height:1.4}
+/* 「保存」行：矮一点（padding 14px→9px）；棕色实心无白边（去 border/outline/hover 变浅） */
+.savebar .btn{width:100%;max-width:360px;padding:9px 0;font-size:15px;font-weight:700;border-radius:20px;
+  border:0;outline:none;-webkit-tap-highlight-color:transparent;
+  background:var(--gold);color:#fff;box-shadow:0 2px 8px rgba(75,53,32,.25)}
+.savebar .btn:hover,.savebar .btn:focus,.savebar .btn:active{
+  background:#7d5426;color:#fff;outline:none;box-shadow:0 2px 8px rgba(75,53,32,.25)}
 
 .addp-mini{font-size:11px;color:var(--gold);padding:2px 8px;border:1px solid var(--gold2);
   border-radius:10px;background:#fff;cursor:pointer}
@@ -200,11 +206,11 @@ button{font:inherit;color:inherit;cursor:pointer}
 .head .mt{display:none}
 
 /* UP 密探行（详情页里只显示名字，不显示两张大卡） */
-.uprow-line{display:flex;align-items:center;justify-content:space-between;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:11px 14px;margin-bottom:10px}
+.uprow-line{display:flex;align-items:center;justify-content:space-between;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:6px 12px;margin-bottom:8px;line-height:1.25}
 .uprow-line .lbl{font-size:13px;color:var(--soft)}
 .uprow-line .nm{font-size:14px;font-weight:700;color:var(--ink)}
 .uprow-line .nm i{color:var(--gold);font-style:normal;font-weight:600}
-.pd-period{margin:-2px 0 10px;padding:0 4px;font-size:12px;color:var(--soft);letter-spacing:.02em;text-align:right}
+.pd-period{margin:-2px 0 4px;padding:0 4px;font-size:12px;color:var(--soft);letter-spacing:.02em;text-align:right}
 /* 300自选 / 累充自选 控件（一行：左边说明，右边密探名，居右不换行） */
 .ps-panel{padding:9px 10px}
 .ps-row{display:flex;align-items:center;gap:8px}
@@ -1625,16 +1631,16 @@ function poolHTML(){
   </div>`:''}
   ${isUpPick?upPickRowHTML(p):''}
   ${poolPeriod(p)?`<div class="pd-period">${poolPeriod(p)}</div>`:''}
-  <div class="pnl" style="margin-top:0">
+  ${p300PanelHTML(p)}
+  <div class="pd-scroll">
+  <div class="pnl">
     <div class="rw"><span>距离下次保底还需多少次招募</span>
       <input class="mi" type="number" id="pity" value="${p.pity}" min="1" max="40"/></div>
     <div class="tip">本页面为未保存草稿；点页面底部「保存」才同步到首页。</div>
   </div>
-  ${p300PanelHTML(p)}
   ${p.type==='pu'?`<div class="pnl">
     <span class="pl">本池可出绝密密探 <b>${puCand().length}</b> 位（已自动排除当期限定 UP）</span>
   </div>`:''}
-  <div class="pd-scroll">
   <div class="grid" style="padding-bottom:10px">
     <div class="cell add" data-act="addrec"><span>+</span></div>
     ${order.map(({r,i})=>recordCellHTML(r,i,{isLimit:(isLimit||isUpPick),up1:p.up1,up2:p.up2})).join('')}
@@ -2021,7 +2027,7 @@ function subOverviewHTML(){
       cPu+bPu+
       cRep+bRep+
     '</div>'+
-    '<div class="warn" style="margin-top:14px">副页独立模块：<b>导入</b> 从 xlsx 抽取抽卡记录、<b>导出</b> 把当前代码里的抽卡数据回写成 xlsx、<b>统计</b> 给限定池做细化排名。点顶部 tab 切换。<span style="opacity:.6">（页面版本 0920m）</span></div>';
+    '<div class="warn" style="margin-top:14px">副页独立模块：<b>导入</b> 从 xlsx 抽取抽卡记录、<b>导出</b> 把当前代码里的抽卡数据回写成 xlsx、<b>统计</b> 给限定池做细化排名。点顶部 tab 切换。<span style="opacity:.6">（页面版本 0920o）</span></div>';
 }
 /* 生成表体（列头 + 行）。rows 必须按组内时间升序存好（no = 1,2,3…）。
    rev = true 倒序渲染（最新在上）。
