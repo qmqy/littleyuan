@@ -417,7 +417,7 @@ button{font:inherit;color:inherit;cursor:pointer}
 /* 普池/周年池表：无「UP 密探」列 → 3 列网格（序号列 26px，3 位数够放且比原 32px 窄） */
 .sch-row.no-up{grid-template-columns:26px minmax(62px,1fr) 96px}
 /* 普池/周年池表（带「卡池类型」列）：编号 / 名称 / 类型 / 持续时间 */
-.sch-row.no-up.with-kind{grid-template-columns:26px minmax(62px,1fr) 54px 96px}
+.sch-row.no-up.with-kind{grid-template-columns:26px minmax(62px,1fr) 84px 96px}
 .sch-head{background:linear-gradient(180deg,#fdf6e9,#f5e9d2)!important;font-weight:700;font-size:10.5px;
   color:#6b4a26;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:2}
 .sch-head>span{white-space:nowrap}
@@ -672,8 +672,8 @@ function attrImg(attr){return 'images/attr/'+attr+'属性.jpg'}
 const POOL_CATALOG=[
  {name:'绣衣天下',type:'pu',tag:'普池',kind:'普池',start:'2024-09-26',end:''},
  // ↑ kind：「卡池类型」列专用展示标签（纯展示，不参与逻辑；详见 scheduleGroups 注释）
- {name:'游说贤士',type:'anniv',tag:'1周年池',kind:'300自选',start:'2025-09-26',end:'2025-10-25',pick300:1},
- {name:'东阁待贤',type:'anniv',tag:'1.5周年池',kind:'300自选',start:'2026-03-26',end:'2026-04-24',pick300:1},
+ {name:'游说贤士',type:'anniv',tag:'1周年池',kind:'1周年300自选',start:'2025-09-26',end:'2025-10-25',pick300:1},
+ {name:'东阁待贤',type:'anniv',tag:'1.5周年池',kind:'1.5周年300自选',start:'2026-03-26',end:'2026-04-24',pick300:1},
  {name:'燕金募秀',type:'anniv',tag:'18禁池',kind:'18禁',start:'2026-09-17',end:'2026-10-16'},
  // 限定UP池：数据库按"老→新"顺序存档（弓剑江东最早、却月凌风最晚）
  // 渲染时会在 home 倒序成"新→老"，保持主页面视觉不变
@@ -715,7 +715,7 @@ const POOL_CATALOG=[
  {name:'却月凌风',type:'limit',tag:'限定复刻',up1:'黄月英',up2:'凌统',  start:'2026-07-23',end:'2026-08-05'},
  {name:'王侯秉德',type:'limit',tag:'限定UP池',up1:'庞德',  up2:'郭女王',start:'2026-09-10',end:'2026-10-07'},
  {name:'言简理直',type:'limit',tag:'限定UP池',up1:'简雍',  up2:'法正',  start:'2026-09-17',end:'2026-10-28'},
- {name:'辕门遣将',type:'anniv',tag:'2周年池',kind:'2周年',start:'2026-09-26',end:'2026-10-25',pick300:1,upPick:2,
+ {name:'辕门遣将',type:'anniv',tag:'2周年池',kind:'2周年300自选',start:'2026-09-26',end:'2026-10-25',pick300:1,upPick:2,
   rule:'40次招募后必得绝密密探；开放期间可自选2位密探概率提升。每300次招募通过「征召册」自选密探1次（活动期间最多3次）。自选范围：仅含2026-09-26已加入「绣衣天下」卡池的密探。'}
 ];
 const SEED_VERSION=3;
@@ -724,8 +724,13 @@ const K='yiruanPool_prev';
 const META_K='yiruanPool_prev_meta';   // 自定义密探图（base64）单独存，避免主数据结构被撑爆
 const VER_K='yiruanPool_prev_version';
 let pools=null;
-function rid(){return 'p'+Date.now()+Math.floor(Math.random()*999)}
-function rid2(){return 'p'+Date.now()+Math.floor(Math.random()*999)+'x'}
+/* id 生成：旧实现 'p'+时间戳+0~998 随机数，defPools() 同毫秒批量生成 40 池时极易撞车
+   （两池同 id → idxById 永远命中第一个 → 点卡进错详情页），改为时间戳+自增序列+大随机，不可能重复 */
+let _ridSeq=0;
+function rid(){return 'p'+Date.now().toString(36)+'-'+(_ridSeq++)+'-'+Math.floor(Math.random()*1e6).toString(36)}
+function rid2(){return rid()+'x'}
+/** 修复老存档里已产生的重复/缺失 id：保留第一个，其余重新生成（记录跟着对象走，不丢数据） */
+function fixDupIds(){const seen={};pools.forEach(p=>{if(!p.id||seen[p.id])p.id=rid();seen[p.id]=1})}
 function defPools(){return POOL_CATALOG.map(m=>({id:rid(),name:m.name,type:m.type,tag:m.tag,kind:m.kind||'',up1:m.up1||'',up2:m.up2||'',start:m.start||'',end:m.end||'',pity:40,joinedUps:m.type==='pu'?[]:undefined,rule:m.rule||'',pick300:m.pick300||0,upPick:m.upPick||0,sel300:[],selRchN:0,selRch:[],records:[],stat:{}}))}
 /** v3 SEED 数据：xlsx「招募记录」表灌入的真实抽卡流水。仅 records 为空的池子在升级时被填充；用户已有数据不会被覆盖 */
 const SEED_POOL_RECORDS={};
@@ -772,6 +777,7 @@ function load(){
   try{packs=JSON.parse(lsGet(accDataKey(curAccId))||'null')}catch(e){packs=null}
   // 没有数据（新建空白账户 / 极端情况）：defPools() 兜底，不带种子记录
   pools=(packs&&Array.isArray(packs.pools)&&packs.pools.length)?packs.pools:defPools();
+  fixDupIds();   // 旧版本 rid() 撞车产生的重复 id：点卡进错详情页的根因，加载时自动修复
   pools.forEach(p=>{
     if(p.type==='pu'&&!p.joinedUps)p.joinedUps=[];
     // 保底剩余 pity：缺省 40，合法值 1~40 原样保留（导入的垫池数据不能被刷新掉）
@@ -2058,7 +2064,7 @@ function subOverviewHTML(){
       cPu+bPu+
       cRep+bRep+
     '</div>'+
-    '<div class="warn" style="margin-top:14px">副页独立模块：<b>导入</b> 从 xlsx 抽取抽卡记录、<b>导出</b> 把当前代码里的抽卡数据回写成 xlsx、<b>统计</b> 给限定池做细化排名。点顶部 tab 切换。<span style="opacity:.6">（页面版本 0920p）</span></div>';
+    '<div class="warn" style="margin-top:14px">副页独立模块：<b>导入</b> 从 xlsx 抽取抽卡记录、<b>导出</b> 把当前代码里的抽卡数据回写成 xlsx、<b>统计</b> 给限定池做细化排名。点顶部 tab 切换。<span style="opacity:.6">（页面版本 0920q）</span></div>';
 }
 /* 生成表体（列头 + 行）。rows 必须按组内时间升序存好（no = 1,2,3…）。
    rev = true 倒序渲染（最新在上）。
