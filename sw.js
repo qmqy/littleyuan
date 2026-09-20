@@ -1,7 +1,10 @@
 /* 如鸢招募 · Service Worker（本地缓存，加载过一次后秒开、断网也能用） */
-const VERSION = 'v0920s';
+const VERSION = 'v0920t';
 const CORE_CACHE = 'yiruan-core-' + VERSION;
-const IMG_CACHE  = 'yiruan-img-'  + VERSION;
+/* 图片缓存名**不带代码版本号**：改代码（0920m→n→o…）不再清空 120 张图，
+   只有真正换了图片内容时才手动 bump IMG_VERSION。 */
+const IMG_VERSION = 'i0920e';
+const IMG_CACHE  = 'yiruan-img-' + IMG_VERSION;
 
 /* 核心文件：安装时立即缓存 */
 const CORE = [
@@ -161,17 +164,24 @@ self.addEventListener('fetch', e => {
   try { u = new URL(req.url); } catch (err) { return; }
   if (u.origin !== self.location.origin) return;
 
-  // 图片：缓存优先（命中直接本地返回，未命中才联网并顺手存起来）
+  // 图片：命中缓存**直接本地返回、不再联网**（旧实现即使命中也会在后台重新下载一遍，
+  //       导致每次打开都在偷偷重下所有图）；未命中才联网并顺手存起来。
+  //       缓存键统一用 pathname：页面重试时带的 ?retry=N 参数不会造成缓存永不命中。
   if (isImg(u)) {
-    e.respondWith(
-      caches.open(IMG_CACHE).then(c => c.match(req).then(hit => {
-        const net = fetch(req).then(res => {
-          if (res && res.status === 200) { try { c.put(req, res.clone()); } catch (err) {} }
-          return res;
-        }).catch(() => hit);
-        return hit || net;
-      }))
-    );
+    e.respondWith((async () => {
+      const c = await caches.open(IMG_CACHE);
+      const key = u.pathname;
+      let hit = null;
+      try { hit = (await c.match(req)) || (await c.match(key)); } catch (err) {}
+      if (hit) return hit;
+      try {
+        const res = await fetch(req);
+        if (res && res.status === 200) { try { await c.put(key, res.clone()); } catch (err) {} }
+        return res;
+      } catch (err) {
+        return hit || new Response('', { status: 504, statusText: 'offline' });
+      }
+    })());
     return;
   }
 
