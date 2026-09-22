@@ -1227,15 +1227,26 @@ function render(restore){   // restore=true：挂载后恢复该视图的滚动�
       if(!draft)return;
       const n=+pe.value;
       if(n<1||n>40){pe.value=draft.pity;return;}
-      draft.pity=n; recalc(draft); render();
+      // 不调 render()：否则重建 DOM 会把紧接着的「保存」点击吞掉（需点多下才成功）。
+      // 实时UI同步已由 oninput 完成（更新300抽那行），这里只定稿到 draft 并重算 stat。
+      draft.pity=n; recalc(draft);
     };
   }
-  // 300自选池：累充盒子数量输入（0~2），改完即时刷新「+」槽数量
+  // 300自选池：累充盒子数量输入（0~2），改完即时刷新「+」槽数量。
+  // 只重画 #rchNames 这一块、并重新绑定槽位点击；不调 render()（否则重建整页会
+  // 把紧接着的「保存」点击吞掉，需点多下才成功）。#rchN 与保存按钮都保留，故不再吞点击。
   const rn=$('#rchN');
   if(rn)rn.onchange=()=>{
     let z=Math.round(+rn.value||0); z=Math.max(0,Math.min(2,z));
     rn.value=z;
-    if(draft){draft.selRchN=z;normSelf(draft);render();}
+    if(draft){
+      draft.selRchN=z; normSelf(draft);
+      const box=$('#rchNames');
+      if(box){
+        box.innerHTML=selfNamesHTML(draft.selRch||[],z,'rchpick');
+        box.querySelectorAll('[data-act]').forEach(el=>el.onclick=e=>{e.stopPropagation();act(el.dataset.act,el)});
+      }
+    }
   };
 
   // 副页面内 subtabs 切换
@@ -1597,30 +1608,31 @@ function p300Line(p){
 }
 /** 300自选池：保底行下方、选择密探上方两块控件（300抽自选 + 累充自选）。
     每块一行：左边说明，右边自选密探名（居右、不换行、无外框，点击可更换）。 */
+/** 生成一组「自选密探名 / + 槽」的 HTML（模块级：onchange 局部刷新槽位时复用） */
+function selfNamesHTML(arr,cnt,key){
+  if(cnt<=0)return '';
+  const parts=[];
+  for(let i=0;i<cnt;i++){
+    const n=arr[i];
+    parts.push(n
+      ? '<span class="psnm on" data-act="'+key+'" data-i="'+i+'">'+escHtml(n)+'</span>'
+      : '<span class="psnm" data-act="'+key+'" data-i="'+i+'">+</span>');
+  }
+  return parts.join('<span class="pssep">、</span>');
+}
 function p300PanelHTML(p){
   if(!p||!p.pick300)return '';
   const X=Math.min(3,Math.floor(poolTotalDraw(p)/300));
   const line=p300Line(p);
   const s300=p.sel300||[], sRch=p.selRch||[], z=+p.selRchN||0;
-  const names=(arr,cnt,key)=>{
-    if(cnt<=0)return '';
-    const parts=[];
-    for(let i=0;i<cnt;i++){
-      const n=arr[i];
-      parts.push(n
-        ? '<span class="psnm on" data-act="'+key+'" data-i="'+i+'">'+escHtml(n)+'</span>'
-        : '<span class="psnm" data-act="'+key+'" data-i="'+i+'">+</span>');
-    }
-    return parts.join('<span class="pssep">、</span>');
-  };
   return ''+
    '<div class="pnl ps-panel"><div class="ps-row">'+
      '<span class="ps-txt">'+line+'</span>'+
-     '<span class="ps-names">'+names(s300,X,'p300pick')+'</span>'+
+     '<span class="ps-names">'+selfNamesHTML(s300,X,'p300pick')+'</span>'+
    '</div></div>'+
    '<div class="pnl ps-panel"><div class="ps-row">'+
      '<span class="ps-txt">累充自选盒子数量：<input class="mi" type="number" id="rchN" min="0" max="2" value="'+z+'"/></span>'+
-     '<span class="ps-names">'+names(sRch,z,'rchpick')+'</span>'+
+     '<span class="ps-names" id="rchNames">'+selfNamesHTML(sRch,z,'rchpick')+'</span>'+
    '</div></div>';
 }
 /** 自选 UP 行（辕门遣将）：未选满时整行高亮；选满后取消高亮 */
@@ -2089,7 +2101,7 @@ function subOverviewHTML(){
       cPu+bPu+
       cRep+bRep+
     '</div>'+
-    '<div class="warn" style="margin-top:14px">副页独立模块：<b>导入</b> 从 xlsx 抽取抽卡记录、<b>导出</b> 把当前代码里的抽卡数据回写成 xlsx、<b>统计</b> 给限定池做细化排名。点顶部 tab 切换。<span style="opacity:.6">（页面版本 0920v）</span></div>';
+    '<div class="warn" style="margin-top:14px">副页独立模块：<b>导入</b> 从 xlsx 抽取抽卡记录、<b>导出</b> 把当前代码里的抽卡数据回写成 xlsx、<b>统计</b> 给限定池做细化排名。点顶部 tab 切换。<span style="opacity:.6">（页面版本 0922a）</span></div>';
 }
 /* 生成表体（列头 + 行）。rows 必须按组内时间升序存好（no = 1,2,3…）。
    rev = true 倒序渲染（最新在上）。
