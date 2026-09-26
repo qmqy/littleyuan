@@ -1,9 +1,9 @@
 /* 如鸢招募 · Service Worker（本地缓存，加载过一次后秒开、断网也能用） */
-const VERSION = 'v0922a';
+const VERSION = 'v0926a';
 const CORE_CACHE = 'yiruan-core-' + VERSION;
 /* 图片缓存名**不带代码版本号**：改代码（0920m→n→o…）不再清空 120 张图，
    只有真正换了图片内容时才手动 bump IMG_VERSION。 */
-const IMG_VERSION = 'i0920e';
+const IMG_VERSION = 'i0926a';
 const IMG_CACHE  = 'yiruan-img-' + IMG_VERSION;
 
 /* 核心文件：安装时立即缓存 */
@@ -127,6 +127,7 @@ const IMAGES = [
   'images/pool/铁弦千钧.jpg',
   'images/pool/长生之术.jpg',
   'images/pool/风兴云蒸.jpg',
+  'images/pool/辕门遣将.jpg',
   'images/attr/地属性.jpg',
   'images/attr/水属性.jpg',
   'images/attr/混沌属性.jpg',
