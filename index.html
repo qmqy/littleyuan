@@ -37,14 +37,10 @@ button{font:inherit;color:inherit;cursor:pointer}
 }
 .bak-remind{margin:0 0 12px;padding:10px 12px;border-radius:10px;background:#fff8e6;border:1px solid #f0d9a8;color:#7a5a22;font-size:12.5px;line-height:1.5}
 .bak-remind .bak-go{color:#b07d2b;font-weight:700;cursor:pointer;text-decoration:underline;margin-left:4px}
-#bar{position:relative;height:52px;background:var(--bg);border-bottom:1px solid var(--line);
+#bar{position:relative;height:38px;background:var(--bg);border-bottom:1px solid var(--line);
   display:flex;align-items:center;padding:0 12px;gap:8px;flex-shrink:0}
+#bar.hide{display:none}
 #bar .bk{background:none;border:0;font-size:24px;color:var(--gold);padding:0 4px;line-height:1}
-#bar .tt{position:absolute;left:0;right:0;top:0;line-height:51px;text-align:center;
-  font-size:16px;font-weight:600;pointer-events:none;margin:0}
-#bar .accbtn{margin-left:auto;background:var(--goldsoft,#f5e9d2);border:1px solid var(--line2);border-radius:20px;
-  padding:4px 10px;font-size:11px;color:var(--ink);max-width:88px;overflow:hidden;
-  text-overflow:ellipsis;white-space:nowrap;flex-shrink:0}
 .accrow .accops{padding:6px 8px;color:var(--soft);font-size:14px;flex-shrink:0}
 .accrow .accops:active{color:var(--gold)}
 .accrow .tx small{color:var(--gold);font-size:10px}
@@ -114,6 +110,11 @@ button{font:inherit;color:inherit;cursor:pointer}
 .top2 .tk-toggle:hover{background:#f5e9d2}
 /* 展开后的完整列表：单行 = 序号 · 定宽名 · [UP|歪|普 三个对齐定宽标签] · 个数
    列表内部纵向滚动，竖向约 9 行高度（超出用滑动查看，不撑长整页） */
+/* 内层滚动区一律加 overscroll-behavior:contain —— 彻底断掉浏览器「原生」链式滚动。
+   原因：原生链式 + JS 手动链式会重叠（Chrome 同一手势滚动开始后 wheel 可能变为不可取消，
+   preventDefault 失效）→ 滚两遍、表现为「一下跳很远」。
+   所以这里用 contain 关掉原生，链式滚动全部交给底部 JS 的 wheel 接管：
+   同一手势内也能带整页滚，且只有一个来源，速度 1:1 不跳动。 */
 .tk-list{display:none;padding:0 0 8px;max-height:342px;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
 .tk-list.open{display:block}
 .tk-list::-webkit-scrollbar{width:5px}
@@ -264,7 +265,7 @@ button{font:inherit;color:inherit;cursor:pointer}
 .cell .frame{position:relative;width:100%;aspect-ratio:4/5;border:1px solid #d4bc9f;border-radius:6px;box-sizing:border-box;background:#fff;overflow:hidden;display:flex;align-items:center;justify-content:center}
 .cell .frame img.face-img{width:100%;height:100%;object-fit:cover;object-position:center 25%;display:block}
 /* 属性图标：大、圆形、白边外圈 */
-.cell .attr-icon{position:absolute;right:2px;top:2px;width:18px;height:18px;z-index:3;
+.cell .attr-icon{position:absolute;right:2px;top:2px;width:15px;height:15px;z-index:3;
   border-radius:50%;background:#fff;padding:1px;box-shadow:0 1px 2px rgba(0,0,0,.25)}
 .cell .placeholder{width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:24px;font-weight:700;background:linear-gradient(135deg,#b99567,#8c5f2b);border-radius:3px}
 .bbar{position:absolute;left:0;right:0;bottom:20px;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;gap:5px;padding:1px 0}
@@ -354,6 +355,10 @@ button{font:inherit;color:inherit;cursor:pointer}
 .subtabs .stab{flex:1;text-align:center;padding:7px 4px;font-size:12.5px;color:var(--soft);
   background:#f5e9d2;border-radius:6px;cursor:pointer;font-weight:600;transition:all .15s}
 .subtabs .stab.on{background:var(--gold);color:#fff}
+/* 账户按钮（从顶部栏挪到个人页 subtabs 右侧）：多账户切换入口 */
+.subtabs .sacc{flex:0 0 auto;align-self:center;margin-left:4px;background:var(--goldsoft,#f5e9d2);
+  border:1px solid var(--line2);border-radius:20px;padding:4px 10px;font-size:11px;color:var(--ink);
+  cursor:pointer;font-weight:600;white-space:nowrap;max-width:92px;overflow:hidden;text-overflow:ellipsis}
 
 /* 概览 / 统计卡片 */
 .stat-card{background:linear-gradient(180deg,#fff,#fdf6e9);border:1px solid var(--line);border-radius:10px;padding:11px 13px;margin-bottom:9px;box-shadow:0 1px 0 rgba(196,139,46,.06)}
@@ -453,6 +458,7 @@ button{font:inherit;color:inherit;cursor:pointer}
   padding:5px 0 4px;background:#fdf6e9;border-radius:7px;margin:0 0 1px}
 /* 概览页展开区：超出 10 项时内部滚动，不撑长整页 */
 /* 展开区滚动条更细（4px）：少占横向空间，排期表能多 1~2px 列宽 */
+/* 同上：contain 关掉原生链式，改由 JS 接管（避免原生+JS 双份跳动） */
 .ovw-scroll{max-height:var(--ovw-h,360px);overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;
   scrollbar-width:thin;scrollbar-color:#d8c49b transparent}
 .ovw-scroll::-webkit-scrollbar{width:4px}
@@ -585,6 +591,7 @@ button{font:inherit;color:inherit;cursor:pointer}
 #body.chars-view>div{flex:1 1 auto;min-height:0;display:flex;flex-direction:column}
 .chars-page{flex:1 1 auto;min-height:0;display:flex;flex-direction:column}
 .chars-page>*{flex-shrink:0}
+/* 同上：contain 关掉原生链式，改由 JS 接管（避免原生+JS 双份跳动） */
 .chars-page .ch-grid{flex:1 1 auto;min-height:120px;overflow-y:auto;
   overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
 
@@ -620,12 +627,10 @@ button{font:inherit;color:inherit;cursor:pointer}
 <div id="phone" data-page-node-id="cwpVUFdQpFJ9HDxUPF4uNu">
   <div id="bar" data-page-node-id="YLdMzuohtOSY9CpzjFcJcz">
     <button class="bk hide" id="bk" data-page-node-id="pIWj1XRPIDEgpAGzWV0Fm1">‹</button>
-    <div class="tt" id="barT" data-page-node-id="mwPZ2waRx1SjiX4zX1X1q9">小鸢助手</div>
-    <button class="accbtn" id="accBtn" title="切换账户">账户</button>
   </div>
   <div class="topnav" id="topnav">
     <div class="navtab on" data-nav="home">招募记录</div>
-    <div class="navtab" data-nav="sub">个人</div>
+    <div class="navtab" data-nav="sub">我的</div>
   </div>
   <div id="body" data-page-node-id="DAktjVcQsuQi4riRqthhaG"></div>
   <div class="tst" id="tst" data-page-node-id="BTTty59GG6IEdKkfiKXxMQ"></div>
@@ -853,7 +858,7 @@ function save(){
   if(typeof markAllDirty==='function')markAllDirty();
 }
 /* ===== 账户操作 ===== */
-function updateAccBtn(){const b=$('#accBtn');if(b)b.textContent=accName()}
+function updateAccBtn(){const b=$('#accBtn');if(b)b.textContent=accName();const s=$('#subAccBtn');if(s)s.textContent=accName()}
 function switchAccount(id){
   if(id===curAccId||!accOf(id))return;
   save();
@@ -895,8 +900,11 @@ function deleteAccount(id){
   confirmModal('删除账户「'+escHtml(a.name)+'」？<br>该账户的<b>全部记录、保底</b>将一并删除，且无法恢复。',()=>{
     accList=accList.filter(x=>x.id!==id);
     try{localStorage.removeItem(accDataKey(id))}catch(e){}
-    if(curAccId===id){curAccId=accList[0].id;lsSet(CUR_K,curAccId);load()}
-    save();updateAccBtn();render();
+    if(curAccId===id)curAccId=accList[0].id;          // 先切到剩余账户
+    lsSet(ACC_K,JSON.stringify(accList));              // 先落盘：ACC_K 已不含被删账户
+    lsSet(CUR_K,curAccId);                            // 落盘当前账户
+    load();                                           // 再 load：initAccounts 读到更新后的 ACC_K，不会复活被删账户
+    updateAccBtn();render();
     toast('已删除账户');
   });
 }
@@ -1175,7 +1183,10 @@ function go(v,push){
     pushNav({kind:'view',view:v});
   }
   $('#bk').classList.toggle('hide',v==='home'||v==='sub');
-  $('#barT').textContent='小鸢助手';
+  $('#bar').classList.toggle('hide',v==='home'||v==='sub');   // 首页/个人页隐藏顶部栏（省空间）；详情页显示返回键
+  // 子页面（卡池详情 pool / 密探库 chars）已经有返回键，顶部「招募记录/我的」是顶层切换入口，
+  // 在这里没用还占地方 → 隐藏。两者互补：有 nav 就没 bar，有 bar 就没 nav。
+  $('#topnav').classList.toggle('hide',v==='pool'||v==='chars');
   // 同步顶部 nav 高亮（主页/副页）
   document.querySelectorAll('#topnav .navtab').forEach(el=>{
     el.classList.toggle('on',(v==='sub'&&el.dataset.nav==='sub')||((v==='home'||v==='pool'||v==='chars')&&el.dataset.nav==='home'));
@@ -1253,6 +1264,7 @@ function render(restore){   // restore=true：挂载后恢复该视图的滚动�
   b.querySelectorAll('#subtabs .stab').forEach(el=>{
     el.onclick=()=>{subView=el.dataset.sv;render()};
   });
+  const sab=$('#subAccBtn'); if(sab)sab.onclick=openAccMenu;   // 账户入口（从顶部栏挪到个人页）
   // 副页 · 统计面板：大框架标题点击展开/收起
   b.querySelectorAll('.stat-toggle').forEach(el=>{
     el.onclick=()=>{el.parentElement.classList.toggle('collapsed')};
@@ -1570,6 +1582,7 @@ function homeHTML(){
         <span class="ln">总绝密数 <i>${p.stat.totalSecret}</i></span>
         <span class="ln">平均出绝密次数 <i>${p.stat.avgDraw}</i></span>
         ${p.type==='limit'?`<span class="ln">小保底不歪比例 <i>${p.stat.warpRate}%</i></span>`:''}
+        <span class="ln">距下次保底还需 <i>${pityLeft(p)}</i> 抽</span>
       </div>
       <div class="ed-strip" data-act="pool" data-id="${p.id}"></div>
     </div>
@@ -1591,6 +1604,9 @@ function renderPrevStrip(p){
 
 // 由池子 id 反查 pools 数组里的真实索引（避免 viewOrder 渲染顺序影响编辑/savepool）
 function idxById(id){return pools.findIndex(p=>p.id===id)}
+/** 距下次保底还需多少抽（即 pity，1~40；异常/缺失兜底 40）。
+    注：daiOf(p)=40−pity 是「垫池抽数」（已垫了多少），跟这个是两回事，别混用。 */
+function pityLeft(p){const q=+((p&&p.pity));return (q>=1&&q<=40)?Math.round(q):40}
 
 /** 卡池招募总次数 = 各条记录的抽出数之和 + 垫池数(= 40 − 保底剩余 pity) */
 function poolTotalDraw(p){
@@ -1948,7 +1964,8 @@ function renderAddCard(lbl){
 // 顶部 subtabs（概览 / 导入 / 导出 / 统计）
 function subTabBar(){
   const tabs=[{k:'overview',t:'概览'},{k:'import',t:'导入'},{k:'export',t:'导出'},{k:'stats',t:'统计'}];
-  return '<div class="subtabs" id="subtabs">'+tabs.map(x=>'<div class="stab'+(subView===x.k?' on':'')+'" data-sv="'+x.k+'">'+x.t+'</div>').join('')+'</div>';
+  return '<div class="subtabs" id="subtabs">'+tabs.map(x=>'<div class="stab'+(subView===x.k?' on':'')+'" data-sv="'+x.k+'">'+x.t+'</div>').join('')
+    +'<button class="sacc" id="subAccBtn" title="切换账户">'+escHtml(accName())+'</button>'+'</div>';
 }
 
 // 久未备份提醒：默认超过 3 天没备份就温和提示（备份/恢复都会刷新时间戳）
@@ -1958,11 +1975,18 @@ function backupReminderHTML(){
   if(!t||isNaN(t)||(Date.now()-t)>3*DAY){
     const days=t?Math.floor((Date.now()-t)/DAY):0;
     const tip=t?('已 '+days+' 天没备份'):'还没备份过';
-    return '<div class="bak-remind">💡 '+tip+'，建议导出一份 JSON 存手机本地，清缓存/换设备时不慌。<span class="bak-go" onclick="window.__gotoExport&&window.__gotoExport()">去备份</span></div>';
+    return '<div class="bak-remind">💡 '+tip+'，建议导出 Excel 或 JSON 存本地：Excel 仅当前账户，JSON 为全部账户。<span class="bak-go" onclick="window.__gotoExport&&window.__gotoExport()">去备份</span></div>';
   }
   return '';
 }
 window.__gotoExport=function(){subView='export';go('sub')};
+/** 备份/导出成功后调用：刷新「上次备份」时间戳，并让当前页的提醒条立刻消失（不用等下次重绘）。
+    Excel 导出（当前账户）与 JSON 备份（全部账户）都算「已备份」，任一种即可让提示消失。 */
+function markBackedUp(){
+  lsSet('yiruanPool_prev_lastbackup',String(Date.now()));
+  const el=document.querySelector('.bak-remind');
+  if(el&&el.parentNode)el.parentNode.removeChild(el);
+}
 // 副页主入口
 function subHTML(){
   return subTabBar()+backupReminderHTML()+'<div id="subbody">'+
@@ -2101,7 +2125,7 @@ function subOverviewHTML(){
       cPu+bPu+
       cRep+bRep+
     '</div>'+
-    '<div class="warn" style="margin-top:14px">副页独立模块：<b>导入</b> 从 xlsx 抽取抽卡记录、<b>导出</b> 把当前代码里的抽卡数据回写成 xlsx、<b>统计</b> 给限定池做细化排名。点顶部 tab 切换。<span style="opacity:.6">（页面版本 0926a）</span></div>';
+    '<div class="warn" style="margin-top:14px">副页独立模块：<b>导入</b> 从 xlsx 抽取抽卡记录、<b>导出</b> 把当前代码里的抽卡数据回写成 xlsx、<b>统计</b> 给限定池做细化排名。点顶部 tab 切换。<span style="opacity:.6">（页面版本 1018a）</span></div>';
 }
 /* 生成表体（列头 + 行）。rows 必须按组内时间升序存好（no = 1,2,3…）。
    rev = true 倒序渲染（最新在上）。
@@ -2177,7 +2201,7 @@ function subImportHTML(){
   // 举例文件名带当天日期（与导出/备份命名规则一致），不再写死过期示例
   const fn=exportFileName(), bj=backupName();
   return '<div class="subhd">从 xlsx 导入招募数据</div>'+
-    '<div class="subhint">选择之前导出的 xlsx：有记录的池子<b>覆盖更新</b>，没抽的池子<b>保留不动</b>，新池子<b>自动补上</b>。'+(hasXLSX?'':'<br><span style="color:#7a5a3a">首次使用会自动加载组件（仅一次）</span>')+
+    '<div class="subhint">选择之前导出的 xlsx（<b>仅当前账户</b>）：有记录的池子<b>覆盖更新</b>，没抽的池子<b>保留不动</b>，新池子<b>自动补上</b>。'+(hasXLSX?'':'<br><span style="color:#7a5a3a">首次使用会自动加载组件（仅一次）</span>')+
     '</div>'+
     '<label class="imp-pick" id="impPick">'+
       '<strong>📂 选择 xlsx 文件 / 拖到此处</strong>'+
@@ -2186,7 +2210,7 @@ function subImportHTML(){
     '</label>'+
     '<div id="impResult"></div>'+
     '<div class="subhd">从 JSON 备份恢复</div>'+
-    '<div class="subhint">换设备或清缓存后，选之前备份的 json 即可恢复<b>抽卡记录 + 保底剩余</b>。</div>'+
+    '<div class="subhint">换设备或清缓存后，选之前备份的 json（<b>全部账户</b>）即可恢复<b>抽卡记录 + 保底剩余</b>。</div>'+
     '<label class="imp-pick" id="bakPick">'+
       '<strong>📂 选择备份 json / 拖到此处</strong>'+
       '<span>文件名形如「'+bj+'」</span>'+
@@ -2418,7 +2442,7 @@ function exportFileName(){
 function subExportHTML(){
   const o=overall();
   return '<div class="subhd">导出当前招募数据</div>'+
-    '<div class="subhint">导出为 xlsx 表格，文件名自动带当天日期；之后可以随时再导入回来。</div>'+
+    '<div class="subhint">导出为 xlsx 表格（<b>仅当前账户</b>），文件名自动带当天日期；之后可以随时再导入回来。</div>'+
     '<div class="exp-area">'+
       '<p><b>当前数据快照</b></p>'+
       '<div class="exp-row"><span>限定池数量</span><span class="v">'+pools.filter(p=>p.type==='limit').length+'</span></div>'+
@@ -2533,6 +2557,7 @@ nonLimitItems.forEach((o,k)=>{
   XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(upRows),'卡池+up密探');
   XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(orderRows),'密探库密探顺序');
   XLSX.writeFile(wb,exportFileName());
+  markBackedUp();   // 导出 Excel 也算备份过 → 顶部「久未备份」提醒立即消失
   toast('已导出 '+exportFileName());
 }
 
@@ -2564,7 +2589,7 @@ function backupToJson(){
   try{ text=JSON.stringify(data) }
   catch(e){ return toast('备份失败：数据无法序列化') }
   downloadText(backupName(),text);
-  lsSet('yiruanPool_prev_lastbackup',String(Date.now()));
+  markBackedUp();   // 与 Excel 导出同一套：刷新备份时间戳 + 立即移除提醒条
   toast('已备份 '+accounts.length+' 个账户 → '+backupName());
 }
 function readBackupFile(f){
@@ -2782,12 +2807,49 @@ $('#bk').onclick=()=>{
   if(_modalStack.length){ closeTopNav(); return; }
   if(view!=='home') history.back();
 };
-// 顶部账户按钮（多账户切换入口）
-$('#accBtn').onclick=openAccMenu;
 // 顶部主 nav 切换：主页 / 副页（一次性绑定，DOM 不会被 render 重写）
 document.querySelectorAll('#topnav .navtab').forEach(el=>{
   el.onclick=()=>{const t=el.dataset.nav;if(t==='sub'){subView='overview';go('sub')}else go('home')};
 });
+/* 内层滚动区"滑到头带整页滚"的补强：
+   这些容器都设了 overscroll-behavior:contain —— 先关掉浏览器「原生」链式滚动，避免
+   「原生 + 本段 JS」重叠滚两遍（表现为一下跳很远）。
+   但浏览器的 scroll latching（滚动锁定）会让**同一个连续滚轮手势**锁死在内层容器上——
+   鼠标停在原地一直滑，滑到底也不会带页面动，必须停一下或挪一下鼠标（= 新手势）才生效。
+   所以这里在同一个手势里手动把多余的滚动量转给最近的可滚动祖先，绕开 latching；
+   原生既已被 contain 关掉，链式滚动就只有这一个来源，速度 1:1、不跳动。
+   用事件委托绑在 document 上：这些内层列表是 render 时动态建的，委托才不会被重建冲掉。
+   注：只处理 wheel（鼠标滚轮）；手机触摸滚动是系统原生平滑的，不受影响。 */
+(function(){
+  var CHAIN_SEL='.tk-list,.ovw-scroll,.ch-grid';
+  function scrollableParent(el){
+    var p=el.parentElement;
+    while(p&&p!==document.body){
+      var st=getComputedStyle(p);
+      if(/(auto|scroll)/.test(st.overflowY) && p.scrollHeight>p.clientHeight+1) return p;
+      p=p.parentElement;
+    }
+    return document.getElementById('body')||document.scrollingElement||document.body;
+  }
+  document.addEventListener('wheel',function(e){
+    var el=e.target&&e.target.closest?e.target.closest(CHAIN_SEL):null;
+    if(!el)return;
+    var dy=e.deltaY;
+    if(!dy)return;
+    if(e.deltaMode===1)dy*=16;                 // 行模式
+    else if(e.deltaMode===2)dy*=el.clientHeight; // 页模式
+    var atTop=el.scrollTop<=0;
+    var atBottom=el.scrollTop+el.clientHeight>=el.scrollHeight-1;
+    // 只有"已经到头、且还想往那个方向滚"时才接管；否则交给浏览器原生处理
+    if(!((dy<0&&atTop)||(dy>0&&atBottom)))return;
+    var p=scrollableParent(el);
+    if(!p)return;
+    var before=p.scrollTop;
+    p.scrollTop=before+dy;
+    if(p.scrollTop!==before)e.preventDefault();   // 确实带动了外层才拦截，避免误吃事件
+  },{passive:false});
+})();
+
 load();go('home');
 
 /* Service Worker：图片加载过一次后存入手机本地缓存，之后打开直接本地读取（秒开、断网也能看） */
