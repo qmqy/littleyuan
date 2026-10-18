@@ -182,10 +182,10 @@ button{font:inherit;color:inherit;cursor:pointer}
 .pool.soon .pt{background:rgba(120,105,85,.92)}
 /* 上下留白收窄（11px→5px）：加了「距下次保底还需 X 抽」后变 4~5 行，
    靠压缩留白把整块文字装回图片高度内，卡片不再被撑高 */
-.pool .mt{flex:1;padding:5px 14px;display:flex;flex-direction:column;justify-content:center;background:#1f1611;color:#d8cbb8;min-width:0}
-/* 字号 11.5→10.5、行高 1.7→1.5：4 行 63px / 5 行 78.8px，加留白后都远低于图片高度（约 94.5px），
-   卡片统一由 min-height(96px) 定高，不再被文字撑高 */
-.pool .ln{display:block;font-size:10.5px;color:#d8cbb8;line-height:1.5}
+.pool .mt{flex:1;padding:3px 14px;display:flex;flex-direction:column;justify-content:center;background:#1f1611;color:#d8cbb8;min-width:0}
+/* 留白收窄到 3px 换来的空间还给字号：10.5→11.5px（行高仍 1.5）。
+   4 行 75px / 5 行 92.3px，都仍在图片高度（约 94.5px）内 → 卡片照样是 96px 不变高 */
+.pool .ln{display:block;font-size:11.5px;color:#d8cbb8;line-height:1.5}
 .pool .ln i{color:#ffd28a;font-style:normal;font-weight:600}
 /* 右下角独立「编辑」按钮：贴近蓝框大小，背景色与卡片协调 */
 .pool .ed-strip{
