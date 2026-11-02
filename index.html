@@ -142,12 +142,21 @@ button{font:inherit;color:inherit;cursor:pointer}
 .sb{flex:1;background:#fdf6e9;border:1px solid var(--line);border-radius:10px;overflow:hidden}
 .sb h4{margin:0;padding:10px 8px;font-size:14px;font-weight:700;color:#5b3a1c;text-align:center;background:linear-gradient(180deg,#ecd5a5,#dcbf7a);border-bottom:1px solid #c8a96a;letter-spacing:.5px;text-shadow:0 1px 1px rgba(255,250,235,.6)}
 .sb .body{padding:8px 14px;background:#fdf6e9}
-.sb .ln{display:flex;justify-content:space-between;align-items:center;font-size:13px;color:var(--ink);padding:3.5px 0}
+.sb .ln{display:flex;justify-content:space-between;align-items:center;font-size:13px;color:var(--ink);padding:1.5px 0;line-height:1.3}
 .sb .ln b{font-size:14.5px;font-weight:700;color:#5b3a1c}
 
 /* ============ 池子列表 ============ */
-.sech{display:flex;justify-content:space-between;align-items:center;margin:0 2px 8px}
-.sech .t{font-size:14px;font-weight:700}
+.sech{display:flex;justify-content:space-between;align-items:center;gap:8px;margin:0 2px 8px}
+.home-search-wrap{flex:1 1 auto;min-width:0;position:relative;display:flex;align-items:center}
+.home-search{flex:1 1 auto;width:100%;min-width:0;box-sizing:border-box;height:30px;padding:0 12px;border:1px solid var(--line);border-radius:8px;font-size:13px;color:var(--ink);background:#fff;outline:none}
+.home-search:focus{border-color:var(--gold)}
+.home-search::placeholder{color:#b3a084;font-size:11px}
+.home-search-wrap.has-text .home-search{padding-right:28px}
+.home-clear{position:absolute;right:7px;top:50%;transform:translateY(-50%);width:18px;height:18px;line-height:17px;text-align:center;border-radius:50%;color:var(--soft);font-size:15px;cursor:pointer;user-select:none}
+.home-clear:active{color:var(--gold)}
+.home-tools{flex:0 0 auto;display:flex;gap:6px;align-items:center}
+.home-tools .fig-toggle{padding:3px 10px}
+.sech .t{font-size:14px;font-weight:700;flex:0 0 auto;white-space:nowrap;writing-mode:horizontal-tb}
 .sech .a{font-size:12px;color:var(--gold)}
 
 .pool{display:flex;align-items:stretch;border-radius:10px;overflow:hidden;margin-bottom:10px;
@@ -1266,6 +1275,10 @@ function render(restore){   // restore=true：挂载后恢复该视图的滚动�
     }
   };
 
+  // 首页 · 搜索框：实时筛选卡池
+  const hsx=$('#homeSearch');
+  if(hsx)hsx.oninput=()=>{ homeSearch=hsx.value; const cl=$('#homeClear'); const w=hsx.closest('.home-search-wrap'); if(cl)cl.hidden=!hsx.value; if(w)w.classList.toggle('has-text',!!hsx.value); applyHomeFilter(); };
+
   // 副页面内 subtabs 切换
   b.querySelectorAll('#subtabs .stab').forEach(el=>{
     el.onclick=()=>{subView=el.dataset.sv;render()};
@@ -1325,6 +1338,8 @@ function act(a,el){
     render();
   }
   else if(a==='chars')go('chars')
+  else if(a==='homefold'){homeFoldAnniv=!homeFoldAnniv;const fb=$('#homeFold');if(fb){fb.classList.toggle('on',homeFoldAnniv);fb.textContent=homeFoldAnniv?'显示周年池':'隐藏周年池';}applyHomeFilter();}
+  else if(a==='homeclear'){homeSearch='';const hs=$('#homeSearch');if(hs)hs.value='';const cl=$('#homeClear');const w=hs?hs.closest('.home-search-wrap'):null;if(cl)cl.hidden=true;if(w)w.classList.remove('has-text');applyHomeFilter();if(hs)hs.focus();}
   else if(a==='addrec')recModal(-1)
   else if(a==='editrec')recModal(+el.dataset.i)
   else if(a==='savepool'){
@@ -1510,9 +1525,10 @@ function selfRowsHTML(){
   return out?'<div class="self-box">'+out+'</div>':'';
 }
 
+let homeSearch='',homeFoldAnniv=false;
 function homeHTML(){
   const s=overall();
-  const list=viewOrder();
+  const list=homeFilterList();
   // 一行展示：序号·密探名(定宽，长短名后方的标签列整体右移从而上下对齐)·UP/歪/普(定宽列)·个数
   const drawnRows=s.drawnList.map((x,i)=>'<div class="tk-row">'
       +'<span class="tk-rk">'+(i+1)+'</span>'
@@ -1570,12 +1586,36 @@ function homeHTML(){
     </div>
   </div>
   <div class="sech">
-    <span class="t">池子</span>
-    <span style="display:flex;gap:6px;align-items:center">
+    <span class="t">卡池</span>
+    <span class="home-search-wrap">
+      <input id="homeSearch" class="home-search" type="text" placeholder="搜索卡池/密探名关键字" enterkeyhint="search"/>
+      <span class="home-clear" id="homeClear" data-act="homeclear" hidden>×</span>
+    </span>
+    <span class="home-tools">
+      <span class="fig-toggle${homeFoldAnniv?' on':''}" data-act="homefold" id="homeFold">${homeFoldAnniv?'显示周年池':'隐藏周年池'}</span>
       <span class="a" data-act="chars">密探库 ›</span>
     </span>
   </div>
-  ${list.map((p,i)=>`
+  <div id="poolList">${poolListHTML(list)}</div>
+  `;
+}
+
+function homeFilterList(){
+  let list=viewOrder();
+  if(homeFoldAnniv)list=list.filter(p=>p.type!=='anniv');
+  const qs=homeSearch.trim().toLowerCase().split(/[\s,，]+/).filter(Boolean);
+  if(qs.length){
+    list=list.filter(p=>{
+      const chars=(p.records||[]).map(r=>r.charName||'').join(' ');
+      const hay=((p.name||'')+' '+(p.up1||'')+' '+(p.up2||'')+' '+chars).toLowerCase();
+      // 并联（OR）：任一关键字命中即显示
+      return qs.some(q=>hay.indexOf(q)>=0);
+    });
+  }
+  return list;
+}
+function poolListHTML(list){
+  return list.map(p=>`
     <div class="pool${isUpcoming(p)?' soon':''}" data-act="toggleprev" data-id="${p.id}">
       <div class="art" data-pool-id="${p.id}">
         <img loading="eager" class="art-img" src="${poolImg(p)}"
@@ -1593,8 +1633,12 @@ function homeHTML(){
       <div class="ed-strip" data-act="pool" data-id="${p.id}"></div>
     </div>
     ${prevOpens[p.id]?renderPrevStrip(p):''}
-  `).join('')}
-  `;
+  `).join('');
+}
+function applyHomeFilter(){
+  const box=$('#poolList'); if(!box)return;
+  box.innerHTML=poolListHTML(homeFilterList());
+  box.querySelectorAll('[data-act]').forEach(el=>el.onclick=(e)=>{e.stopPropagation();act(el.dataset.act,el)});
 }
 
 function renderPrevStrip(p){
@@ -2131,7 +2175,7 @@ function subOverviewHTML(){
       cPu+bPu+
       cRep+bRep+
     '</div>'+
-    '<div class="warn" style="margin-top:14px">副页独立模块：<b>导入</b> 从 xlsx 抽取抽卡记录、<b>导出</b> 把当前代码里的抽卡数据回写成 xlsx、<b>统计</b> 给限定池做细化排名。点顶部 tab 切换。<span style="opacity:.6">（页面版本 1105a）</span></div>';
+    '<div class="warn" style="margin-top:14px">副页独立模块：<b>导入</b> 从 xlsx 抽取抽卡记录、<b>导出</b> 把当前代码里的抽卡数据回写成 xlsx、<b>统计</b> 给限定池做细化排名。点顶部 tab 切换。<span style="opacity:.6">（页面版本 1105c）</span></div>';
 }
 /* 生成表体（列头 + 行）。rows 必须按组内时间升序存好（no = 1,2,3…）。
    rev = true 倒序渲染（最新在上）。
