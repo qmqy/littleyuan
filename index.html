@@ -1606,8 +1606,7 @@ function homeFilterList(){
   const qs=homeSearch.trim().toLowerCase().split(/[\s,，]+/).filter(Boolean);
   if(qs.length){
     list=list.filter(p=>{
-      const chars=(p.records||[]).map(r=>r.charName||'').join(' ');
-      const hay=((p.name||'')+' '+(p.up1||'')+' '+(p.up2||'')+' '+chars).toLowerCase();
+      const hay=((p.name||'')+' '+(p.up1||'')+' '+(p.up2||'')).toLowerCase();
       // 并联（OR）：任一关键字命中即显示
       return qs.some(q=>hay.indexOf(q)>=0);
     });
