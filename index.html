@@ -2826,13 +2826,15 @@ function subStatsHTML(){
     '<div class="disclaim">本网页为玩家自制同人记录工具，非《如鸢》官方，也非辟雍学府原版。网页界面设计参考辟雍学府，功能逻辑独立实现。致敬辟雍学府，感谢原作者付出。<br>本网页仅用于玩家本地记录，无广无商业用途，不存储隐私账号数据。<br>所有游戏相关资料版权归属灵犀互娱，辟雍学府相关内容版权归其原制作者所有。如原作者要求，会立即下架。</div>';
 }
 
-// 总抽数排行每行的「明细」：UP1/UP2 各自抽到的个数 + 歪的个数（按 drawCount 计副本数，与总抽数口径一致）
+// 总抽数排行每行的「明细」：UP1/UP2 各自【抽到的密探个数】+ 歪的个数
+// ⚠️ 按【记录条数】计（每记录 = 1 个密探），不是 drawCount（花了多少抽）。
+//    与 recalc 的 totalSecret=r.length、overall 的 c[nm]+=1 口径一致。
 function poolDrawBreakdown(p){
   const r=p.records||[];let u1=0,u2=0,w=0;
-  for(let i=0;i<r.length;i++){const c=+r[i].drawCount||0,nm=r[i].charName||'';
-    if(p.up1&&nm===p.up1)u1+=c;
-    else if(p.up2&&nm===p.up2)u2+=c;
-    else w+=c;}
+  for(let i=0;i<r.length;i++){const nm=r[i].charName||'';
+    if(p.up1&&nm===p.up1)u1++;
+    else if(p.up2&&nm===p.up2)u2++;
+    else w++;}
   let s='';
   if(u1>0)s+='<span class="upn">'+u1+'</span><span class="upnm">'+p.up1+'</span>';
   if(u2>0)s+='<span class="upn">'+u2+'</span><span class="upnm">'+p.up2+'</span>';
