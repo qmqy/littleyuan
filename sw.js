@@ -1,5 +1,5 @@
 /* 如鸢招募 · Service Worker（本地缓存，加载过一次后秒开、断网也能用） */
-const VERSION = 'v1105f';
+const VERSION = 'v1105g';
 const CORE_CACHE = 'yiruan-core-' + VERSION;
 /* 图片缓存名**不带代码版本号**：改代码（0920m→n→o…）不再清空 120 张图，
    只有真正换了图片内容时才手动 bump IMG_VERSION。 */
@@ -88,6 +88,8 @@ const IMAGES = [
   'images/char/鲁肃.jpg',
   'images/char/黄月英.jpg',
   'images/char/黄盖.jpg',
+  'images/char/酆公玖.jpg',
+  'images/char/酆公珠.jpg',
   'images/pool/东阁待贤.jpg',
   'images/pool/九门磔攘.jpg',
   'images/pool/云雨滂润.jpg',
@@ -128,6 +130,7 @@ const IMAGES = [
   'images/pool/长生之术.jpg',
   'images/pool/风兴云蒸.jpg',
   'images/pool/辕门遣将.jpg',
+  'images/pool/珠玑琼玖.jpg',
   'images/attr/地属性.jpg',
   'images/attr/水属性.jpg',
   'images/attr/混沌属性.jpg',
