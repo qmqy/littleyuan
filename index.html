@@ -524,6 +524,15 @@ button{font:inherit;color:inherit;cursor:pointer}
 .rank .ri .nm{flex:1;min-width:0;font-weight:600}
 .rank .ri .v{color:var(--gold);font-weight:700;font-size:13px;white-space:nowrap}
 .rank .ri .sub{font-size:10.5px;color:var(--soft);margin-left:4px}
+/* 总抽数排行：右侧数值上下两行（总抽数在上·明细在下），line-height 收紧控高 */
+.rank.detail .ri .v{display:flex;flex-direction:column;align-items:flex-end;font-size:11px;line-height:1.15}
+.rank.detail .ri .v .sub{font-size:9px;font-weight:600;color:var(--soft);margin-top:2px;line-height:1.25;letter-spacing:.3px}
+/* 明细配色：UP个数橙金加粗 · UP名浅黑(#555) · ·歪灰 · 歪数红 */
+.rank.detail .ri .v .upn{color:#e08a1e;font-weight:800}
+.rank.detail .ri .v .upnm{color:#555}
+.rank.detail .ri .v .warp{color:#9a8c75}
+.rank.detail .ri .v .warpn{color:var(--red);font-weight:700}
+.rank.detail .ri .v .muted{color:var(--soft)}
 
 /* 导入面板 */
 .imp-pick{display:block;border:2px dashed var(--line2);border-radius:10px;padding:24px 12px;text-align:center;color:var(--soft);font-size:13px;cursor:pointer;background:#fffaf0;transition:all .2s;margin-bottom:11px}
@@ -2219,7 +2228,7 @@ function subOverviewHTML(){
       cPu+bPu+
       cRep+bRep+
     '</div>'+
-    '<div class="warn" style="margin-top:14px">副页独立模块：<b>导入</b> 从 xlsx 抽取抽卡记录、<b>导出</b> 把当前代码里的抽卡数据回写成 xlsx、<b>统计</b> 给限定池做细化排名。点顶部 tab 切换。<span style="opacity:.6">（页面版本 1105h）</span></div>';
+    '<div class="warn" style="margin-top:14px">副页独立模块：<b>导入</b> 从 xlsx 抽取抽卡记录、<b>导出</b> 把当前代码里的抽卡数据回写成 xlsx、<b>统计</b> 给限定池做细化排名。点顶部 tab 切换。<span style="opacity:.6">（页面版本 1105i）</span></div>';
 }
 /* 生成表体（列头 + 行）。rows 必须按组内时间升序存好（no = 1,2,3…）。
    rev = true 倒序渲染（最新在上）。
@@ -2787,8 +2796,8 @@ function subStatsHTML(){
   // 说明文字与数据行统一装进 .rank 卡片：收起时随 .rank 一起隐藏，展开时也在卡片内（不再悬在卡外）
   return '<div class="stat-block collapsed">'+
     '<div class="subhd stat-toggle"><span class="arr">▾</span> 总抽数排行 <span class="hint">点击展开</span></div>'+
-    '<div class="rank">'+
-    (byTotal.length?rankRows(byTotal.map(x=>({nm:x.name+'（'+x.up1+' / '+x.up2+'）',v:x.stat.totalDraw,sub:'抽 · 绝密密探共 '+x.stat.totalSecret+' 个'}))):
+    '<div class="rank detail">'+
+    (byTotal.length?rankRows(byTotal.map(x=>({nm:x.name+'（'+x.up1+' / '+x.up2+'）',v:x.stat.totalDraw+'抽',sub:poolDrawBreakdown(x)}))):
      '<div class="subhint" style="margin:8px 12px">尚未抽卡</div>')+
     '</div></div>'+
 
@@ -2815,6 +2824,20 @@ function subStatsHTML(){
 
     /* 免责声明（统计页最底部，小字灰色，仿常见网站 footer 声明样式；三段，单换行紧凑排） */
     '<div class="disclaim">本网页为玩家自制同人记录工具，非《如鸢》官方，也非辟雍学府原版。网页界面设计参考辟雍学府，功能逻辑独立实现。致敬辟雍学府，感谢原作者付出。<br>本网页仅用于玩家本地记录，无广无商业用途，不存储隐私账号数据。<br>所有游戏相关资料版权归属灵犀互娱，辟雍学府相关内容版权归其原制作者所有。如原作者要求，会立即下架。</div>';
+}
+
+// 总抽数排行每行的「明细」：UP1/UP2 各自抽到的个数 + 歪的个数（按 drawCount 计副本数，与总抽数口径一致）
+function poolDrawBreakdown(p){
+  const r=p.records||[];let u1=0,u2=0,w=0;
+  for(let i=0;i<r.length;i++){const c=+r[i].drawCount||0,nm=r[i].charName||'';
+    if(p.up1&&nm===p.up1)u1+=c;
+    else if(p.up2&&nm===p.up2)u2+=c;
+    else w+=c;}
+  let s='';
+  if(u1>0)s+='<span class="upn">'+u1+'</span><span class="upnm">'+p.up1+'</span>';
+  if(u2>0)s+='<span class="upn">'+u2+'</span><span class="upnm">'+p.up2+'</span>';
+  if(w>0)s+='<span class="warp">·</span><span class="warpn">'+w+'</span><span class="warp">歪</span>';
+  return s||'<span class="muted">未抽</span>';
 }
 
 // 排行数据行（不含 .rank 外壳——外壳由调用方包，便于把说明文字也装进卡片）
