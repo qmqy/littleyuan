@@ -383,7 +383,7 @@ button{font:inherit;color:inherit;cursor:pointer}
 /* 概览页专用：卡片纵向堆叠，保证每张卡片的展开区正好落在**它自己下方**（不跑到区底） */
 .stat-stack{display:flex;flex-direction:column;gap:8px;margin-bottom:13px}
 /* 紧凑型卡片：单行 —— 左「名称」，中「数值」，右侧展开按钮；用于概览页 5 张卡 */
-.stat-card.slim{display:flex;align-items:center;gap:6px;padding:10px 13px;min-height:0}
+.stat-card.slim{display:flex;align-items:center;flex-wrap:wrap;gap:6px;padding:10px 13px;min-height:0}
 .stat-card.slim .lbl{margin:0;font-size:12.5px;flex:0 0 auto}
 .stat-card.slim .val{margin-left:auto;font-size:15px;line-height:1.35}
 .stat-card.slim .fig-toggle{flex:0 0 auto;margin-left:6px}
@@ -394,7 +394,39 @@ button{font:inherit;color:inherit;cursor:pointer}
 .stat-card.slim .lbl.fixw{width:104px;flex:0 0 104px}
 .stat-card.slim .val.align{flex:1 1 auto;margin-left:0;text-align:right;font-variant-numeric:tabular-nums}
 .stat-card.slim .val.align>small{display:inline-block;width:24px;text-align:left}
+/* 概览密探库入口：无框单行小字，两段文字紧挨、整行居右；数字金色高亮。点击进密探库新页面 */
+.ovw-lib{display:flex;align-items:baseline;justify-content:flex-end;gap:10px;padding:0 2px 1px}
+.ovw-lib .ovw-lib-lbl{font-size:10.5px;color:var(--soft);font-weight:600;white-space:nowrap}
+.ovw-lib .ovw-lib-lbl b{font-size:11.5px;color:var(--gold);font-weight:800;margin:0 1px}
+.ovw-lib .a{font-size:10.5px;color:var(--gold);font-weight:700;white-space:nowrap;cursor:pointer;user-select:none}
+.ovw-lib .a:active{opacity:.55}
+/* ⚠️ 旧版「.stat-card.slim .sch-body{border-top+margin-top:9px}」已删除：
+   它会与 .sch-hd 的 border-bottom 叠成两条平行线，且把展开内容推开 9px。
+   现在分隔线统一由 .sch-hd::after 一条短线负责（见下方排期卡区块）。 */
 .stat-grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:13px}
+.stat-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:13px}
+.stat-grid-2>.stat-card{margin:0}
+.stat-grid-2 .stat-card .lbl{font-size:13.5px;font-weight:700;color:var(--ink);margin-bottom:4px}
+/* 抽卡总览标题行：左「▏抽卡总览」+ 右「卡池数量▕」（右侧竖线与左侧镜像，margin-left:auto 推到最右） */
+.subhd.ovhd .ovhd-r{display:inline-flex;align-items:center;gap:7px;margin-left:auto;font-size:14px;font-weight:700;color:var(--ink)}
+.subhd.ovhd .ovhd-r::after{content:'';width:4px;height:14px;background:linear-gradient(180deg,var(--gold),#a06c1f);border-radius:2px}
+/* 卡池总数：标签左、总数右（与下面三行数值同一右对齐列） */
+.combi-hd{display:flex;align-items:baseline;justify-content:space-between;gap:6px;margin-bottom:4px}
+.combi-hd .lbl{margin-bottom:0}
+.combi-hd .total{font-size:16px;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.combi-hd .total small{font-size:9.5px;color:var(--soft);font-weight:500;margin-left:2px}
+/* 抽卡总览：三行数字右对齐同列 */
+.sum-row{display:flex;align-items:baseline;gap:6px;margin-top:3px}
+.sum-lbl{flex:0 0 auto;font-size:12.5px;color:var(--soft);font-weight:600}
+.sum-val{flex:1;font-size:16px;font-weight:700;color:var(--ink);text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.sum-val small{font-size:10.5px;color:var(--soft);font-weight:500;margin-left:2px}
+/* 左模块：三行在整卡高度内均匀分配，字号略放大；右模块四行保持原行距/字号 */
+.stat-card.combi.even{display:flex;flex-direction:column;justify-content:space-evenly}
+.stat-card.combi.even .sum-row{margin-top:0}
+.stat-card.combi.even .sum-lbl{font-size:13.5px}
+.stat-card.combi.even .sum-val{font-size:17.5px}
+.stat-card.combi.even .sum-val small{font-size:11px}
+.pool-brk{font-size:10px;line-height:1.3;color:var(--soft);margin-top:7px;font-weight:600;text-align:left}
 .stat-grid .stat-card{margin:0}
 .stat-stack>.stat-card{margin:0}
 .stat-card.accent{background:linear-gradient(135deg,#fdebd0,#f5d8a1);border-color:#e0b97a}
@@ -430,30 +462,57 @@ button{font:inherit;color:inherit;cursor:pointer}
   background:#fffbf5;padding:8px;animation:slideDown .2s ease}
 
 /* ============ 概览 · 卡池排期表 ============ */
-.sch-strip{padding:0}
+.sch-strip{padding:2px 6px 4px;background:#faf6ef;border:1px solid #efe6d6;border-radius:9px}
+/* 排期 fig-strip：紧贴上层卡片标题，顶部不留空（表头与展开内容仅一条线分隔） */
+.sch-fig{padding:3px 7px 6px}
 /* 排期表的滚动条往右贴：抵消 fig-strip 右侧 8px 内边距的大半，给表格多腾 6px 列宽 */
 .sch-strip .ovw-scroll{margin-right:-6px}
-.sch-tip{font-size:10.5px;color:var(--soft);margin:0 2px 7px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.sch-body .ovw-scroll{margin-right:-6px}
+.sch-tip{font-size:10px;color:#9a8b73;margin:0 2px 4px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
 .sch-tip>span:first-child{margin-right:auto}
 .sch-legend{display:flex;align-items:center;gap:4px;color:var(--soft)}
-/* 「倒序 ▼ / 正序 ▲」切换钮；与展开钮同款，视觉更紧凑 */
-.sch-rev{font-size:10.5px;padding:1px 9px}
-.sch-table{border:1px solid var(--line);border-radius:8px;overflow:hidden;background:#fff}
+/* 「倒序 ▼ / 正序 ▲」切换钮；与展开钮同款，视觉更紧凑；正序/倒序文字改灰橙 */
+.sch-rev{font-size:10px;padding:1px 8px;color:#b1a48f;font-weight:600}
+/* 卡池进行中（概览·卡池排期顶部）：无表头，逐行写 卡池名+UP/类型+持续时间 */
+.sch-ongoing{margin:0 0 10px;padding:8px 10px;background:#fff;border:1px solid var(--line);border-radius:8px}
+.sch-ongoing .ong-title{font-size:12px;font-weight:700;color:#e0892c;margin-bottom:5px;display:flex;justify-content:space-between;align-items:baseline}
+.sch-ongoing .ong-count{color:#e0892c;font-weight:800;font-size:12px}
+.sch-ongoing .ong-row{font-size:11px;line-height:1.55;display:grid;grid-template-columns:72px minmax(0,1fr) 100px;align-items:baseline;gap:8px;margin-top:2px}
+.sch-ongoing .ong-name{color:var(--gold);font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sch-ongoing .ong-up{color:#6b4a2a;font-weight:600;justify-self:center;text-align:center;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sch-ongoing .ong-dur{color:#000;font-weight:600;white-space:nowrap;justify-self:end}
+.sch-ongoing .ong-empty{font-size:11px;color:var(--soft);margin-top:2px}
+.sch-table{background:#fff}
+/* 排期卡：单一边框。标题行 .sch-hd 自带底边分隔线，展开内容 .sch-body 直接贴在下方（不再套内层框）
+   ⚠️ 选择器必须写满 .stat-card.slim.sch-card（0,3,0）：.stat-card.slim（0,2,0）的
+   padding:10px 13px / align-items:center / gap:6px / flex-wrap:wrap 会压过单类 .sch-card，
+   导致卡片四周留白、标题分隔线不通栏、标题与内容间多出 6px 缝 → 看起来像"大框套小框"。
+   这里用更高优先级强制归零：padding:0 + gap:0 + 撑满，标题底边即为内容顶边（共用一条线）。 */
+.stat-card.slim.sch-card{display:flex;flex-direction:column;align-items:stretch;flex-wrap:nowrap;padding:0;gap:0}
+.sch-card>.sch-hd{display:flex;align-items:center;gap:6px;padding:10px 13px;position:relative}
+/* 标题与展开内容之间只用【一条短线】：左右各内缩 13px，长度与下方表格大致相同。
+   ⚠️ 不用 border-bottom（通栏到卡片边缘，太长），改绝对定位伪元素，不影响 flex 布局。 */
+.sch-card>.sch-hd::after{content:"";position:absolute;left:13px;right:13px;bottom:0;height:1px;background:var(--line)}
+/* 收起态：标题行是卡内唯一元素，卡片自身外框底边即为那条线，隐藏内部短线避免双线 */
+.sch-card>.sch-hd:last-child::after{display:none}
+.sch-card>.sch-body{padding:6px 13px 11px}
+.sch-card>.sch-hd .lbl.fixw{margin-bottom:0}
 /* 4 列：序号 / 卡池名称 / UP密探 / 持续时间（类型列已删——卡片标题即类型）
    排期分表后行数少（最多 31 行），故列宽放宽、字号加大，保证手机窄屏看全。 */
 /* 限定UP池表：序号列 21px（3 位数编号也放得下：3×6px+2px padding），名称列 minmax 下限 72px
    （保证「进行中/待上线」角标完整显示），UP 列 .95fr 弹性，时间列 96px 不动 */
-.sch-row{display:grid;grid-template-columns:21px minmax(72px,1fr) minmax(56px,.95fr) 96px;
-  align-items:center;gap:5px;padding:7px 8px;font-size:12px;color:var(--ink);
+.sch-row{display:grid;grid-template-columns:18px minmax(60px,1fr) minmax(68px,.95fr) 84px;
+  align-items:center;gap:5px;padding:7px 8px 7px 5px;font-size:12px;color:var(--ink);
   border-bottom:1px solid #f1e7d4}
 .sch-row:last-child{border-bottom:none}
 .sch-row:nth-child(odd){background:#fffdf9}
 /* 普池/周年池表：无「UP 密探」列 → 3 列网格（序号列 26px，3 位数够放且比原 32px 窄） */
-.sch-row.no-up{grid-template-columns:26px minmax(62px,1fr) 96px}
+.sch-row.no-up{grid-template-columns:26px minmax(62px,1fr) 84px}
 /* 普池/周年池表（带「卡池类型」列）：编号 / 名称 / 类型 / 持续时间 */
-.sch-row.no-up.with-kind{grid-template-columns:26px minmax(62px,1fr) 84px 96px}
-.sch-head{background:linear-gradient(180deg,#fdf6e9,#f5e9d2)!important;font-weight:700;font-size:10.5px;
-  color:#6b4a26;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:2}
+.sch-row.no-up.with-kind{grid-template-columns:26px minmax(62px,1fr) 84px 84px}
+/* 表头改纯白（原来米色 #f4eee2 太重），只留一条底边线与数据行分隔 */
+.sch-head{background:#fff!important;font-weight:700;font-size:10px;
+  color:#7a6a52;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:2}
 .sch-head>span{white-space:nowrap}
 .sch-row.ongoing{background:linear-gradient(90deg,#fff8e6,#fdf3dc)}
 .sch-row.ongoing .sch-name{color:#a06c1f;font-weight:800}
@@ -465,15 +524,15 @@ button{font:inherit;color:inherit;cursor:pointer}
 .sch-row.soon .sch-name::after{content:'待上线';margin-left:4px;font-size:9px;font-weight:700;
   color:#fff;background:#b3a084;padding:1px 4px;border-radius:7px;vertical-align:1px}
 /* 编号列：右对齐贴住「卡池名称」，避免与名称之间出现大片空隙 */
-.sch-no{text-align:right;font-size:10px;color:var(--soft);font-weight:700;padding-right:2px}
-.sch-name{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.sch-up{color:#5b4a35;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.sch-time{color:var(--soft);font-size:10px;text-align:right;white-space:nowrap;letter-spacing:-.2px}
-.sch-empty{color:#cbb99c;font-weight:600}
+.sch-no{text-align:right;font-size:10px;color:#9a8b73;font-weight:700;padding-right:0}
+.sch-name{font-weight:600;color:#4a3a28;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sch-up{color:#6e5d49;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sch-time{color:#8a7c66;font-size:10px;text-align:right;white-space:nowrap;letter-spacing:-.2px}
+.sch-empty{color:#b6a587;font-weight:600}
 /* 「卡池类型」列：居中小胶囊（普池 / 300自选 / 18禁） */
-.sch-kind{font-size:10px;color:#7a5a3a;text-align:center;white-space:nowrap;overflow:hidden;
+.sch-kind{font-size:10px;color:#9a8a72;text-align:center;white-space:nowrap;overflow:hidden;
   text-overflow:ellipsis}
-.sch-head .sch-kind{font-size:10px;color:#6b4a26}
+.sch-head .sch-kind{font-size:10px;color:#9a8a72}
 /* 复刻表：限定复刻 / 常驻复刻 之间的细分界线（短横线，两侧留白） */
 .sch-div{margin:5px auto;width:64%;height:1px;background:linear-gradient(90deg,transparent,var(--line2),transparent)}
 /* 复刻表分组头（卡池类型：限定复刻 / 常驻复刻）—— 居中 */
@@ -1169,19 +1228,17 @@ const $=s=>document.querySelector(s);
 let view='home', poolIdx=0, prevOpens={}, chF={attrs:[],jobs:[]};   // prevOpens：主页展开的缩略图集合（可同时展开多个，只受点击控制）
 let _viewScroll={};    // 每个视图离开时的滚动位置：从卡池详情返回首页时回到原处，不用重新往下翻
 let subView='overview'; // 副页内导航：overview / import / export / stats
+let _charsFromSub=false; // 本次进密探库是否来自「我的-概览」：决定返回时回「我的」还是首页
 let figOpen=false;      // 副页概览「全图鉴瑕」缩略图是否展开（仅会话内，不持久化）
-let chOpen=false;       // 副页概览「密探库」网格是否展开（与首页密探库共用 yiruanPool_prev_chF 筛选）
-// 概览页折叠态（会话内，不持久化）；同一时刻只允许展开一个
+// 概览页折叠态（会话内，不持久化）
+/* 三张卡池排期：默认全部收起，且彼此独立、可同时展开（互不收起） */
 let schLimit=false, schPu=false, schRep=false;
 // 排期表排序方向：false = 倒序（最新在上，默认）；true = 正序（先开始的在上）
 let schAsc=false;
-// 通用：收起其他所有概览页折叠区（含密探库/全图鉴瑕与 3 张排期表）
+/* 概览密探库已改为「小字一行 + 跳转密探库新页面」，不再有内联展开网格；
+   折叠态只剩「全图鉴瑕」与三张排期，三张排期彼此独立、互不收起。 */
 function ovwCollapseAll(except){
-  if(except!=='ch')chOpen=false;
   if(except!=='fig')figOpen=false;
-  if(except!=='limit')schLimit=false;
-  if(except!=='pu')schPu=false;
-  if(except!=='rep')schRep=false;
 }
 // 招募页"未保存不持久化"：进入池子详情时把 pools[poolIdx] 深拷贝到 draft，
 // poolHTML/recModal 都用 draft；点"保存"才写回 pools；退出丢弃 draft
@@ -1215,7 +1272,13 @@ function go(v,push){
   }
   // 从首页进入非首页视图（pool/chars/sub）时 push 一条历史，使安卓侧滑 / 浏览器后退可返回首页
   if(push && v!=='home' && prev==='home'){
+    _charsFromSub=false;
     pushNav({kind:'view',view:v});
+  }
+  // 从「我的 → 概览」的密探库入口进密探库页：也 push 一条，返回时回到「我的」而不是跳去首页
+  else if(push && v==='chars' && prev==='sub'){
+    _charsFromSub=true;
+    pushNav({kind:'view',view:'chars',from:'sub'});
   }
   $('#bk').classList.toggle('hide',v==='home'||v==='sub');
   $('#bar').classList.toggle('hide',v==='home'||v==='sub');   // 首页/个人页隐藏顶部栏（省空间）；详情页显示返回键
@@ -1305,9 +1368,12 @@ function render(restore){   // restore=true：挂载后恢复该视图的滚动�
     el.onclick=()=>{subView=el.dataset.sv;render()};
   });
   const sab=$('#subAccBtn'); if(sab)sab.onclick=openAccMenu;   // 账户入口（从顶部栏挪到个人页）
-  // 副页 · 统计面板：大框架标题点击展开/收起
+  // 副页 · 统计面板：大框架标题点击展开/收起；文案随状态切换（展开→点击收起 / 收起→点击展开）
   b.querySelectorAll('.stat-toggle').forEach(el=>{
-    el.onclick=()=>{el.parentElement.classList.toggle('collapsed')};
+    el.onclick=()=>{
+      const blk=el.parentElement, nowCollapsed=blk.classList.toggle('collapsed');
+      const h=el.querySelector('.hint'); if(h)h.textContent=nowCollapsed?'点击展开':'点击收起';
+    };
   });
   // 副页面 · 导入：选择文件 + 拖放
   const pick=$('#impPick');
@@ -1423,13 +1489,19 @@ function act(a,el){
       });
     }
   }
-  // ===== 概览页折叠区：全部互斥（同一时刻只允许展开一个） =====
-  // 展开本项前先 ovwCollapseAll(本人)，再翻转本项；点已展开的则单纯收起。
+  // ===== 概览页折叠区 =====
+  // 概览只剩「全图鉴瑕」一个内联缩略图区（密探库已改为跳转新页面）；
   // 不进返回栈：侧滑返回只管弹窗（概览页展开不纳入返回栈，避免操作繁琐）。
-  else if(a==='figtoggle'||a==='chartoggle'||a==='schlimit'||a==='schpu'||a==='schrep'){
-    const key={figtoggle:'fig',chartoggle:'ch',schlimit:'limit',schpu:'pu',schrep:'rep'}[a];
-    const open={ch:chOpen,fig:figOpen,limit:schLimit,pu:schPu,rep:schRep}[key];
-    if(!open){ ovwCollapseAll(key); }
+  else if(a==='figtoggle'){
+    const open=figOpen;
+    if(!open){ ovwCollapseAll('fig'); }
+    setOvw('fig',!open);
+    _viewDirty['sub']=true; render();
+  }
+  // 三张卡池排期：彼此独立，只翻转自己 → 可同时展开，不会展开一个收起另一个。
+  else if(a==='schlimit'||a==='schpu'||a==='schrep'){
+    const key={schlimit:'limit',schpu:'pu',schrep:'rep'}[a];
+    const open={limit:schLimit,pu:schPu,rep:schRep}[key];
     setOvw(key,!open);
     _viewDirty['sub']=true; render();
   }
@@ -1876,9 +1948,9 @@ function charsHTML(){
 // 注意：history.state 只能存可结构化克隆的数据，因此 modal 的 DOM 引用存在 _modalStack，
 //       不进 history.state；expand 的快照是纯对象，可放心存。
 let _modalStack=[];
-function _navSnapshot(){return {ch:chOpen,fig:figOpen,limit:schLimit,pu:schPu,rep:schRep};}
-function _navApply(s){chOpen=!!(s&&s.ch);figOpen=!!(s&&s.fig);schLimit=!!(s&&s.limit);schPu=!!(s&&s.pu);schRep=!!(s&&s.rep);}
-function setOvw(key,v){if(key==='ch')chOpen=v;else if(key==='fig')figOpen=v;else if(key==='limit')schLimit=v;else if(key==='pu')schPu=v;else if(key==='rep')schRep=v;}
+function _navSnapshot(){return {fig:figOpen,limit:schLimit,pu:schPu,rep:schRep};}
+function _navApply(s){figOpen=!!(s&&s.fig);schLimit=!!(s&&s.limit);schPu=!!(s&&s.pu);schRep=!!(s&&s.rep);}
+function setOvw(key,v){if(key==='fig')figOpen=v;else if(key==='limit')schLimit=v;else if(key==='pu')schPu=v;else if(key==='rep')schRep=v;}
 function pushNav(state){ try{ history.pushState(state,''); }catch(e){ /* file:// 等受限环境忽略：手势返回不可用，但弹窗仍正常开/关 */ } }
 function closeTopNav(){
   // 优先走 history.back()（与系统手势返回对称）；
@@ -1893,11 +1965,16 @@ function onPopState(){
     if(el&&el.parentNode)el.remove();
     return;
   }
-  // 没有弹窗时：当前若在非首页视图（pool/chars/sub），返回首页
+  // 没有弹窗时：当前若在非首页视图（pool/chars/sub），返回上一层。
+  // ⚠️ 用显式标记 _charsFromSub 判断，不读 history.state —— 用户「切过我的再回首页点密探库」时
+  //    历史栈顶残留的仍是 sub 条目，读 state 会误跳回「我的」。
   if(view!=='home'){
-    go('home',false);
+    const backTo=(view==='chars'&&_charsFromSub)?'sub':'home';
+    _charsFromSub=false;
+    go(backTo,false);
     return;
   }
+  _charsFromSub=false;
   // 已在首页：不拦截，让浏览器执行默认返回（退出网页）
 }
 window.addEventListener('popstate', onPopState);
@@ -2157,27 +2234,16 @@ function subOverviewHTML(){
   const o=overall();
   const cntChars=names().length;
   const miss=missingChars();
-  const libList=filt(chF.attrs,chF.jobs);
   const g=scheduleGroups();
+  const totalPools=g.limit.length+g.pu.length+g.repAll.length;
   const rev=!schAsc;   // 默认倒序（最新在上）
   // 卡片 + 紧贴其下的展开区，纵向堆叠：展开内容永远属于**它自己那张卡**
   const pair=(card,body)=>({card:card,body:body});
   // --- 抽卡总览 ---
-  const cDraw='<div class="stat-card slim"><div class="lbl fixw">密探库</div><div class="val align">'+cntChars+'<small>位</small></div>'+
-      '<span class="fig-toggle" data-act="chartoggle">'+(chOpen?'收起 ▲':'展开 ▾')+'</span></div>';
-  const bDraw=(chOpen?'<div class="fig-strip" style="margin-top:8px"><div class="pnl ch-filters">'+
-      '<span class="lbl">属性 <span style="font-size:10px;color:#b99567">（可多选，再点已选取消；都不选＝全部）</span></span><div class="chips tight">'+chipRow('a',ATTRS,chF.attrs,'subchip')+'</div>'+
-      '<span class="lbl">职业 <span style="font-size:10px;color:#b99567">（可多选，都不选＝全部）</span></span><div class="chips tight">'+chipRow('j',JOBS,chF.jobs,'subchip')+'</div>'+
-    '</div>'+
-    '<div class="sech" style="margin:0 2px 8px"><span class="t" style="font-size:12px;color:#7a5a3a">共 '+libList.length+' 位</span></div>'+
-    '<div class="ovw-scroll ovw-grid"><div class="prev-grid">'+
-      libList.map(n=>{const at=meta[n]&&meta[n].attr;
-        return '<div class="cell"><div class="frame">'+
-          '<img loading="eager" class="face-img" data-char-img="'+escHtml(n)+'" src="'+charImg(n)+'" alt="'+escHtml(n)+'"  onload="window._imgRetryOK&&window._imgRetryOK(this)" onerror="window._replaceWithFace&&window._replaceWithFace(this,\'char\',this.dataset.charImg,this.dataset.charImg)"/>'+
-          (at?'<img loading="eager" class="attr-icon" src="'+attrImg(at)+'" alt="'+at+'"  onload="window._imgRetryOK&&window._imgRetryOK(this)" onerror="window._replaceAttr&&window._replaceAttr(this,\''+at+'\')"/>':'')+
-          // 概览密探库：只显示立绘 + 名字（属性/职业不再标注，图片右下角仍有属性小图标）
-          '</div><span class="nm">'+escHtml(n)+'</span></div>'}).join('')+
-    '</div></div></div>':'');
+  // 概览密探库：无框单行小字，两段文字紧挨、整行居右；数字金色高亮。
+  // 点击 data-act="chars" 走 go('chars')，与首页「密探库 ›」共用同一个 charsHTML() 页面。
+  const cDraw='<div class="ovw-lib"><span class="ovw-lib-lbl">全图鉴绝密密探：<b>'+cntChars+'</b>位</span>'+
+      '<span class="a" data-act="chars">进入密探库 ›</span></div>';
   const cMiss=miss.length
       ? '<div class="stat-card slim"><div class="lbl">全图鉴瑕 <b class="fig-num">'+miss.length+'</b> 密探</div>'+
         '<span class="fig-toggle" data-act="figtoggle" style="margin-left:auto">'+(figOpen?'收起 ▲':'展开 ▾')+'</span></div>'
@@ -2191,44 +2257,68 @@ function subOverviewHTML(){
   // --- 卡池排期：3 张排期卡，各自展开在自身下方 ---
   // 「倒序/正序」切换按钮（放在表头右上的 tip 行）
   const revBtn='<span class="fig-toggle sch-rev" data-act="schrev">'+(rev?'倒序 ▼':'正序 ▲')+'</span>';
-  const cLimit='<div class="stat-card slim"><div class="lbl fixw">限定 UP 池排期</div><div class="val align">'+g.limit.length+'<small>个</small></div>'+
-      '<span class="fig-toggle" data-act="schlimit">'+(schLimit?'收起 ▲':'展开 ▾')+'</span></div>';
-  const bLimit=(schLimit?'<div class="fig-strip" style="margin-top:8px"><div class="sch-strip">'+
-      '<div class="sch-tip"><span>共 '+g.limit.length+' 个</span>'+revBtn+'</div>'+
-      '<div class="ovw-scroll ovw-list">'+schTableRows(g.limit,rev)+'</div></div></div>':'');
-  const cPu='<div class="stat-card slim"><div class="lbl fixw">普池/周年池排期</div><div class="val align">'+g.pu.length+'<small>个</small></div>'+
-      '<span class="fig-toggle" data-act="schpu">'+(schPu?'收起 ▲':'展开 ▾')+'</span></div>';
-  const bPu=(schPu?'<div class="fig-strip" style="margin-top:8px"><div class="sch-strip">'+
-      '<div class="sch-tip"><span>共 '+g.pu.length+' 个</span>'+revBtn+'</div>'+
-      '<div class="ovw-scroll ovw-list">'+schTableRows(g.pu,rev,null,true,true)+'</div></div></div>':'');
-  const cRep='<div class="stat-card slim"><div class="lbl fixw">复刻池排期</div><div class="val align">'+g.repAll.length+'<small>个</small></div>'+
-      '<span class="fig-toggle" data-act="schrep">'+(schRep?'收起 ▲':'展开 ▾')+'</span></div>';
-  // 复刻表：限定复刻 / 常驻复刻 两块，各带居中类型头 + 自己的列头，序号组内从 1 起
-  const bRep=(schRep?'<div class="fig-strip" style="margin-top:8px"><div class="sch-strip">'+
-      '<div class="sch-tip"><span>限定复刻 '+g.repLimit.length+' · 常驻复刻 '+g.repChang.length+'</span>'+revBtn+'</div>'+
-      '<div class="ovw-scroll ovw-list">'+schTableRows(null,rev,[{title:'限定复刻',rows:g.repLimit},{title:'常驻复刻',rows:g.repChang}])+
-      '</div></div></div>':'');
-  return '<div class="subhd">抽卡总览</div>'+
-    '<div class="stat-grid-3">'+
-      '<div class="stat-card accent"><div class="lbl">总抽数</div><div class="val">'+o.totalDraw+'<small>次</small></div></div>'+
-      '<div class="stat-card"><div class="lbl">总绝密个数</div><div class="val">'+o.totalSecret+'<small>位·次</small></div></div>'+
-      '<div class="stat-card cool"><div class="lbl">平均抽数</div><div class="val">'+o.avgDraw+'<small>抽/位</small></div></div>'+
+  // 排期卡：标题行与展开内容合并进同一张框（sch-card + 内嵌 sch-body，单一边框，标题底边作分隔）
+  const cLimit='<div class="stat-card slim sch-card"><div class="sch-hd"><div class="lbl fixw">限定 UP 池排期</div><div class="val align">'+g.limit.length+'<small>个</small></div>'+
+      '<span class="fig-toggle" data-act="schlimit">'+(schLimit?'收起 ▲':'展开 ▾')+'</span></div>'+
+      (schLimit?'<div class="sch-body"><div class="sch-tip"><span>共 '+g.limit.length+' 个</span>'+revBtn+'</div>'+
+        '<div class="ovw-scroll ovw-list">'+schTableRows(g.limit,rev)+'</div></div>':'')+'</div>';
+  const cPu='<div class="stat-card slim sch-card"><div class="sch-hd"><div class="lbl fixw">普池/周年池排期</div><div class="val align">'+g.pu.length+'<small>个</small></div>'+
+      '<span class="fig-toggle" data-act="schpu">'+(schPu?'收起 ▲':'展开 ▾')+'</span></div>'+
+      (schPu?'<div class="sch-body"><div class="sch-tip"><span>共 '+g.pu.length+' 个</span>'+revBtn+'</div>'+
+        '<div class="ovw-scroll ovw-list">'+schTableRows(g.pu,rev,null,true,true)+'</div></div>':'')+'</div>';
+  const cRep='<div class="stat-card slim sch-card"><div class="sch-hd"><div class="lbl fixw">复刻池排期</div><div class="val align">'+g.repAll.length+'<small>个</small></div>'+
+      '<span class="fig-toggle" data-act="schrep">'+(schRep?'收起 ▲':'展开 ▾')+'</span></div>'+
+      (schRep?'<div class="sch-body"><div class="sch-tip"><span>限定复刻 '+g.repLimit.length+' · 常驻复刻 '+g.repChang.length+'</span>'+revBtn+'</div>'+
+        '<div class="ovw-scroll ovw-list">'+schTableRows(null,rev,[{title:'限定复刻',rows:g.repLimit},{title:'常驻复刻',rows:g.repChang}])+
+        '</div></div>':'')+'</div>';
+    return '<div class="subhd ovhd"><span>抽卡总览</span><span class="ovhd-r">卡池数量</span></div>'+
+    '<div class="stat-grid-2">'+
+      '<div class="stat-card combi even">'+
+        '<div class="sum-row"><span class="sum-lbl">总抽数</span><span class="sum-val">'+o.totalDraw+'<small>次</small></span></div>'+
+        '<div class="sum-row"><span class="sum-lbl">总绝密个数</span><span class="sum-val">'+o.totalSecret+'<small>位</small></span></div>'+
+        '<div class="sum-row"><span class="sum-lbl">平均抽数</span><span class="sum-val">'+o.avgDraw+'<small>抽/位</small></span></div>'+
+      '</div>'+
+      '<div class="stat-card combi">'+
+        '<div class="combi-hd"><span class="lbl">卡池总数</span><span class="total">'+totalPools+'<small>个</small></span></div>'+
+        '<div class="sum-row"><span class="sum-lbl">限定UP池</span><span class="sum-val">'+g.limit.length+'<small>个</small></span></div>'+
+        '<div class="sum-row"><span class="sum-lbl">普池/周年池</span><span class="sum-val">'+g.pu.length+'<small>个</small></span></div>'+
+        '<div class="sum-row"><span class="sum-lbl">复刻池</span><span class="sum-val">'+g.repAll.length+'<small>个</small></span></div>'+
+      '</div>'+
     '</div>'+
     '<div class="stat-stack">'+
       // 全图鉴瑕 卡 + 展开（放在密探库上面）
       // ⚠️ 不要在这里再套 miss.length 判断：cMiss 内部已区分「有瑕 / 满图鉴·恭喜」，
       //    外层再加一层会导致满图鉴时整块被置空，「恭喜殿下全图鉴！」永远不显示。
       cMiss+bMiss+
-      // 密探库 卡 + 展开
-      cDraw+bDraw+
+      // 密探库入口（单行小字 + 跳转链接）
+      cDraw+
     '</div>'+
     '<div class="subhd">卡池排期</div>'+
+    (function(){
+      // 卡池进行中：普池/周年池常驻，永远进行中且排最前；其余（限定UP / 复刻）按上线时间(start)升序
+      // 卡池名与 up/类型名高亮，持续时间黑色
+      const ong=pools.filter(p=>{
+        if(p.type==='pu')return true;          // 普池/周年池常驻，永远进行中，排第一
+        return isOpen(p);
+      }).sort((a,b)=>{
+        const ap=a.type==='pu'?0:1, bp=b.type==='pu'?0:1;
+        if(ap!==bp)return ap-bp;               // 普池在前
+        return (a.start||'').localeCompare(b.start||'');  // 其余按上线时间升序
+      });
+      if(!ong.length)return '<div class="sch-ongoing"><div class="ong-title"><span>卡池进行中</span><span class="ong-count">0池</span></div><div class="ong-empty">当前无进行中的卡池</div></div>';
+      const rows=ong.map(p=>{
+        const up=(p.up1||p.up2)?((p.up1||'')+(p.up2?' / '+p.up2:'')+''):(p.kind||(p.type==='anniv'?'周年池':''));
+        return '<div class="ong-row"><b class="ong-name">'+escHtml(p.name)+'</b>'+
+          '<span class="ong-up">'+escHtml(up)+'</span>'+
+          '<span class="ong-dur">'+escHtml(poolPeriodShort(p))+'</span></div>';
+      }).join('');
+      return '<div class="sch-ongoing"><div class="ong-title"><span>卡池进行中</span><span class="ong-count">'+ong.length+'池</span></div>'+rows+'</div>';
+    })()+
     '<div class="stat-stack">'+
-      cLimit+bLimit+
-      cPu+bPu+
-      cRep+bRep+
-    '</div>'+
-    '<div class="warn" style="margin-top:14px">副页独立模块：<b>导入</b> 从 xlsx 抽取抽卡记录、<b>导出</b> 把当前代码里的抽卡数据回写成 xlsx、<b>统计</b> 给限定池做细化排名。点顶部 tab 切换。<span style="opacity:.6">（页面版本 1105i）</span></div>';
+      cLimit+
+      cPu+
+      cRep+
+    '</div>';
 }
 /* 生成表体（列头 + 行）。rows 必须按组内时间升序存好（no = 1,2,3…）。
    rev = true 倒序渲染（最新在上）。
@@ -2770,6 +2860,7 @@ function subStatsHTML(){
   const withData=limits.filter(p=>(p.records||[]).length);
   // 排名 1：总抽数排行（所有池子，滑动查看）
   const byTotal=[...withData].sort((a,b)=>(b.stat.totalDraw||0)-(a.stat.totalDraw||0));
+  const noData=limits.filter(p=>!(p.records||[]).length);   // 0 记录（未抽）的限定UP池
   // 排名 2：抽齐双 UP 最短抽数
   function uptoFirstBoth(p){
     const r=p.records||[];const u=new Set();
@@ -2794,32 +2885,47 @@ function subStatsHTML(){
   const byWarp=withData.map(p=>({p,r:p.stat.warpRate||0})).sort((a,b)=>b.r-a.r);
 
   // 说明文字与数据行统一装进 .rank 卡片：收起时随 .rank 一起隐藏，展开时也在卡片内（不再悬在卡外）
-  return '<div class="stat-block collapsed">'+
-    '<div class="subhd stat-toggle"><span class="arr">▾</span> 总抽数排行 <span class="hint">点击展开</span></div>'+
+  // 总抽数排行：有记录池(含未出)按总抽数降序，0 记录池(未抽)追加底部继续排号；默认展开
+  const allTotal=byTotal.concat(noData);
+  return '<div class="stat-block">'+
+    '<div class="subhd stat-toggle"><span class="arr">▾</span> 总抽数排行 <span class="hint">点击收起</span></div>'+
     '<div class="rank detail">'+
-    (byTotal.length?rankRows(byTotal.map(x=>({nm:x.name+'（'+x.up1+' / '+x.up2+'）',v:x.stat.totalDraw+'抽',sub:poolDrawBreakdown(x)}))):
-     '<div class="subhint" style="margin:8px 12px">尚未抽卡</div>')+
+    rankRows(allTotal.map(x=>{const has=(x.records||[]).length;
+      return {nm:x.name+'（'+x.up1+' / '+x.up2+'）',v:has?x.stat.totalDraw+'抽':'未抽',sub:has?poolDrawBreakdown(x):''}}))+
     '</div></div>'+
 
     '<div class="stat-block collapsed">'+
     '<div class="subhd stat-toggle"><span class="arr">▾</span> 抽齐双UP抽数 <span class="hint">点击展开</span></div>'+
     '<div class="rank">'+
-    (byFastest.length?rankRows(byFastest.map(x=>({nm:x.p.name+'（'+x.p.up1+' / '+x.p.up2+'）',v:x.n+' 抽',sub:''}))):
-     '<div class="subhint" style="margin:8px 12px">尚未抽到双 UP</div>')+
+    (function(){
+      const fastMap=withData.map(p=>({p,n:uptoFirstBoth(p)}));
+      const done=fastMap.filter(x=>x.n!=null).sort((a,b)=>a.n-b.n);
+      const noUp=fastMap.filter(x=>x.n==null).map(x=>x.p);   // 未出：有记录但未抽齐双UP
+      const rows=done.map(x=>({nm:x.p.name+'（'+x.p.up1+' / '+x.p.up2+'）',v:x.n+' 抽',sub:''}))
+        .concat(noUp.map(p=>({nm:p.name+'（'+p.up1+' / '+p.up2+'）',v:'未出',sub:''})))
+        .concat(noData.map(p=>({nm:p.name+'（'+p.up1+' / '+p.up2+'）',v:'未抽',sub:''})));
+      return rows.length?rankRows(rows):'<div class="subhint" style="margin:8px 12px">尚无限定UP池</div>';
+    })()+
     '</div></div>'+
 
     '<div class="stat-block collapsed">'+
     '<div class="subhd stat-toggle"><span class="arr">▾</span> UP 命中率 <span class="hint">点击展开</span></div>'+
     '<div class="rank">'+
-    (upRates.length?rankRows(upRates.map(x=>({nm:x.p.name+'（'+x.p.up1+' / '+x.p.up2+'）',v:x.rate.toFixed(1)+'%',sub:'/'+x.total+' 抽中 '+(x.up1c+x.up2c)+' 个 UP'}))):
-     '<div class="subhint" style="margin:8px 12px">尚无数据</div>')+
+    (function(){
+      const rows=upRates.map(x=>({nm:x.p.name+'（'+x.p.up1+' / '+x.p.up2+'）',v:x.rate.toFixed(1)+'%',sub:'/'+x.total+' 抽中 '+(x.up1c+x.up2c)+' 个 UP'}))
+        .concat(noData.map(p=>({nm:p.name+'（'+p.up1+' / '+p.up2+'）',v:'未抽',sub:''})));
+      return rows.length?rankRows(rows):'<div class="subhint" style="margin:8px 12px">尚无限定UP池</div>';
+    })()+
     '</div></div>'+
 
     '<div class="stat-block collapsed">'+
     '<div class="subhd stat-toggle"><span class="arr">▾</span> 小保底不歪比例 <span class="hint">点击展开</span></div>'+
     '<div class="rank">'+
-    (byWarp.length?rankRows(byWarp.map(x=>({nm:x.p.name+'（'+x.p.up1+' / '+x.p.up2+'）',v:(x.r||0).toFixed(1)+'%',sub:''}))):
-     '<div class="subhint" style="margin:8px 12px">尚无数据</div>')+
+    (function(){
+      const rows=byWarp.map(x=>({nm:x.p.name+'（'+x.p.up1+' / '+x.p.up2+'）',v:(x.r||0).toFixed(1)+'%',sub:''}))
+        .concat(noData.map(p=>({nm:p.name+'（'+p.up1+' / '+p.up2+'）',v:'未抽',sub:''})));
+      return rows.length?rankRows(rows):'<div class="subhint" style="margin:8px 12px">尚无限定UP池</div>';
+    })()+
     '</div></div>'+
 
     /* 免责声明（统计页最底部，小字灰色，仿常见网站 footer 声明样式；三段，单换行紧凑排） */
