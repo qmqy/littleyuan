@@ -586,12 +586,19 @@ button{font:inherit;color:inherit;cursor:pointer}
 /* 总抽数排行：右侧数值上下两行（总抽数在上·明细在下），line-height 收紧控高 */
 .rank.detail .ri .v{display:flex;flex-direction:column;align-items:flex-end;font-size:11px;line-height:1.15}
 .rank.detail .ri .v .sub{font-size:9px;font-weight:600;color:var(--soft);margin-top:2px;line-height:1.25;letter-spacing:.3px}
-/* 明细配色：UP个数橙金加粗 · UP名浅黑(#555) · ·歪灰 · 歪数红 */
-.rank.detail .ri .v .upn{color:#e08a1e;font-weight:800}
-.rank.detail .ri .v .upnm{color:#555}
-.rank.detail .ri .v .warp{color:#9a8c75}
-.rank.detail .ri .v .warpn{color:var(--red);font-weight:700}
-.rank.detail .ri .v .muted{color:var(--soft)}
+/* 明细配色：UP个数橙金加粗 · UP名浅黑(#555) · ·歪灰 · 歪数红
+   （不限定 .rank.detail；未出档的「歪W」另用 .warpw 同色稍深） */
+.rank .ri .v .upn{color:#e08a1e;font-weight:800}
+.rank .ri .v .upnm{color:#555}
+.rank .ri .v .warp{color:#9a8c75}
+.rank .ri .v .warpn{color:var(--red);font-weight:700}
+.rank .ri .v .muted{color:var(--soft)}
+/* 抽齐双UP排行「未出」细分文案：字号与正常行「N 抽」一致（13px） */
+.rank .ri .v .un{font-size:13px;font-weight:600;color:var(--ink);letter-spacing:-.1px}
+.rank .ri .v .unN{color:var(--ink);font-weight:800}
+.rank .ri .v .un .upnm{margin-left:3px}
+/* 「歪W」整体同色，比原来的浅灰(#9a8c75)稍深一档；只作用于未出档，不动总抽数排行的 ·n歪 */
+.rank .ri .v .un .warpw{color:#857559;font-weight:600;margin-left:1px}
 
 /* 导入面板 */
 .imp-pick{display:block;border:2px dashed var(--line2);border-radius:10px;padding:24px 12px;text-align:center;color:var(--soft);font-size:13px;cursor:pointer;background:#fffaf0;transition:all .2s;margin-bottom:11px}
@@ -2900,10 +2907,14 @@ function subStatsHTML(){
     (function(){
       const fastMap=withData.map(p=>({p,n:uptoFirstBoth(p)}));
       const done=fastMap.filter(x=>x.n!=null).sort((a,b)=>a.n-b.n);
-      const noUp=fastMap.filter(x=>x.n==null).map(x=>x.p);   // 未出：有记录但未抽齐双UP
-      const rows=done.map(x=>({nm:x.p.name+'（'+x.p.up1+' / '+x.p.up2+'）',v:x.n+' 抽',sub:''}))
-        .concat(noUp.map(p=>({nm:p.name+'（'+p.up1+' / '+p.up2+'）',v:'未出',sub:''})))
-        .concat(noData.map(p=>({nm:p.name+'（'+p.up1+' / '+p.up2+'）',v:'未抽',sub:''})));
+      const noUp=fastMap.filter(x=>x.n==null).map(x=>x.p);   // 有记录但未抽齐双UP
+      // 0 记录池再分两档：垫过抽数(dai>0)=「下了抽数但 0 绝密密探」，归入未出；完全没抽过=「未抽」
+      const padOnly=noData.filter(p=>(p.stat&&p.stat.totalDraw||0)>0);
+      const blank=noData.filter(p=>!(p.stat&&p.stat.totalDraw));
+      const nm=p=>p.name+'（'+p.up1+' / '+p.up2+'）';
+      const rows=done.map(x=>({nm:nm(x.p),v:x.n+' 抽',sub:''}))
+        .concat(noUp.concat(padOnly).map(p=>({nm:nm(p),v:unreachedText(p),sub:''})))
+        .concat(blank.map(p=>({nm:nm(p),v:'未抽',sub:''})));
       return rows.length?rankRows(rows):'<div class="subhint" style="margin:8px 12px">尚无限定UP池</div>';
     })()+
     '</div></div>'+
@@ -2946,6 +2957,28 @@ function poolDrawBreakdown(p){
   if(u2>0)s+='<span class="upn">'+u2+'</span><span class="upnm">'+p.up2+'</span>';
   if(w>0)s+='<span class="warp">·</span><span class="warpn">'+w+'</span><span class="warp">歪</span>';
   return s||'<span class="muted">未抽</span>';
+}
+
+// 抽齐双UP排行「未出」档的细分文案：下了抽数但没抽齐双UP。
+// 口径与 poolDrawBreakdown 一致 —— 按【记录条数】计密探个数；N = 该池总抽数(含垫池)。
+//   0 绝密密探      → 33抽未出
+//   0 UP、歪 W      → 30抽歪2          （不写 0）
+//   单 UP、0 歪     → 33抽1酆公玖
+//   单 UP、歪 W     → 98抽2酆公玖歪1  （首位数字 = UP 个数；「歪W」同色、字号与正常行一致；不写「UP」二字）
+function unreachedText(p){
+  const r=p.records||[],n=(p.stat&&p.stat.totalDraw)||0;
+  let u1=0,u2=0,w=0;
+  for(let i=0;i<r.length;i++){const nm=r[i].charName||'';
+    if(p.up1&&nm===p.up1)u1++;
+    else if(p.up2&&nm===p.up2)u2++;
+    else w++;}
+  const head='<span class="unN">'+n+'</span>抽';
+  const k=u1+u2;
+  if(!r.length)return '<span class="un">'+head+'<span class="muted">未出</span></span>';
+  const upNm=[u1?p.up1:null,u2?p.up2:null].filter(Boolean).join(' / ');
+  const mid=k?'<span class="upn">'+k+'</span>'+(upNm?'<span class="upnm">'+escHtml(upNm)+'</span>':''):'';
+  const tail=w?'<span class="warpw">歪'+w+'</span>':'';
+  return '<span class="un">'+head+mid+tail+'</span>';
 }
 
 // 排行数据行（不含 .rank 外壳——外壳由调用方包，便于把说明文字也装进卡片）
