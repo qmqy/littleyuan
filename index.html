@@ -248,6 +248,9 @@ button{font:inherit;color:inherit;cursor:pointer}
 /* 自选 UP 行（辕门遣将，可点击更换；未选满时高亮） */
 .up-pickset{display:inline-flex;align-items:center;gap:5px}
 .up-pickline .upset{border-bottom:1px dashed var(--gold2);padding:0 2px;cursor:pointer}
+.up-pickline .upslot{display:inline-flex;align-items:center;gap:3px}
+.up-pickline .upclr{font-style:normal;font-weight:700;font-size:12px;line-height:1;color:var(--soft);cursor:pointer;padding:0 2px}
+.up-pickline .upclr:hover{color:var(--red)}
 .up-pickline .upsep{color:var(--soft)}
 .up-pickline.hl{border-color:var(--gold2);background:var(--goldsoft);box-shadow:0 0 0 1px var(--gold2) inset}
 /* 首页「周年自选」汇总（每个周年一行） */
@@ -360,6 +363,9 @@ button{font:inherit;color:inherit;cursor:pointer}
 .subhd{display:flex;align-items:center;gap:7px;margin:14px 0 10px;font-size:14px;color:var(--ink);font-weight:700}
 .subhd::before{content:'';width:4px;height:14px;background:linear-gradient(180deg,var(--gold),#a06c1f);border-radius:2px}
 .subhint{font-size:11px;color:var(--soft);margin:-7px 0 10px;line-height:1.5}
+.subhd .exphl{color:#e08a1e;font-style:normal;font-weight:700}
+.exp-grp{display:flex;flex-direction:column;align-items:flex-start;gap:5px}
+.exp-grp .subhint{margin:0}
 /* 副页顶部 tab（概览/导入/导出/统计）：吸顶、直接贴滚动区最顶，无缝隙。
    左右用负 margin 抵消 #body 内边距实现通栏；底色不透明遮住滚过的内容。
    ⚠️ 不用负 margin-top：它是 pane 的首子元素，负上边距会与父级发生 margin 塌缩，产生顶部缝隙。 */
@@ -1466,6 +1472,13 @@ function act(a,el){
     if(list[i])selfPickModal(a,i);      // 已选 → 编辑弹窗（点卡换人 / 删除）
     else openSelfPicker(a,i,null);      // 空槽「+」→ 直接开选择密探
   }
+  else if(a==='upclear'){
+    if(!draft)return;
+    const i=+el.dataset.i;
+    poolInputSync();
+    if(i===0)draft.up1=''; else draft.up2='';
+    recalc(draft); render();
+  }
   else if(a==='upick'){
     if(!draft)return;
     const i=+el.dataset.i;
@@ -1842,7 +1855,7 @@ function p300PanelHTML(p){
 function upPickRowHTML(p){
   const n=+p.upPick||0; if(!n)return '';
   const one=(i,name)=>name
-    ? '<i class="upset on" data-act="upick" data-i="'+i+'">'+escHtml(name)+'</i>'
+    ? '<span class="upslot"><i class="upset on" data-act="upick" data-i="'+i+'">'+escHtml(name)+'</i><b class="upclr" data-act="upclear" data-i="'+i+'" title="清除这个up角色">×</b></span>'
     : '<i class="upset" data-act="upick" data-i="'+i+'">+</i>';
   const arr=[];
   for(let i=0;i<n;i++)arr.push(one(i,i===0?p.up1:p.up2));
@@ -2415,7 +2428,7 @@ function subImportHTML(){
     '</label>'+
     '<div id="impResult"></div>'+
     '<div class="subhd">从 JSON 备份恢复</div>'+
-    '<div class="subhint">换设备或清缓存后，选之前备份的 json（<b>全部账户</b>）即可恢复<b>抽卡记录 + 保底剩余</b>。</div>'+
+    '<div class="subhint">换设备或清缓存后，选之前备份的 json（<b>全部账户</b>）即可恢复。点击右上角切换账户，当前页账户维持不变。</div>'+
     '<label class="imp-pick" id="bakPick">'+
       '<strong>📂 选择备份 json / 拖到此处</strong>'+
       '<span>文件名形如「'+bj+'」</span>'+
@@ -2646,8 +2659,7 @@ function exportFileName(){
 }
 function subExportHTML(){
   const o=overall();
-  return '<div class="subhd">导出当前招募数据</div>'+
-    '<div class="subhint">导出为 xlsx 表格（<b>仅当前账户</b>），文件名自动带当天日期；之后可以随时再导入回来。</div>'+
+  return '<div class="subhd"><span>导出当前招募数据：<em class="exphl">单账户导Excel，多账户导json</em></span></div>'+
     '<div class="exp-area">'+
       '<p><b>当前数据快照</b></p>'+
       '<div class="exp-row"><span>限定池数量</span><span class="v">'+pools.filter(p=>p.type==='limit').length+'</span></div>'+
@@ -2657,10 +2669,15 @@ function subExportHTML(){
       '<div class="exp-row"><span>密探库密探数</span><span class="v">'+names().length+'</span></div>'+
     '</div>'+
     '<div class="exp-btns">'+
-      '<button class="btn-down" id="expDownload">⬇ 下载 '+exportFileName()+'</button>'+
-      '<button class="btn-down" id="bakDownload" style="background:linear-gradient(180deg,#7a8c5a,#5f7043)">💾 备份 JSON（'+backupName()+'）</button>'+
-    '</div>'+
-    '<div class="subhint" style="margin-top:9px">备份<b>全部账户</b>的抽卡记录、保底剩余和自选密探，文件名带当天日期。换设备或清缓存后，到「导入」页选这个 json 恢复即可。</div>';
+      '<div class="exp-grp">'+
+        '<button class="btn-down" id="expDownload">⬇ 下载 '+exportFileName()+'</button>'+
+        '<div class="subhint">导出为 xlsx 表格（<b>仅当前账户</b>），文件名带当天日期。</div>'+
+      '</div>'+
+      '<div class="exp-grp">'+
+        '<button class="btn-down" id="bakDownload" style="background:linear-gradient(180deg,#7a8c5a,#5f7043)">💾 备份 JSON（'+backupName()+'）</button>'+
+        '<div class="subhint">导出为 json 表格（<b>全部账户</b>），文件名带当天日期。<br/>换设备或清缓存后，到「导入」页选这个 json 恢复，点击右上角切换对应账户即可，当前页账户维持不变。</div>'+
+      '</div>'+
+    '</div>';
 }
 
 async function exportToXlsx(){
