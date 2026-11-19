@@ -161,6 +161,24 @@ button{font:inherit;color:inherit;cursor:pointer}
 .sech .t{font-size:14px;font-weight:700;flex:0 0 auto;white-space:nowrap;writing-mode:horizontal-tb}
 .sech .a{font-size:12px;color:var(--gold)}
 
+/* 周年池堆叠：普池下方「一叠向下箭头 + 展开周年池（N）」指引，默认折叠 */
+.anniv-stack{margin:-7px 0 3px}
+.anniv-guide-row{text-align:center;padding:0;line-height:1}
+.anniv-guide{display:inline-flex;align-items:center;gap:4px;
+  color:var(--gold);font-size:6px;font-weight:700;cursor:pointer;user-select:none;
+  -webkit-tap-highlight-color:transparent;transition:opacity .15s}
+.anniv-guide:hover{opacity:.75}
+.anniv-guide:active{opacity:.55}
+/* 两枚 ∨：浅小深大制造向下流向感，尖端仍对齐同一竖线(left+w/2 相等)；整体约缩小一半 */
+.anniv-guide .chev{position:relative;flex:0 0 9px;width:9px;height:10px;transition:transform .18s}
+.anniv-guide .chev i{position:absolute;top:0;
+  border-right:1.4px solid var(--gold);border-bottom:1.4px solid var(--gold);
+  transform:rotate(45deg);border-radius:0 0 1px 0}
+.anniv-guide .chev i:first-child{left:2.5px;top:0;width:4px;height:4px;opacity:.5}
+.anniv-guide .chev i:last-child{left:2px;top:3px;width:5px;height:5px}
+.anniv-stack.open .anniv-guide .chev{transform:rotate(180deg)}
+.anniv-body{display:none;padding-top:6px}
+.anniv-stack.open .anniv-body{display:block}
 .pool{display:flex;align-items:stretch;border-radius:10px;overflow:hidden;margin-bottom:10px;
   background:#1f1611;position:relative;min-height:96px;cursor:pointer}
 .pool .art{position:relative;flex:1 1 50%;min-width:130px;max-width:50%;
@@ -394,6 +412,13 @@ button{font:inherit;color:inherit;cursor:pointer}
 .stat-card.slim .val{margin-left:auto;font-size:15px;line-height:1.35}
 .stat-card.slim .fig-toggle{flex:0 0 auto;margin-left:6px}
 .stat-card.slim .val .fig-toggle{margin-left:0}
+/* 概览页展开卡：整条可点（像统计页 stat-toggle），不再只限「展开 ▾」小字；
+   data-act 挂在整行（figtoggle 挂 slim 卡、schlimit/pu/rep 挂 .sch-hd），事件委托按最近 [data-act] 命中。 */
+.stat-card.slim[data-act],.sch-card>.sch-hd[data-act]{cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent;transition:background .15s}
+.stat-card.slim[data-act]:hover{background:linear-gradient(180deg,#fff,#f7edda)}
+.stat-card.slim[data-act]:active{background:#f2e3c6}
+.sch-card>.sch-hd[data-act]:hover{background:#fdf6e9}
+.sch-card>.sch-hd[data-act]:active{background:#f7ead1}
 /* 数字纵向对齐（密探库 / 卡池排期 4 张卡）：
    标签固定等宽 → 各卡数值区起点一致；数字右对齐 + 等宽数字 → 上下成一条竖线。
    单位 small 也定宽，避免「位/个」宽窄不同把数字挤歪。 */
@@ -448,8 +473,9 @@ button{font:inherit;color:inherit;cursor:pointer}
   padding:2px 10px;border:1px solid var(--line);border-radius:999px;background:#fdf6e9;white-space:nowrap}
 .fig-toggle:hover{background:#f5e9d2}
 /* 首页「出密探卡池」开关：iOS 风格滑块，默认关、开启用网站金棕色调 */
-.home-inc-row{display:flex;align-items:center;gap:8px;margin:0 4px 6px}
-.home-inc-text{font-size:10.5px;color:var(--soft);opacity:.85;line-height:1.4}
+/* 提示词单独一行、左边缘与下方开关对齐(均距容器 2px)；行距收紧 */
+.home-inc-row{margin:0 2px 4px}
+.home-inc-text{font-size:10.5px;color:var(--soft);opacity:.85;line-height:1.2}
 .extra-nomore{margin-left:10px;color:var(--soft);opacity:.7;cursor:pointer;font-size:10px;border:1px solid var(--line);border-radius:999px;padding:1px 7px;user-select:none;-webkit-tap-highlight-color:transparent}
 .extra-nomore:hover{opacity:1;color:var(--gold);border-color:var(--gold2)}
 .sw{position:relative;display:inline-block;width:38px;height:22px;border-radius:999px;background:#d6ccbd;cursor:pointer;flex:0 0 auto;transition:background .2s;user-select:none;-webkit-tap-highlight-color:transparent}
@@ -1443,7 +1469,7 @@ function act(a,el){
     render();
   }
   else if(a==='chars')go('chars')
-  else if(a==='homefold'){homeFoldAnniv=!homeFoldAnniv;const fb=$('#homeFold');if(fb){fb.classList.toggle('on',homeFoldAnniv);fb.textContent=homeFoldAnniv?'显示周年池':'隐藏周年池';}applyHomeFilter();}
+  else if(a==='annivtoggle'){annivOpen=!annivOpen;applyHomeFilter();}
   else if(a==='homeinc'){homeIncDrawn=!homeIncDrawn;const ib=$('#homeIncSw');if(ib)ib.classList.toggle('on',homeIncDrawn);applyHomeFilter();}
   else if(a==='homeincdrawn'){homeIncDrawn=true;const ib=$('#homeIncSw');if(ib)ib.classList.add('on');applyHomeFilter();}
   else if(a==='extranomore'){homeExtraHintOff=true;lsSet('yiruanPool_extra_hint_off','1');applyHomeFilter();}
@@ -1646,7 +1672,7 @@ function selfRowsHTML(){
   return out?'<div class="self-box">'+out+'</div>':'';
 }
 
-let homeSearch='',homeFoldAnniv=false,homeIncDrawn=false,homeExtraHintOff=(lsGet('yiruanPool_extra_hint_off')==='1');
+let homeSearch='',annivOpen=false,homeIncDrawn=false,homeExtraHintOff=(lsGet('yiruanPool_extra_hint_off')==='1');
 function homeHTML(){
   const s=overall();
   const list=homeFilterList();
@@ -1707,16 +1733,15 @@ function homeHTML(){
     </div>
   </div>
   <div class="home-inc-row">
-    <span class="sw${homeIncDrawn?' on':''}" id="homeIncSw" data-act="homeinc"><span class="sw-knob"></span></span>
     <span class="home-inc-text" id="homeIncHint">开启可查询抽到过某密探的卡池</span>
   </div>
   <div class="sech">
+    <span class="sw${homeIncDrawn?' on':''}" id="homeIncSw" data-act="homeinc"><span class="sw-knob"></span></span>
     <span class="home-search-wrap">
       <input id="homeSearch" class="home-search" type="text" placeholder="搜索卡池/密探名关键字" enterkeyhint="search"/>
       <span class="home-clear" id="homeClear" data-act="homeclear" hidden>×</span>
     </span>
     <span class="home-tools">
-      <span class="fig-toggle${homeFoldAnniv?' on':''}" data-act="homefold" id="homeFold">${homeFoldAnniv?'显示周年池':'隐藏周年池'}</span>
       <span class="a" data-act="chars">密探库 ›</span>
     </span>
   </div>
@@ -1726,7 +1751,6 @@ function homeHTML(){
 
 function homeFilterList(){
   let list=viewOrder();
-  if(homeFoldAnniv)list=list.filter(p=>p.type!=='anniv');
   const qs=homeSearch.trim().toLowerCase().split(/[\s,，]+/).filter(Boolean);
   if(qs.length){
     list=list.filter(p=>{
@@ -1745,7 +1769,6 @@ function homeFilterList(){
 function homeExtraHint(qs){
   if(!qs.length || homeIncDrawn || homeExtraHintOff)return '';
   const extra=viewOrder().filter(p=>{
-    if(homeFoldAnniv && p.type==='anniv')return false;
     const name=((p.name||'')+' '+(p.up1||'')+' '+(p.up2||'')).toLowerCase();
     if(qs.some(q=>name.indexOf(q)>=0))return false;              // 已在主结果中
     const drawn=(p.records||[]).map(r=>r.charName||'').join(' ').toLowerCase();
@@ -1754,8 +1777,8 @@ function homeExtraHint(qs){
   if(!extra.length)return '';
   return '<div class="home-extra-hint" data-act="homeincdrawn">△ 这些密探还在 '+extra.length+' 个卡池被抽到过（非UP池），点此展开查看<span class="extra-nomore" data-act="extranomore">不再提示</span></div>';
 }
-function poolListHTML(list){
-  return list.map(p=>`
+function poolCardHTML(p){
+  return `
     <div class="pool${isUpcoming(p)?' soon':''}" data-act="toggleprev" data-id="${p.id}">
       <div class="art" data-pool-id="${p.id}">
         <img loading="eager" class="art-img" src="${poolImg(p)}"
@@ -1773,7 +1796,25 @@ function poolListHTML(list){
       <div class="ed-strip" data-act="pool" data-id="${p.id}"></div>
     </div>
     ${prevOpens[p.id]?renderPrevStrip(p):''}
-  `).join('');
+  `;
+}
+function poolListHTML(list){
+  const pu=list.filter(p=>p.type==='pu');
+  const anniv=list.filter(p=>p.type==='anniv');
+  const rest=list.filter(p=>p.type!=='pu'&&p.type!=='anniv');
+  let out=pu.map(poolCardHTML).join('');
+  if(anniv.length){
+    // 默认折叠；搜索命中周年池时自动展开，避免「搜到了却看不到」
+    const open=annivOpen||!!homeSearch.trim();
+    out+='<div class="anniv-stack'+(open?' open':'')+'" id="annivStack">'
+      +'<div class="anniv-guide-row"><div class="anniv-guide" data-act="annivtoggle" id="annivBar">'
+        +'<span class="chev"><i></i><i></i></span>'
+        +'<span class="lbl">'+(open?'收起周年池':'展开周年池')+'（'+anniv.length+'）</span>'
+      +'</div></div>'
+      +'<div class="anniv-body">'+anniv.map(poolCardHTML).join('')+'</div>'
+    +'</div>';
+  }
+  return out+rest.map(poolCardHTML).join('');
 }
 function applyHomeFilter(){
   const box=$('#poolList'); if(!box)return;
@@ -2168,7 +2209,7 @@ function renderAddCard(lbl){
 
 // 顶部 subtabs（概览 / 导入 / 导出 / 统计）
 function subTabBar(){
-  const tabs=[{k:'overview',t:'概览'},{k:'import',t:'导入'},{k:'export',t:'导出'},{k:'stats',t:'统计'}];
+  const tabs=[{k:'overview',t:'概览'},{k:'stats',t:'统计'},{k:'import',t:'导入'},{k:'export',t:'导出'}];
   return '<div class="subtabs" id="subtabs">'+tabs.map(x=>'<div class="stab'+(subView===x.k?' on':'')+'" data-sv="'+x.k+'">'+x.t+'</div>').join('')
     +'<button class="sacc" id="subAccBtn" title="切换账户">'+escHtml(accName())+'</button>'+'</div>';
 }
@@ -2270,8 +2311,8 @@ function subOverviewHTML(){
   const cDraw='<div class="ovw-lib"><span class="ovw-lib-lbl">全图鉴绝密密探：<b>'+cntChars+'</b>位</span>'+
       '<span class="a" data-act="chars">进入密探库 ›</span></div>';
   const cMiss=miss.length
-      ? '<div class="stat-card slim"><div class="lbl">全图鉴瑕 <b class="fig-num">'+miss.length+'</b> 密探</div>'+
-        '<span class="fig-toggle" data-act="figtoggle" style="margin-left:auto">'+(figOpen?'收起 ▲':'展开 ▾')+'</span></div>'
+      ? '<div class="stat-card slim" data-act="figtoggle"><div class="lbl">全图鉴瑕 <b class="fig-num">'+miss.length+'</b> 密探</div>'+
+        '<span class="fig-toggle" style="margin-left:auto">'+(figOpen?'收起 ▲':'展开 ▾')+'</span></div>'
       : '<div class="stat-card fullfig"><span class="fig-congrats">恭喜殿下全图鉴！</span></div>';
   const bMiss=(figOpen&&miss.length?'<div class="fig-strip" style="margin-top:8px"><div class="ovw-scroll ovw-grid"><div class="prev-grid">'+
       miss.map(n=>'<div class="cell"><div class="frame">'+
@@ -2283,16 +2324,16 @@ function subOverviewHTML(){
   // 「倒序/正序」切换按钮（放在表头右上的 tip 行）
   const revBtn='<span class="fig-toggle sch-rev" data-act="schrev">'+(rev?'倒序 ▼':'正序 ▲')+'</span>';
   // 排期卡：标题行与展开内容合并进同一张框（sch-card + 内嵌 sch-body，单一边框，标题底边作分隔）
-  const cLimit='<div class="stat-card slim sch-card"><div class="sch-hd"><div class="lbl fixw">限定 UP 池排期</div><div class="val align">'+g.limit.length+'<small>个</small></div>'+
-      '<span class="fig-toggle" data-act="schlimit">'+(schLimit?'收起 ▲':'展开 ▾')+'</span></div>'+
+  const cLimit='<div class="stat-card slim sch-card"><div class="sch-hd" data-act="schlimit"><div class="lbl fixw">限定 UP 池排期</div><div class="val align">'+g.limit.length+'<small>个</small></div>'+
+      '<span class="fig-toggle">'+(schLimit?'收起 ▲':'展开 ▾')+'</span></div>'+
       (schLimit?'<div class="sch-body"><div class="sch-tip"><span>共 '+g.limit.length+' 个</span>'+revBtn+'</div>'+
         '<div class="ovw-scroll ovw-list">'+schTableRows(g.limit,rev)+'</div></div>':'')+'</div>';
-  const cPu='<div class="stat-card slim sch-card"><div class="sch-hd"><div class="lbl fixw">普池/周年池排期</div><div class="val align">'+g.pu.length+'<small>个</small></div>'+
-      '<span class="fig-toggle" data-act="schpu">'+(schPu?'收起 ▲':'展开 ▾')+'</span></div>'+
+  const cPu='<div class="stat-card slim sch-card"><div class="sch-hd" data-act="schpu"><div class="lbl fixw">普池/周年池排期</div><div class="val align">'+g.pu.length+'<small>个</small></div>'+
+      '<span class="fig-toggle">'+(schPu?'收起 ▲':'展开 ▾')+'</span></div>'+
       (schPu?'<div class="sch-body"><div class="sch-tip"><span>共 '+g.pu.length+' 个</span>'+revBtn+'</div>'+
         '<div class="ovw-scroll ovw-list">'+schTableRows(g.pu,rev,null,true,true)+'</div></div>':'')+'</div>';
-  const cRep='<div class="stat-card slim sch-card"><div class="sch-hd"><div class="lbl fixw">复刻池排期</div><div class="val align">'+g.repAll.length+'<small>个</small></div>'+
-      '<span class="fig-toggle" data-act="schrep">'+(schRep?'收起 ▲':'展开 ▾')+'</span></div>'+
+  const cRep='<div class="stat-card slim sch-card"><div class="sch-hd" data-act="schrep"><div class="lbl fixw">复刻池排期</div><div class="val align">'+g.repAll.length+'<small>个</small></div>'+
+      '<span class="fig-toggle">'+(schRep?'收起 ▲':'展开 ▾')+'</span></div>'+
       (schRep?'<div class="sch-body"><div class="sch-tip"><span>限定复刻 '+g.repLimit.length+' · 常驻复刻 '+g.repChang.length+'</span>'+revBtn+'</div>'+
         '<div class="ovw-scroll ovw-list">'+schTableRows(null,rev,[{title:'限定复刻',rows:g.repLimit},{title:'常驻复刻',rows:g.repChang}])+
         '</div></div>':'')+'</div>';
