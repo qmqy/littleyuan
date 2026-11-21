@@ -198,10 +198,17 @@ button{font:inherit;color:inherit;cursor:pointer}
   text-shadow:0 1px 2px rgba(0,0,0,.25);
 }
 .pool .pt{
-  position:absolute;right:8px;top:8px;
+  position:absolute;right:4px;top:4px;
   background:rgba(196,139,46,.92);color:#fff;font-size:10.5px;
   padding:2px 9px;border-radius:10px;z-index:3;font-weight:600;
   box-shadow:0 1px 3px rgba(0,0,0,.4);
+}
+/* 左上角持续时间：贴角折角标签，镜像左下池名 .pn（left/top:0 + 只留内侧一个圆角 + 无阴影） */
+.pool .pd-period{
+  position:absolute;left:0;top:0;z-index:3;
+  background:rgba(31,22,17,.82);color:#ffe0a8;font-size:10px;font-weight:600;
+  padding:3px 5px;border-bottom-right-radius:6px;letter-spacing:0;
+  white-space:nowrap;text-shadow:0 1px 2px rgba(0,0,0,.3);
 }
 /* 预告池（还没到上线日）：首页卡整体置灰 + 名字后灰色「待上线」小角标 */
 .pool.soon .art-img{filter:grayscale(.7) brightness(.92)}
@@ -1783,6 +1790,7 @@ function poolCardHTML(p){
       <div class="art" data-pool-id="${p.id}">
         <img loading="eager" class="art-img" src="${poolImg(p)}"
            onload="window._imgRetryOK&&window._imgRetryOK(this)" onerror="window._replaceWithFace && window._replaceWithFace(this,'pool','${p.id}','${p.name}')" alt="${p.name}"/>
+        <span class="pd-period">${poolPeriodShort(p)}</span>
         <span class="pn">${p.name}</span>
         ${showPoolTag(p) ? `<span class="pt">${p.tag}</span>` : ''}
       </div>
